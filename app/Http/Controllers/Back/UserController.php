@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -66,6 +67,16 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $users = User::findOrFail($id);
+        $users->status = 0;
+        $users->deleted = 1;
+        $users->modified_by = Auth::id();
+        try {
+            $users->save();
+            return response()->json(['message' => 'ลบข้อมูลเรียบร้อย', 'class' => 'success'], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['message' => 'ลบข้อมูลไม่สำเร็จ', 'class' => 'error'], 200);
+        }
     }
 }

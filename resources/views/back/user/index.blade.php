@@ -70,6 +70,8 @@
     const RoleStoreUrl = "{{ route('UserRole.store') }}";
     const RoleUpdateUrl = "{{ route('UserRole.update', ':id') }}";
     const RoleDelUrl = "{{ route('UserRole.destroy', ':id') }}";
+    const UserDelUrl = "{{ route('User.destroy', ':id') }}";
+
 
 </script>
 <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/user.js']) }}"></script>

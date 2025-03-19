@@ -95,6 +95,7 @@ class AuthController extends Controller
         $request->validate([
             'empid' => 'required|unique:users',
             'password' => 'required|min:6',
+            'repassword' => 'required|same:password',
         ]);
 
 
@@ -109,7 +110,7 @@ class AuthController extends Controller
             User::create([
                 'empid' => $DetailEmp->CODEMPID,
                 'fullname' => $DetailEmp->NAMFIRSTT . ' ' . $DetailEmp->NAMLASTT,
-                'email' => $DetailEmp->EMAIL,
+                'email' => $DetailEmp->EMAIL ?? "",
                 'bu' => $DetailEmp->alias_name,
                 'dept' => $DetailEmp->DEPT,
                 // 'status' => $DetailEmp->STAEMP,
