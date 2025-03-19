@@ -80,7 +80,7 @@ class AuthController extends Controller
         $employees = Valldataemp::where('CODEMPID', $empid)
             ->where('NUMOFFID', $idcard)
             ->where('STAEMP', '!=', '9')
-            ->first('CODEMPID');
+            ->first();
 
         if ($employees) {
             return response()->json(['status' => 200, 'message' => 'พบข้อมูลพนักงาน', 'employees' => $employees], 200);
