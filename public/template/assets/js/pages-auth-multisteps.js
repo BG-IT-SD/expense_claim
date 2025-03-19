@@ -236,6 +236,9 @@ document.addEventListener ('DOMContentLoaded', function (e) {
             password: stepsValidationFormStep2.querySelector (
               '[name="multiStepsPass"]'
             ).value,
+            repassword: stepsValidationFormStep2.querySelector (
+                '[name="multiStepsConfirmPass"]'
+              ).value,
           },
           headers: {
             'X-CSRF-TOKEN': $ ('meta[name="csrf-token"]').attr ('content'),
