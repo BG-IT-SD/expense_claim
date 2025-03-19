@@ -181,14 +181,14 @@
             <span class="menu-header-text" data-i18n="Admin">Admin</span>
         </li>
         {{-- User --}}
-        <li class="menu-item  @if (Route::is('User.index') || Route::is('Role.index') || Route::is('Role.create')) active open @endif ">
+        <li class="menu-item  @if (Route::is('User.index') || Route::is('Role.index') || Route::is('Role.create') || Route::is('User.create')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-account-multiple-plus"></i>
                 <div data-i18n="User">User</div>
 
             </a>
             <ul class="menu-sub">
-                <li class="menu-item  @if (Route::is('User.index')) active @endif ">
+                <li class="menu-item  @if (Route::is('User.index') || Route::is('User.create')) active @endif ">
                     <a href="{{ route('User.index') }}" class="menu-link">
                         <div data-i18n="จัดการผู้ใช้งาน">จัดการผู้ใช้งาน</div>
                     </a>

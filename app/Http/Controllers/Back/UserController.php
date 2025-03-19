@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('back.user.adduser');
+        return view('back.user.create');
     }
 
     /**
