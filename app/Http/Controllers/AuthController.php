@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
-
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -66,7 +66,12 @@ class AuthController extends Controller
     public function CheckEmpID(Request $request)
     {
         $request->validate([
-            'empid' => 'required|unique:users',
+            'empid' => [
+                'required',
+                Rule::unique('users')->where(function ($query) {
+                    return $query->where('deleted', 0);
+                }),
+            ],
             'idcard' => 'required',
         ], [
             'empid.unique' => 'คุณสร้างบัญชีผู้ใช้ไปแล้วกรุณา Login',
