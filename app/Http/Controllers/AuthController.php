@@ -43,7 +43,16 @@ class AuthController extends Controller
             'empid.required' => 'กรุณากรอกรหัสพนักงาน',
             'password.required' => 'กรุณากรอกรหัสผ่าน',
         ]);
-        $remember = $request->has('remember'); // Check if the "Remember Me" checkbox is checked
+
+        $remember = $request->has('remember');
+
+        $user = User::where('empid', $credentials['empid'])
+                ->where('status', 1) // Only allow active users
+                ->first();
+
+        if (!$user) {
+            return back()->withErrors(['empid' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อฝ่ายสนับสนุน']);
+        }
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();

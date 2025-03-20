@@ -92,6 +92,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Setting
     // User
     Route::get('User', [UserController::class, 'index'])->name('User.index');
+    Route::put('User/{id}/reset',[UserController::class,'ResetPassword'])->name('User.reset');
     Route::resource('User', UserController::class);
     Route::get('Role/create/{type}', [RoleController::class, 'create'])->name('Role.create');
     Route::get('Role/{Role}/edit/{type?}', [RoleController::class, 'edit'])->name('Role.edit');
