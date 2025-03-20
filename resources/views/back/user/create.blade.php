@@ -29,6 +29,7 @@
                         </div>
                         <div class="card-body">
                             <form action="" method="POST">
+                                @csrf
                                 <div class="row" id="content-check">
                                     <div class="col-md-12 mb-3">
                                         <div class="form-floating form-floating-outline">
