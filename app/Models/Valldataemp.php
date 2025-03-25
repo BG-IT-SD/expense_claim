@@ -18,7 +18,8 @@ class Valldataemp extends Model
         'alias_name',
         'STAEMP',
         'DEPT',
-        'NUMOFFID'
+        'NUMOFFID',
+        'NUMBANK'
     ];
     protected $primaryKey = 'CODEMPID';
 

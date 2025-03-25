@@ -12,6 +12,7 @@
 
     <meta name="description" content="" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="assets-path" content="{{ asset('template/assets/') }}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('template/assets/img/favicon/favicon.ico') }}" />
