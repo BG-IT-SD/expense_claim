@@ -14,7 +14,12 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif
+                @endif
+                @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+                @endif
                 <form id="formAuthentication" class="mb-3" action="{{ url('/login') }}" method="POST">
                     @csrf
                     <div class="form-floating form-floating-outline mb-3">

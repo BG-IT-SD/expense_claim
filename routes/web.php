@@ -17,6 +17,7 @@ use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\Front\DriverClaimController;
 use App\Http\Controllers\Front\ExpenseController;
 use App\Http\Controllers\Front\HeadApprovedController;
+use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\TechClaimController;
 use App\Http\Controllers\MapController;
 use App\Models\Role;
@@ -61,6 +62,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
     // Frontend
+    // Profile
+    Route::get('Profile',[ProfileController::class,'index'])->name('profile.index');
+    Route::get('Profile/Reset',[ProfileController::class,'resetPassword'])->name('profile.reset');
+    Route::put('Profile/{id}',[ProfileController::class,'updatePassword'])->name('profile.updatepassword');
     // Route::get('/distance', [DistanceController::class, 'showForm']);
     // Route::post('/distance', [DistanceController::class, 'calculateDistance']);
 
