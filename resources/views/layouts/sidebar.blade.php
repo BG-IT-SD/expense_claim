@@ -21,7 +21,7 @@
             <span class="menu-header-text" data-i18n="Normal">Normal</span>
         </li>
         <!-- Normal -->
-        <li class="menu-item @if (Route::is('Expense.index')) active open @endif ">
+        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                 <div data-i18n="เบิกค่าใช้จ่าย">เบิกค่าใช้จ่าย</div>
@@ -33,7 +33,7 @@
                         <div data-i18n="ฟอร์มการเบิก">ฟอร์มการเบิก</div>
                     </a>
                 </li> --}}
-                <li class="menu-item @if (Route::is('Expense.index')) active @endif">
+                <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')) active @endif">
                     <a href="{{ route('Expense.index') }}" class="menu-link">
                         <div data-i18n="รายการเบิก">รายการเบิก</div>
                         <div class="badge bg-danger rounded-pill ms-auto">5</div>

@@ -1,0 +1,190 @@
+<div id="account-details" class="content">
+    <div class="alert alert-primary mb-3 mt-3">
+        <h6 class="mb-0">ส่วนที่ 1</h6>
+        <small>การออกเดินทาง</small>
+    </div>
+    <div class="row g-4">
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t1" class="form-control" value="{{ $booking->location_name }}" disabled>
+                <label for="expense_t1">สถานที่ปฏิบัติงาน</label>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t2" class="form-control" value="{{ $departure_date }}" disabled>
+                <label for="expense_t2">วันเวลาที่ออกปฏิบัติงาน</label>
+            </div>
+        </div>
+        <div class="col-sm-6 form-password-toggle">
+            <div class="input-group input-group-merge">
+                <div class="form-floating form-floating-outline">
+                    <select id="departurefrom" name="departurefrom" class="selectpicker w-100" data-style="btn-default"
+                        tabindex="null">
+                        <!-- <option>เลือกสถานที่</option> -->
+                        {{-- ถ้าเดินทางแบบรถส่วนตัวให้เลือกทั้งสองรายการ แต่ถ้าเดินทางจากรถบริษัทมีแค่บริษัทอย่างเดียว --}}
+                        @if ($booking->type_reserve == 4)
+                            <option value="1">บริษัท</option>
+                            <option value="2">สถานที่พัก</option>
+                        @else
+                            <option value="1">บริษัท</option>
+                        @endif
+
+                    </select>
+                    <label for="departurefrom">ออกเดินทางจาก</label>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- กรณีไป Plant ปกติ --}}
+        <div class="col-sm-6 form-password-toggle">
+            <div class="input-group input-group-merge">
+                <div class="form-floating form-floating-outline">
+                    {{-- <input type="text" id="confirm-password" class="form-control" value="{{ $booking->bu }}"
+                        aria-describedby="confirm-password2">
+                    --}}
+                    @if ($booking->locationid == 12)
+                    @else
+                        <select id="departureplant" name="departureplant" class="form-control w-100 text-dark"
+                            data-style="btn-default" tabindex="null" disabled>
+                            @foreach ($plants as $plant)
+                                <option value="{{ $plant->id }}"
+                                    {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>{{ $plant->plantname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="departureplant">รายละเอียดสถานที่</label>
+                    @endif
+
+                </div>
+
+            </div>
+        </div>
+        {{-- Map --}}
+        <div class="col-sm-12" style="display:none;" id="MapDistanceModal">
+            <input id="origin-input" class="controls" type="text" placeholder="Enter an origin location" />
+
+            <input id="destination-input" class="controls" type="text" placeholder="Enter a destination location" />
+
+            <div id="mode-selector" class="controls">
+                <input type="radio" name="type" id="changemode-walking" checked="checked" />
+                <label for="changemode-walking">Walking</label>
+
+                <input type="radio" name="type" id="changemode-transit" />
+                <label for="changemode-transit">Transit</label>
+
+                <input type="radio" name="type" id="changemode-driving" />
+                <label for="changemode-driving">Driving</label>
+            </div>
+
+            <div id="map"></div>
+
+            <script
+                src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap&libraries=places&v=weekly"
+                defer></script>
+        </div>
+        {{-- Map --}}
+    </div>
+
+    <div class="alert alert-primary mb-3 mt-3">
+        <h6 class="mb-0">ส่วนที่ 1</h6>
+        <small>เดินทางกลับ</small>
+    </div>
+    <div class="row g-4">
+
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t3" class="form-control" value="{{ $return_date }}" disabled>
+                <label for="expense_t3">วันเวลาที่เดินทางกลับ</label>
+            </div>
+        </div>
+        <div class="col-sm-6 form-password-toggle">
+            <div class="input-group input-group-merge">
+                <div class="form-floating form-floating-outline">
+                    <select id="returnfrom" name="returnfrom" class="selectpicker w-100" data-style="btn-default"
+                        tabindex="null">
+                        @if ($booking->type_reserve == 4 && $booking->locationid != 12)
+                            <option>บริษัท</option>
+                            <option>สถานที่อื่นๆ</option>
+                        @else
+                            <option>บริษัท</option>
+                        @endif
+
+                    </select>
+                    <label for="returnfrom">ออกเดินทางจาก</label>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-6 form-password-toggle">
+            <div class="input-group input-group-merge">
+                <div class="form-floating form-floating-outline">
+                    @if ($booking->locationid == 12)
+                    @else
+                        <select id="returnplant" name="returnplant" class="form-control w-100 text-dark"
+                            data-style="btn-default" tabindex="null" disabled>
+                            @foreach ($plants as $plant)
+                                <option value="{{ $plant->id }}"
+                                    {{ $plant->plantname == $booking->locationbu ? 'selected' : '' }}>
+                                    {{ $plant->plantname }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                    <label for="returnplant">รายละเอียดสถานที่</label>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="time" id="returntime" name="returntime" class="form-control" value="">
+                <label for="returntime">ถึงเวลา</label>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control" value="{{ $totalDistance }}" disabled>
+                <input type="hidden" id="totaldistance" name="totaldistance" class="form-control" value="{{ $totalDistance }}">
+                <label for="totaldistance">ระยะทางไป-กลับ</label>
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-primary mb-3 mt-3">
+        <h6 class="mb-0">ส่วนที่ 1</h6>
+        <small>วัตถุประสงค์</small>
+    </div>
+    <div class="row g-4">
+        <div class="col-sm-12">
+            @foreach ($reasons as $key => $label)
+                <label class="form-check-inline me-3">
+                    <input class="form-check-input" type="radio" name="purpose" value="{{ $label }}"
+                        {{ $booking->objname == $label ? 'checked disabled' : 'disabled' }}>
+                    {{ $label }}
+                </label>
+            @endforeach
+
+
+        </div>
+        @if ($booking->objid == 7)
+            <div class="col-sm-12">
+                <div class="form-floating form-floating-outline mb-4">
+                    <textarea class="form-control h-px-100" id="exampleFormControlTextarea1" disabled>{{ $booking->remark }}</textarea>
+                    <label for="exampleFormControlTextarea1">อื่่นๆ</label>
+                </div>
+            </div>
+        @endif
+        <div class="col-12 d-flex justify-content-between">
+            <button class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
+                <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
+                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+            </button>
+            <button class="btn btn-primary btn-next waves-effect waves-light">
+                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                <i class="mdi mdi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
