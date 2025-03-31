@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Vbooking extends Model
 {
     protected $connection = 'booking_carv2';
-    protected $table = 'v_booking';
+    protected $table = 'v_booking_expense';
 }

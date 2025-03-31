@@ -94,20 +94,22 @@
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
-                                <tr>
-                                    <td>EX20241102</td>
-                                    <td>11/11/2024 8:30 น.</td>
-                                    <td>11099</td>
-                                    <td>AGI</td>
-                                    <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
-                                    <td><span class="badge rounded-pill bg-label-danger me-1">Not Approved</span></td>
-                                    <td>
-                                        {{-- เบิกได้ภายใน 7 วันหลังการเดินทาง --}}
-                                        <button class="btn btn-sm btn-info" onclick="window.location.href='{{ route('Expense.create') }}'"><span class="mdi mdi-pencil-circle-outline"></span> Edit</button>
-                                        {{-- <button class="btn btn-sm btn-danger"><span class="mdi mdi-trash-can-outline"></span></button> --}}
-                                    </td>
-                                </tr>
-                                <tr>
+                                @foreach ($booking as $booking)
+                                    <tr>
+                                        <td></td>
+                                        <td>{{ $booking->departure_date.' - '.$booking->return_date }}</td>
+                                        <td>{{ $booking->id }}</td>
+                                        <td>{{ $booking->location_name }}</td>
+                                        <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
+                                        <td><span class="badge rounded-pill bg-label-danger me-1">Not Approved</span></td>
+                                        <td>
+                                            {{-- เบิกได้ภายใน 7 วันหลังการเดินทาง --}}
+                                            <button class="btn btn-sm btn-info" onclick="window.location.href='{{ route('Expense.create',$booking->id) }}'"><span class="mdi mdi-pencil-circle-outline"></span> Edit</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+
+                                {{-- <tr>
                                     <td>-</td>
                                     <td>10/11/2024 10:00 น.</td>
                                     <td>11085</td>
@@ -116,10 +118,10 @@
                                     <td><span class="badge rounded-pill bg-label-danger me-1">Not Approved</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-info"><span class="mdi mdi-pencil-circle-outline"></span> Edit</button>
-                                        {{-- <button class="btn btn-sm btn-danger"><span class="mdi mdi-trash-can-outline"></span></button> --}}
+                                        <button class="btn btn-sm btn-danger"><span class="mdi mdi-trash-can-outline"></span></button>
                                     </td>
-                                </tr>
-                                <tr>
+                                </tr> --}}
+                                {{-- <tr>
                                     <td>EX20241101</td>
                                     <td>09/11/2024 10:30 น.</td>
                                     <td>11080</td>
@@ -129,7 +131,7 @@
                                     <td>
                                         <button class="btn btn-sm btn-warning"><span class="mdi mdi-eye-circle-outline"></span> View</button>
                                     </td>
-                                </tr>
+                                </tr> --}}
 
                             </tbody>
                         </table>

@@ -13,7 +13,25 @@ return new class extends Migration
     {
         Schema::create('distance_rates', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('startplant');
+            $table->unsignedBigInteger('endplant');
+
+            $table->decimal('kilometer', 10, 2);
+            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('deleted')->default(0);
+            $table->integer('created_by');
+            $table->integer('modified_by')->nullable();
             $table->timestamps();
+
+            // Foreign keys
+            $table->foreign('startplant')
+                ->references('id')->on('plants')
+                ->onDelete('cascade');
+
+            $table->foreign('endplant')
+                ->references('id')->on('plants')
+                ->onDelete('cascade');
         });
     }
 

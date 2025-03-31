@@ -74,7 +74,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Booker
     // Route::resource('Expense', ExpenseController::class);
     Route::get('Expense', [ExpenseController::class, 'index'])->name('Expense.index');
-    Route::get('Expense/create', [ExpenseController::class, 'create'])->name('Expense.create');
+    Route::get('Expense/{id}/create', [ExpenseController::class, 'create'])->name('Expense.create');
     // HeadApprove
     // Route::resource('HeadApprove', HeadApprovedController::class);
     Route::get('HeadApprove', [HeadApprovedController::class, 'index'])->name('HeadApprove.index');
