@@ -12,24 +12,44 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('expenses', function (Blueprint $table) {
-            $table->id();
+            $table->string('id', 20)->primary();
             $table->string('prefix',10);
             $table->integer('bookid');
             $table->string('empid',20);
             $table->tinyInteger('extype');
             $table->tinyInteger('departurefrom')->nullable();
             // departureplant
+            $table->unsignedBigInteger('departureplant');
+            $table->foreign('departureplant')
+                ->references('id')
+                ->on('plants')
+                ->onDelete('cascade');
             $table->string('departuretext',255)->nullable();
             $table->tinyInteger('returnfrom')->nullable();
              // returnplant
+             $table->unsignedBigInteger('returnplant');
+             $table->foreign('returnplant')
+                 ->references('id')
+                 ->on('plants')
+                 ->onDelete('cascade');
             $table->string('returnfromtext',255)->nullable();
             $table->time('returntime');
             $table->decimal('totaldistance', 10, 2);
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 10, 8)->nullable();
-            $table->tinyInteger('checktoil');
+            $table->tinyInteger('checktoil')->nullable();
             // fuel91id
+            $table->unsignedBigInteger('fuel91id')->nullable();
+            $table->foreign('fuel91id')
+                ->references('id')
+                ->on('fuel_price91s')
+                ->onDelete('cascade');
             // fuelpricesid
+            $table->unsignedBigInteger('fuelpricesid')->nullable();
+            $table->foreign('fuelpricesid')
+                ->references('id')
+                ->on('fuelprices')
+                ->onDelete('cascade');
             $table->decimal('publictransportfare', 10, 2)->nullable();
             $table->decimal('expresswaytoll', 10, 2)->nullable();
             $table->decimal('otherexpenses', 10, 2)->nullable();
@@ -47,18 +67,29 @@ return new class extends Migration
         Schema::create('expensefoods', function (Blueprint $table) {
             $table->id();
             // exid
+            $table->string('exid');
+            $table->foreign('exid')
+                ->references('id')
+                ->on('expenses')
+                ->onDelete('cascade');
             //mealid
-            $table->float('meal1', 10, 2)->default(0.00)->nullable();
-            $table->float('meal2', 10, 2)->default(0.00)->nullable();
-            $table->float('meal3', 10, 2)->default(0.00)->nullable();
-            $table->float('meal4', 10, 2)->default(0.00)->nullable();
+            $table->unsignedBigInteger('mealid');
+            $table->foreign('mealid')
+                ->references('id')
+                ->on('pricepermeals')
+                ->onDelete('cascade');
+            $table->decimal('meal1', 10, 2)->default(0.00)->nullable();
+            $table->decimal('meal2', 10, 2)->default(0.00)->nullable();
+            $table->decimal('meal3', 10, 2)->default(0.00)->nullable();
+            $table->decimal('meal4', 10, 2)->default(0.00)->nullable();
             $table->tinyInteger('meal1reject')->default(0);
             $table->tinyInteger('meal2reject')->default(0);
             $table->tinyInteger('meal3reject')->default(0);
             $table->tinyInteger('meal4reject')->default(0);
-            $table->float('totalpricebf', 10, 2)->default(0.00);
-            $table->float('totalreject', 10, 2)->default(0.00);
-            $table->float('totalprice', 10, 2)->default(0.00);
+            $table->date('used_date');
+            $table->decimal('totalpricebf', 10, 2)->default(0.00);
+            $table->decimal('totalreject', 10, 2)->default(0.00);
+            $table->decimal('totalprice', 10, 2)->default(0.00);
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('deleted')->default(0);
             $table->integer('created_by');
@@ -68,7 +99,11 @@ return new class extends Migration
 
         Schema::create('expensefiles', function (Blueprint $table) {
             $table->id();
-            // exid
+            $table->string('exid');
+            $table->foreign('exid')
+                ->references('id')
+                ->on('expenses')
+                ->onDelete('cascade');
             $table->string('path',255);
             $table->string('etc',100);
             $table->tinyInteger('status')->default(1);
@@ -81,9 +116,17 @@ return new class extends Migration
         Schema::create('approve', function (Blueprint $table) {
             $table->id();
             // exid
-            $table->string('path',255);
+            $table->string('exid');
+            $table->foreign('exid')
+                ->references('id')
+                ->on('expenses')
+                ->onDelete('cascade');
+            // $table->string('path',255);
             $table->tinyInteger('typeapprove');
             $table->string('empid',20);
+            $table->string('email',255);
+            $table->string('approvename',255);
+            $table->tinyInteger('emailstatus')->nullable();
             $table->tinyInteger('statusappprove');
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('deleted')->default(0);
@@ -98,8 +141,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('expenses');
-        Schema::dropIfExists('expensefoods');
+        Schema::dropIfExists('approve');
         Schema::dropIfExists('expensefiles');
+        Schema::dropIfExists('expensefoods');
+        Schema::dropIfExists('expenses');
     }
 };

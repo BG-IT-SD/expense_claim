@@ -1,4 +1,4 @@
-<div id="account-details" class="content">
+<div id="account-details" class="content" step="1">
     <div class="alert alert-primary mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 1</h6>
         <small>การออกเดินทาง</small>
@@ -19,8 +19,8 @@
         <div class="col-sm-6 form-password-toggle">
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
-                    <select id="departurefrom" name="departurefrom" class="selectpicker w-100" data-style="btn-default"
-                        tabindex="null">
+                    <select id="departurefrom" name="departurefrom" class="form-control w-100 text-dark"
+                        data-style="btn-default" tabindex="null">
                         <!-- <option>เลือกสถานที่</option> -->
                         {{-- ถ้าเดินทางแบบรถส่วนตัวให้เลือกทั้งสองรายการ แต่ถ้าเดินทางจากรถบริษัทมีแค่บริษัทอย่างเดียว --}}
                         @if ($booking->type_reserve == 4)
@@ -46,7 +46,10 @@
                     --}}
                     @if ($booking->locationid == 12)
                     @else
-                        <select id="departureplant" name="departureplant" class="form-control w-100 text-dark"
+                        @php
+                            $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
+                        @endphp
+                        <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
@@ -54,6 +57,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="departureplant" value="{{ $selectedPlant?->id }}">
                         <label for="departureplant">รายละเอียดสถานที่</label>
                     @endif
 
@@ -78,11 +82,11 @@
                 <label for="changemode-driving">Driving</label>
             </div>
 
-            <div id="map"></div>
+            {{-- <div id="map"></div>
 
             <script
                 src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap&libraries=places&v=weekly"
-                defer></script>
+                defer></script> --}}
         </div>
         {{-- Map --}}
     </div>
@@ -99,16 +103,17 @@
                 <label for="expense_t3">วันเวลาที่เดินทางกลับ</label>
             </div>
         </div>
+
         <div class="col-sm-6 form-password-toggle">
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
-                    <select id="returnfrom" name="returnfrom" class="selectpicker w-100" data-style="btn-default"
-                        tabindex="null">
+                    <select id="returnfrom" name="returnfrom" class="form-control w-100 text-dark"
+                        data-style="btn-default" tabindex="null">
                         @if ($booking->type_reserve == 4 && $booking->locationid != 12)
-                            <option>บริษัท</option>
-                            <option>สถานที่อื่นๆ</option>
+                            <option value="1">บริษัท</option>
+                            <option value="2">สถานที่อื่นๆ</option>
                         @else
-                            <option>บริษัท</option>
+                            <option value="1">บริษัท</option>
                         @endif
 
                     </select>
@@ -123,7 +128,10 @@
                 <div class="form-floating form-floating-outline">
                     @if ($booking->locationid == 12)
                     @else
-                        <select id="returnplant" name="returnplant" class="form-control w-100 text-dark"
+                    @php
+                     $selectedReturnPlant = $plants->firstWhere('plantname', $booking->locationbu);
+                    @endphp
+                        <select id="returnplant2" name="returnplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
@@ -132,6 +140,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="returnplant" value="{{ $selectedReturnPlant?->id }}">
                     @endif
                     <label for="returnplant">รายละเอียดสถานที่</label>
                 </div>
@@ -139,15 +148,22 @@
             </div>
         </div>
         <div class="col-sm-6">
-            <div class="form-floating form-floating-outline">
+            {{-- <div class="form-floating form-floating-outline">
                 <input type="time" id="returntime" name="returntime" class="form-control" value="">
+                <label for="returntime">ถึงเวลา</label>
+            </div> --}}
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="returntime" name="returntime" placeholder="20:00:00" class="form-control"
+                    required />
                 <label for="returntime">ถึงเวลา</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
-                <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control" value="{{ $totalDistance }}" disabled>
-                <input type="hidden" id="totaldistance" name="totaldistance" class="form-control" value="{{ $totalDistance }}">
+                <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
+                    value="{{ $totalDistance }}" disabled>
+                <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                    value="{{ $totalDistance }}">
                 <label for="totaldistance">ระยะทางไป-กลับ</label>
             </div>
         </div>

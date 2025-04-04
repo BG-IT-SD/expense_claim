@@ -10,8 +10,8 @@
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                    <h5>Default</h5>
-                </div> -->
+                            <h5>Default</h5>
+                        </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -58,13 +58,14 @@
                         </div>
                     </div>
                     <div class="bs-stepper-content">
-                        <form onsubmit="return false">
+                        <form id="expensefrm" onsubmit="return false">
+                            @csrf
                             {{-- hidden --}}
-                            <input type="text" name="extype" value="{{ $typegroup }}">
-                            <input type="text" name="bookid" value="{{ $booking->id }}">
-                            <input type="text" name="empid" value="{{ Auth::user()->empid }}">
-                            <input type="text" name="locationbu" value="{{ $booking->locationbu }}">
-                            <input type="text" name="locationid" value="{{ $booking->locationid }}">
+                            <input type="hidden" name="extype" value="{{ $typegroup }}">
+                            <input type="hidden" name="bookid" value="{{ $booking->id }}">
+                            <input type="hidden" name="empid" value="{{ $empid }}">
+                            <input type="hidden" name="locationbu" value="{{ $booking->locationbu }}">
+                            <input type="hidden" name="locationid" value="{{ $booking->locationid }}">
                             {{-- hidden --}}
                             <!-- Tab1 Details -->
                             @include('front.expenses.expenset1')
@@ -140,15 +141,36 @@
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/select2/select2.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/@form-validation/umd/styles/index.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/pickr/pickr-themes.css') }}" />
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/dropzone/dropzone.css') }}" />
+@endsection
+
+
+@section('jsvendor')
+    <script src="{{ asset('template/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+
+    <script src="{{ asset('template/assets/vendor/libs/bs-stepper/bs-stepper.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/dropzone/dropzone.js') }}"></script>
 @endsection
 
 @section('jscustom')
-    <script src="{{ asset('template/assets/js/forms-file-upload.js') }}"></script>
     <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
-    <script src="{{ asset('template/assets/js/form-wizard-numbered.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/pickr/pickr.js') }}"></script>
+
+    {{-- <script src="{{ asset('template/assets/js/form-wizard-numbered.js') }}"></script> --}}
     <script src="{{ asset('template/assets/js/form-wizard-validation.js') }}"></script>
+
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script>
-    <script></script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step.js']) }}"></script>
+
     <script>
         // function initMap() {
         //     const map = new google.maps.Map(document.getElementById("map"), {
@@ -273,17 +295,4 @@
 
         // window.initMap = initMap;
     </script>
-@endsection
-
-@section('jsvendor')
-    <script src="{{ asset('template/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-
-    <script src="{{ asset('template/assets/vendor/libs/bs-stepper/bs-stepper.js') }}"></script>
-    <script src="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
-    <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
-    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js') }}"></script>
-    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js') }}"></script>
-    <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js') }}"></script>
-
-    <script src="{{ asset('template/assets/vendor/libs/dropzone/dropzone.js') }}"></script>
 @endsection

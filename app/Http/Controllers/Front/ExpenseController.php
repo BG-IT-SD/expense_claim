@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApproveGroup;
 use App\Models\DistanceRate;
 use App\Models\Groupplant;
 use App\Models\GroupSpecial;
+use App\Models\Heademp;
 use App\Models\Plant;
 use App\Models\Valldataemp;
 use App\Models\Vbooking;
@@ -13,7 +15,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApproveNotification;
+use App\Models\Approve;
+use App\Models\Expense;
+use App\Models\ExpenseFile;
+use App\Models\ExpenseFood;
+use Illuminate\Support\Facades\DB;
 
 class ExpenseController extends Controller
 {
@@ -30,7 +38,7 @@ class ExpenseController extends Controller
             ->get()
             ->unique('id')
             ->values();
-            // ->unique('booking_id');
+        // ->unique('booking_id');
         // dd($booking);
         return view('front.expenses.list', compact('booking'));
     }
@@ -42,7 +50,11 @@ class ExpenseController extends Controller
     {
         $booking = Vbooking::find($id);
         $empid = Auth::user()->empid;
+        $empemail = Auth::user()->email;
+        $empfullname = Auth::user()->fullname;
         // $booking->booking_emp_id ?? "";
+        // $this->sendMail();
+
         $typegroup = 1;
         $totalDistance = 0;
         $startplant = "";
@@ -50,8 +62,9 @@ class ExpenseController extends Controller
         $PlantStart = $booking->bu;
         $bu = Auth::user()->bu;
         $level = 1;
-
-        if (session('level') <= 7) {
+        $empLevel = $this->LevelEmp($empid);
+        // ession('level')
+        if ($empLevel <= 7) {
             $level = 1;
         } else {
             $level = 2;
@@ -97,6 +110,8 @@ class ExpenseController extends Controller
             })
             ->first();
 
+        // dd($groupplant->mealid);
+
         $startDate = Carbon::parse($booking->departure_date);
         $endDate = Carbon::parse($booking->return_date);
         $startTime = Carbon::parse($booking->departure_time);
@@ -105,14 +120,20 @@ class ExpenseController extends Controller
         // Loop by day (you can change the interval to '1 week', '1 month', etc.)
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
 
+        // หัวหน้างานอนุมัติ
+        $oHeademp = Heademp::where('account_number', $empid)->first();
+        $headempid = $oHeademp?->head_emp_id ?? "";
+        $headlevel = $this->LevelEmp($headempid);
+        $heademail =  $oHeademp?->head_email;
+        $headname = $oHeademp?->name_head . '  ' . $oHeademp?->surname_head;
+        // กลุ่มเลขา
+        $approve_g = ApproveGroup::where('empid', $empid)->count();
 
+        // dd($approve_g);
 
-
-
-        // dd($booking);
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact('booking', 'typegroup', 'plants', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime'));
+                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 echo 'ไม่ใช้ประเภทคนทั่วไป [พขร ช่าง admin ทำการเบิก]';
             }
@@ -124,8 +145,144 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $request->validate([
+            'bookid' => 'required',
+            'empid' => 'required',
+            'extype' => 'required',
+            'returntime' => 'required',
+            'totaldistance' => 'required',
+            'costoffood' => 'required',
+            'travelexpenses' => 'required',
+            'gasolinecost' => 'required',
+            'totalExpense' => 'required',
+
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $todayPrefix = Carbon::now()->format('Ymd');
+
+            $latestId = Expense::where('id', 'like', $todayPrefix . '%')
+                ->orderByDesc('id')
+                ->first();
+
+            $nextNumber = $latestId ? ((int)substr($latestId->id, 8)) + 1 : 1;
+            $newId = $todayPrefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+            $expense = Expense::create([
+                'id' => $newId,
+                'prefix' => "EX",
+                'bookid' => $request->bookid,
+                'empid' => $request->empid,
+                'extype' => $request->extype,
+                'departurefrom' => $request->departurefrom,
+                'departureplant' => $request->departureplant,
+                'departuretext' => null,
+                'returnfrom' => $request->returnfrom,
+                'returnplant' => $request->returnplant,
+                'returnfromtext' => null,
+                'returntime' => $request->returntime,
+                'totaldistance' => $request->totaldistance,
+                'latitude' => null,
+                'longitude' => null,
+                'checktoil' => 0,
+                'fuel91id' => null,
+                'fuelpricesid' => null,
+                'publictransportfare' => $request->publictransportfare ?? 0,
+                'expresswaytoll' => $request->expresswaytoll ?? 0,
+                'otherexpenses' => $request->otherexpenses ?? 0,
+                'costoffood' => $request->costoffood,
+                'travelexpenses' => $request->travelexpenses,
+                'gasolinecost' => $request->gasolinecost,
+                'totalprice' => $request->totalExpense,
+            ]);
+
+            if (is_array($request->days)) {
+                foreach ($request->days as $day) {
+                    ExpenseFood::create([
+                        'exid' => $expense->id,
+                        'mealid' => $day['mealid'],
+                        'meal1' => floatval($day['meal1'][0] ?? 0),
+                        'meal2' => floatval($day['meal2'][0] ?? 0),
+                        'meal3' => floatval($day['meal3'][0] ?? 0),
+                        'meal4' => floatval($day['meal4'][0] ?? 0),
+                        'meal1reject' => isset($day['meal1'][1]) ? 1 : 0,
+                        'meal2reject' => isset($day['meal2'][1]) ? 1 : 0,
+                        'meal3reject' => isset($day['meal3'][1]) ? 1 : 0,
+                        'meal4reject' => isset($day['meal4'][1]) ? 1 : 0,
+                        'totalprice' => floatval($day['totalprice']),
+                        'totalpricebf' => floatval($day['totalpricebf']),
+                        'totalreject' => intval($day['totalreject']),
+                        'used_date' => $day['date'],
+                    ]);
+                }
+            }
+
+            // ✅ บันทึก Approve
+            Approve::create([
+                'exid' => $expense->id,
+                'typeapprove' => 1, //ประเภทที่ 1 รอหัวหน้าอนุมัติ
+                'empid' => $request->head_id,
+                'email' => $request->head_email ?? '',
+                'approvename' => $request->head_name ?? '',
+                'emailstatus' => 0,
+                'statusappprove' => 0,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว',
+                'expense_id' => $expense->id
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'expense_id' => 'required|exists:expenses,id',
+            'files.*' => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf',
+        ]);
+
+        $paths = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('images/expenses', 'public');
+
+                ExpenseFile::create([
+                    'exid' => $request->expense_id,
+                    'path' => $path,
+                ]);
+
+                $paths[] = $path;
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'อัปโหลดสำเร็จ',
+                'paths' => $paths
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'ไม่มีไฟล์ถูกอัปโหลด'
+        ]);
+    }
+
 
     /**
      * Display the specified resource.
@@ -159,6 +316,68 @@ class ExpenseController extends Controller
         //
     }
 
+    public function Heademp(Request $request)
+    {
+        $keyword = $request->input('sKeyword');
+        $page = $request->input('page', 1);
+        $limit = 5;
+
+        $query = Valldataemp::query();
+
+        if ($keyword) {
+            $query->where('EMAIL', 'like', "%$keyword%");
+        }
+
+        $query->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+            ->where('STAEMP', '!=', 9)
+            ->where('numlvl', '>=', 7);
+
+        $total = $query->count();
+
+        $results = $query->skip(($page - 1) * $limit)
+            ->take($limit)
+            ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT']) // ดึงหลาย field
+            ->map(function ($item) {
+                return [
+                    'id' => $item->CODEMPID,
+                    'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}"
+                ];
+            });
+
+        return response()->json([
+            'data' => $results,
+            'total_count' => $total,
+        ]);
+    }
+
+    public function getAllHeadEmp(Request $request)
+    {
+        $empid = $request->query('emid'); // รับ emid จาก query string
+
+        $data = Valldataemp::where('CODEMPID', $empid)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
+            ->where('STAEMP', '!=', 9)
+            ->where('numlvl', '>=', 7)
+            ->first();
+
+        // ถ้าไม่เจอข้อมูลเลย
+        if (!$data) {
+            return response()->json([
+                'message' => 'ไม่พบข้อมูล',
+            ], 404);
+        }
+
+        return response()->json([
+            'Idemp' => $data->CODEMPID,
+            'Emailemp' => $data->EMAIL,
+            'Nameemp' => $data->NAMFIRSTT . ' ' . $data->NAMLASTT,
+        ]);
+    }
+
     private function getDistance($startName, $endName)
     {
         return DistanceRate::where(function ($q) use ($startName, $endName) {
@@ -174,5 +393,26 @@ class ExpenseController extends Controller
                 $q3->where('plantname', $startName);
             });
         })->where('deleted', 0)->value('kilometer') ?? 0;
+    }
+
+    private function LevelEmp($id)
+    {
+        $vAllemp = Valldataemp::where('CODEMPID', "$id")->first();
+        $level = $vAllemp?->NUMLVL ?? "";
+        return  $level;
+    }
+
+    public function sendMail()
+    {
+        $data = [
+            'name' => 'สมชาย ใจดี',
+            'title' => 'ใบเบิกค่าเดินทาง',
+            'status' => 'อนุมัติแล้ว',
+            'date' => now()->format('d/m/Y'),
+        ];
+
+        Mail::to('kamolwan.b@bgiglass.com')->send(new ApproveNotification($data));
+
+        return back()->with('success', 'ส่งอีเมลเรียบร้อยแล้ว');
     }
 }

@@ -149,6 +149,26 @@ return [
                 PDO::ATTR_EMULATE_PREPARES => true // สำหรับอ่าน Database ที่ Table เป็น Viwe
             ]): [],
         ],
+        'heademp' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HEADEMP_HOST', '192.168.0.39'),
+            'port' => env('DB_HEADEMP_PORT', '3306'),
+            'database' => env('DB_HEADEMP_DATABASE', 'laravel'),
+            'username' => env('DB_HEADEMP_USERNAME', 'root'),
+            'password' => env('DB_HEADEMP_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES => true // สำหรับอ่าน Database ที่ Table เป็น Viwe
+            ]): [],
+        ],
+
 
     ],
 
