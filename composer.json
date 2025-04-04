@@ -29,7 +29,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/GoogleMapsHelper.php"
+            "app/Helpers/GoogleMapsHelper.php",
+            "app/Helpers/Approvestatus.php"
         ]
     },
     "autoload-dev": {

@@ -15,7 +15,8 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-first-name">Expense ID</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-first-name">Expense
+                                            ID</label>
                                         <div class="col-sm-9">
                                             <input type="text" id="formtabs-first-name" class="form-control"
                                                 placeholder="">
@@ -24,7 +25,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-last-name">Booking ID</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-last-name">Booking
+                                            ID</label>
                                         <div class="col-sm-9">
                                             <input type="text" id="formtabs-last-name" class="form-control"
                                                 placeholder="">
@@ -35,7 +37,8 @@
 
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-birthdate">Date Time</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-birthdate">Date
+                                            Time</label>
                                         <div class="col-sm-9">
                                             <input type="hidden" id="formtabs-birthdate"
                                                 class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD"
@@ -46,13 +49,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="row">
+                                    {{-- <div class="row">
                                         <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-phone">Location</label>
                                         <div class="col-sm-9">
                                             <input type="text" id="formtabs-phone" class="form-control phone-mask"
                                                 placeholder="" aria-label="658 799 8941">
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -81,30 +84,56 @@
                 <div class="card">
                     <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก</h5>
                     <div class="table-responsive text-nowrap">
-                        <table class="table">
+                        <table class="table" id="ExpenseList">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Expense ID</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
                                     <th>Location</th>
-                                    <th>Status</th>
+                                    <th>Type Approve</th>
                                     <th>Approve</th>
+                                    <th>Approve Name</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
                                 @foreach ($booking as $booking)
+                                    @php
+                                        $expense = optional($booking->expense);
+                                        $approve = optional($expense->latestApprove);
+                                    @endphp
                                     <tr>
-                                        <td></td>
-                                        <td>{{ $booking->departure_date.' - '.$booking->return_date }}</td>
+                                        <td>{{ $expense->prefix . $expense->id }}</td>
+                                        <td>{{ $booking->departure_date . ' - ' . $booking->return_date }}</td>
                                         <td>{{ $booking->id }}</td>
                                         <td>{{ $booking->location_name }}</td>
-                                        <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
-                                        <td><span class="badge rounded-pill bg-label-danger me-1">Not Approved</span></td>
+                                        <td>
+                                            @if (!is_null($approve->typeapprove))
+                                                {!! type_approve_text($approve->typeapprove) !!}
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if (!is_null($approve->statusappprove))
+                                                {!! status_approve_badge($approve->statusappprove, $approve->typeapprove) !!}
+                                            @endif
+
+                                        </td>
+                                        <td>
+                                            @if (!is_null($approve->approvename))
+                                                {{ $approve->approvename }}
+                                            @endif
+                                        </td>
                                         <td>
                                             {{-- เบิกได้ภายใน 7 วันหลังการเดินทาง --}}
-                                            <button class="btn btn-sm btn-info" onclick="window.location.href='{{ route('Expense.create',$booking->id) }}'"><span class="mdi mdi-pencil-circle-outline"></span> Edit</button>
+                                            @if (!is_null($expense->id))
+                                            <button class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</button>
+                                            @else
+                                                <button class="btn btn-sm btn-primary"
+                                                    onclick="window.location.href='{{ route('Expense.create', $booking->id) }}'"><span
+                                                        class="mdi mdi-pencil-circle-outline"></span> เบิก</button>
+                                            @endif
+
                                         </td>
                                     </tr>
                                 @endforeach
@@ -140,4 +169,19 @@
             </div>
         </div>
     </div>
+@endsection
+@section('jscustom')
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script>
 @endsection

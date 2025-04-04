@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Expense extends Model
 {
+    protected $connection = 'mysql';
     protected $keyType = 'string';
     public $incrementing = false;
     protected $table = 'expenses';
@@ -42,6 +43,14 @@ class Expense extends Model
         'status',
         'deleted',
     ];
+
+    public function latestApprove()
+    {
+        return $this->hasOne(Approve::class, 'exid', 'id')
+        ->where('deleted', 0)
+        ->where('status', 1)
+        ->latestOfMany(); // ✅ ดึง row ล่าสุด
+    }
 
     public function Departureplant()
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Front;
 
+use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ApproveGroup;
 use App\Models\DistanceRate;
@@ -17,11 +18,13 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ApproveNotification;
+use App\Mail\TestMail;
 use App\Models\Approve;
 use App\Models\Expense;
 use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ExpenseController extends Controller
 {
@@ -33,13 +36,25 @@ class ExpenseController extends Controller
         // ข้อมูลจองรถตาม CODEMPID 7 วันย้อนหลัง
         // create view ที่รวมเป็นผู้โดยสารด้วย
         $empid = Auth::user()->empid;
-        $booking = Vbooking::where('booking_emp_id', "$empid")
-            ->orWhere('passenger_empid', "$empid")
-            ->get()
-            ->unique('id')
-            ->values();
-        // ->unique('booking_id');
-        // dd($booking);
+        // $booking = Vbooking::where('booking_emp_id', "$empid")
+        //     ->orWhere('passenger_empid', "$empid")
+        //     ->get()
+        //     ->unique('id')
+        //     ->values();
+        $booking = Vbooking::with([
+            'expense' => function ($q) use ($empid) {
+                $q->where('empid', $empid)
+                  ->with('latestApprove'); // ✅ include latest approve
+            }
+        ])
+        ->where(function ($q) use ($empid) {
+            $q->where('booking_emp_id', $empid)
+              ->orWhere('passenger_empid', $empid);
+        })
+        ->get()
+        ->unique('id')
+        ->values();
+        // dd($booking[0]->expense->id ?? 'no expense');
         return view('front.expenses.list', compact('booking'));
     }
 
@@ -53,7 +68,8 @@ class ExpenseController extends Controller
         $empemail = Auth::user()->email;
         $empfullname = Auth::user()->fullname;
         // $booking->booking_emp_id ?? "";
-        // $this->sendMail();
+        // MailHelper::SendMail('kamolwan.b@bgiglass.com', 'Subject from API', 'Some body text', 'dddd');
+
 
         $typegroup = 1;
         $totalDistance = 0;
@@ -145,7 +161,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-
+        $fullname = Auth::user()->fullname;
         $request->validate([
             'bookid' => 'required',
             'empid' => 'required',
@@ -156,6 +172,7 @@ class ExpenseController extends Controller
             'travelexpenses' => 'required',
             'gasolinecost' => 'required',
             'totalExpense' => 'required',
+            'files.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
 
@@ -208,10 +225,10 @@ class ExpenseController extends Controller
                         'meal2' => floatval($day['meal2'][0] ?? 0),
                         'meal3' => floatval($day['meal3'][0] ?? 0),
                         'meal4' => floatval($day['meal4'][0] ?? 0),
-                        'meal1reject' => isset($day['meal1'][1]) ? 1 : 0,
-                        'meal2reject' => isset($day['meal2'][1]) ? 1 : 0,
-                        'meal3reject' => isset($day['meal3'][1]) ? 1 : 0,
-                        'meal4reject' => isset($day['meal4'][1]) ? 1 : 0,
+                        'meal1reject' => in_array("1", $day['mealx1'] ?? []) ? 1 : 0,
+                        'meal2reject' => in_array("1", $day['mealx2'] ?? []) ? 1 : 0,
+                        'meal3reject' => in_array("1", $day['mealx3'] ?? []) ? 1 : 0,
+                        'meal4reject' => in_array("1", $day['mealx4'] ?? []) ? 1 : 0,
                         'totalprice' => floatval($day['totalprice']),
                         'totalpricebf' => floatval($day['totalpricebf']),
                         'totalreject' => intval($day['totalreject']),
@@ -221,30 +238,65 @@ class ExpenseController extends Controller
             }
 
             // ✅ บันทึก Approve
-            Approve::create([
+            $token = Str::random(64);
+            $approve = Approve::create([
                 'exid' => $expense->id,
                 'typeapprove' => 1, //ประเภทที่ 1 รอหัวหน้าอนุมัติ
                 'empid' => $request->head_id,
                 'email' => $request->head_email ?? '',
                 'approvename' => $request->head_name ?? '',
-                'emailstatus' => 0,
+                'emailstatus' => 1,
                 'statusappprove' => 0,
+                'login_token' => $token,
+                'token_expires_at' => now()->addDays(10),
             ]);
+            $link = route('approve.magic.login', ['token' => $approve->login_token]);
+            $data = [
+                'type' => 1,
+                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+                'name' => $request->head_name,
+                'full_name' => $fullname,
+                'departuredate' => $request->departuredatemail ?? '',
+                'link' => $link,
+            ];
+
+
+            MailHelper::sendExternalMail(
+                $request->head_email,
+                'อนุมัติการเบิกเบี้ยเลี้ยง',
+                'mails.exapprove', // ชื่อ blade view
+                $data,
+                'Expense Claim System'
+            );
+
+            foreach ($request->file('files') as $file) {
+                $filename = Str::random() . '.' . $file->getClientOriginalExtension();
+                // $file->hashName();
+                $path = $file->storeAs('images/expenses', $filename, 'public');
+
+                ExpenseFile::create([
+                    'exid' => $expense->id,
+                    'path' => $path,
+                    'etc' => $file->getClientOriginalName(),
+                ]);
+            }
 
             DB::commit();
 
             return response()->json([
-                'status' => true,
+                'status' => 200,
                 'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว',
-                'expense_id' => $expense->id
+                'expense_id' => $expense->id,
+                'class' => 'success'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                'status' => false,
+                'status' => 500,
                 'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'class' => 'error'
             ], 500);
         }
     }
@@ -253,7 +305,8 @@ class ExpenseController extends Controller
     {
         $request->validate([
             'expense_id' => 'required|exists:expenses,id',
-            'files.*' => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'files' => 'required',
+            'files.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
         ]);
 
         $paths = [];
@@ -400,19 +453,5 @@ class ExpenseController extends Controller
         $vAllemp = Valldataemp::where('CODEMPID', "$id")->first();
         $level = $vAllemp?->NUMLVL ?? "";
         return  $level;
-    }
-
-    public function sendMail()
-    {
-        $data = [
-            'name' => 'สมชาย ใจดี',
-            'title' => 'ใบเบิกค่าเดินทาง',
-            'status' => 'อนุมัติแล้ว',
-            'date' => now()->format('d/m/Y'),
-        ];
-
-        Mail::to('kamolwan.b@bgiglass.com')->send(new ApproveNotification($data));
-
-        return back()->with('success', 'ส่งอีเมลเรียบร้อยแล้ว');
     }
 }

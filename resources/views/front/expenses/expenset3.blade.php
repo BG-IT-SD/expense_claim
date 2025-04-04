@@ -86,14 +86,33 @@
         <div class="col-sm-12">
             <div class="card ">
                 <h5 class="card-header">Upload ไฟล์หลักฐาน</h5>
-                <div class="card-body ">
-                    <div id="dropzone-multi" class="dropzone needsclick">
+                <div class="card-body row">
+                    {{-- <div id="dropzone-multi" class="dropzone needsclick">
                         <div class="dz-message needsclick">
                             Drop files here or click to upload
                             <span class="note needsclick">(This is just a demo dropzone. Selected files are not actually
                                 uploaded.)</span>
                         </div>
+                    </div> --}}
+                    <!-- input แบบ multiple -->
+                    {{-- <div class="mb-3">
+                        <label for="fileInput" class="form-label">Upload ไฟล์หลักฐาน</label>
+                        <input type="file" name="files[]" id="fileInput" class="form-control" multiple>
+                        <div id="fileList" class="mt-2"></div>
+                    </div> --}}
+                    <div class="col-md-8">
+                        <div id="file-container">
+                            <div class="file-row mb-2 d-flex gap-2 align-items-center">
+                                <input type="file" name="files[]" class="form-control w-75" required>
+                                <button type="button" class="btn btn-danger btn-remove">ลบ</button>
+                            </div>
+                        </div>
                     </div>
+                    <div class="col-md-4"><button type="button" id="add-file"
+                            class="btn btn-secondary mb-3">เพิ่มไฟล์</button>
+                    </div>
+
+
 
                 </div>
             </div>
@@ -254,7 +273,7 @@
                     <tr>
                         <td>ค่าอาหาร</td>
                         <td><span
-                                class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">110.00</span>
+                                class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">0</span>
                         </td>
                     </tr>
                     <tr>
@@ -341,7 +360,8 @@
                                                     $finalId = $headempid;
                                                 @endphp
                                                 {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
-                                                <option value="{{ $headempid }}">{{ $heademail . ' | ' . $headname }}
+                                                <option value="{{ $headempid }}">
+                                                    {{ $heademail . ' | ' . $headname }}
                                                 </option>
                                             @endif
                                         @endif

@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="bs-stepper-content">
-                        <form id="expensefrm" onsubmit="return false">
+                        <form id="expensefrm" method="POST" enctype="multipart/form-data">
                             @csrf
                             {{-- hidden --}}
                             <input type="hidden" name="extype" value="{{ $typegroup }}">
