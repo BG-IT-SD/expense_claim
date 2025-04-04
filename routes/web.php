@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ApproveController;
+use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Back\DistanceRateController;
 use App\Http\Controllers\Back\FuelPrice91Controller;
@@ -25,10 +27,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
 // Auth
 Route::get('/', [AuthController::class, 'index'])->name('login');
@@ -63,9 +61,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
     // Frontend
     // Profile
-    Route::get('Profile',[ProfileController::class,'index'])->name('profile.index');
-    Route::get('Profile/Reset',[ProfileController::class,'resetPassword'])->name('profile.reset');
-    Route::put('Profile/{id}',[ProfileController::class,'updatePassword'])->name('profile.updatepassword');
+    Route::get('Profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('Profile/Reset', [ProfileController::class, 'resetPassword'])->name('profile.reset');
+    Route::put('Profile/{id}', [ProfileController::class, 'updatePassword'])->name('profile.updatepassword');
     // Route::get('/distance', [DistanceController::class, 'showForm']);
     // Route::post('/distance', [DistanceController::class, 'calculateDistance']);
 
@@ -75,10 +73,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Route::resource('Expense', ExpenseController::class);
     Route::get('Expense', [ExpenseController::class, 'index'])->name('Expense.index');
     Route::get('Expense/{id}/create', [ExpenseController::class, 'create'])->name('Expense.create');
-    Route::get('/Expense/Heademp',[ExpenseController::class,'Heademp'])->name('Expense.heademp');
-    Route::get('/Expense/GetAllHeadEmp',[ExpenseController::class,'getAllHeadEmp'])->name('Expense.allheademp');
-    Route::post('/Expense/Upload',[ExpenseController::class,'upload'])->name('Expense.upload');
-    Route::post('/Expense/Save',[ExpenseController::class,'store'])->name('Expense.store');
+    Route::get('/Expense/Heademp', [ExpenseController::class, 'Heademp'])->name('Expense.heademp');
+    Route::get('/Expense/GetAllHeadEmp', [ExpenseController::class, 'getAllHeadEmp'])->name('Expense.allheademp');
+    Route::post('/Expense/Upload', [ExpenseController::class, 'upload']);
+    Route::post('/Expense/Save', [ExpenseController::class, 'store'])->name('Expense.store');
     // HeadApprove
     // Route::resource('HeadApprove', HeadApprovedController::class);
     Route::get('HeadApprove', [HeadApprovedController::class, 'index'])->name('HeadApprove.index');
@@ -101,7 +99,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Setting
     // User
     Route::get('User', [UserController::class, 'index'])->name('User.index');
-    Route::put('User/{id}/reset',[UserController::class,'ResetPassword'])->name('User.reset');
+    Route::put('User/{id}/reset', [UserController::class, 'ResetPassword'])->name('User.reset');
     Route::resource('User', UserController::class);
     Route::get('Role/create/{type}', [RoleController::class, 'create'])->name('Role.create');
     Route::get('Role/{Role}/edit/{type?}', [RoleController::class, 'edit'])->name('Role.edit');
@@ -119,7 +117,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::resource('UserRole', UserroleController::class);
 
     // DistanceRate
-    Route::resource('DistanceRate',DistanceRateController::class);
+    Route::resource('DistanceRate', DistanceRateController::class);
 
     // Import
     Route::get('ImportList', [ImportlistController::class, 'index'])->name('importlist.index');
@@ -141,8 +139,18 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // EndBackend
     // Map
 
+    // อนุมัติผ่าน link
+    Route::get('/approve/login', [ApproveLoginController::class, 'loginWithToken'])->name('approve.magic.login');
+    Route::get('/approve/view/{id}', [ApproveController::class, 'show'])->name('approve.page');
+    Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
+    // อนุมัติผ่าน link
+
+
 });
 
 
+
+
+// Update API น้ำมัน
 
 // Update API น้ำมัน

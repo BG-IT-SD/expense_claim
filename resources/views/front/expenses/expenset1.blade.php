@@ -13,6 +13,7 @@
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="text" id="expense_t2" class="form-control" value="{{ $departure_date }}" disabled>
+                <input type="hidden" name="departuredatemail" value="{{ $departure_date.' - '. $return_date}}">
                 <label for="expense_t2">วันเวลาที่ออกปฏิบัติงาน</label>
             </div>
         </div>

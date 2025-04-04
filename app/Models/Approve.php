@@ -21,10 +21,13 @@ class Approve extends Model
         'modified_by',
         'status',
         'deleted',
+        'login_token',
+        'token_expires_at',
+        'remark'
     ];
 
 
-    public function Exid()
+    public function expense()
     {
         return $this->belongsTo(Expense::class, 'exid', 'id');
     }

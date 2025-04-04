@@ -36,14 +36,14 @@
                 <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')) active @endif">
                     <a href="{{ route('Expense.index') }}" class="menu-link">
                         <div data-i18n="รายการเบิก">รายการเบิก</div>
-                        <div class="badge bg-danger rounded-pill ms-auto">5</div>
+                        {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
                     </a>
                 </li>
             </ul>
         </li>
 
         {{-- Normal Approve --}}
-        <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
+        {{-- <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-file-check"></i>
                 <div data-i18n="การอนุมัติ">การอนุมัติ</div>
@@ -57,7 +57,7 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
         <li class="menu-header fw-medium mt-4">
             <span class="menu-header-text" data-i18n="Other Driver">Other Driver</span>
         </li>

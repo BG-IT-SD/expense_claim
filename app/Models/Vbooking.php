@@ -8,4 +8,11 @@ class Vbooking extends Model
 {
     protected $connection = 'booking_carv2';
     protected $table = 'v_booking_expense';
+
+    public function expense()
+{
+    return $this->hasOne(Expense::class, 'bookid', 'id');
 }
+}
+
+
