@@ -1,4 +1,4 @@
-<div id="personal-info" class="content">
+<div id="personal-info" class="content" step="2">
     {{-- <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 2</h6>
         <small>รายชื่อพนักงาน</small>
@@ -59,7 +59,7 @@
         <small>เงื่อนไขมื้ออาหาร</small>
     </div>
     <div class="row g-4">
-        @foreach ($Alldayfood as $dayFood)
+        @foreach ($Alldayfood as $index => $dayFood)
             {{-- {{ $dayFood->format('Y-m-d') . "\n"; }} --}}
             @php
                 $mealchecked_1 = '';
@@ -139,31 +139,36 @@
                                         <td>
                                             <i class="mdi mdi-food-outline mdi-20px text-danger me-3"></i><span
                                                 class="fw-medium">เบิกมื้ออาหาร</span>
+                                                <input type="hidden" name="days[{{ $index }}][date]" value="{{ $dayFood->toDateString() }}">
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-success">
-                                                <input class="form-check-input meal-checkbox" type="checkbox" name="meal1[]" data-price="{{ $groupplant->meal->meal1 }}" data-meal="breakfast"
-                                                    value="{{ $groupplant->meal->meal1 }}" {{ $mealchecked_1 }}
-                                                    onclick="return false;">
+                                                <input class="form-check-input meal-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][meal1][]" data-price="{{ $groupplant->meal->meal1 }}"
+                                                    data-meal="breakfast" value="{{ $groupplant->meal->meal1 }}"
+                                                    {{ $mealchecked_1 }} onclick="return false;">
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-success">
-                                                <input class="form-check-input meal-checkbox" type="checkbox" name="meal2[]" data-price="{{ $groupplant->meal->meal2 }}"
+                                                <input class="form-check-input meal-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][meal2][]" data-price="{{ $groupplant->meal->meal2 }}"
                                                     value="{{ $groupplant->meal->meal2 }}" {{ $mealchecked_2 }}
                                                     onclick="return false;">
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-success">
-                                                <input class="form-check-input meal-checkbox" type="checkbox" name="meal3[]" data-price="{{ $groupplant->meal->meal3 }}"
+                                                <input class="form-check-input meal-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][meal3][]" data-price="{{ $groupplant->meal->meal3 }}"
                                                     value="{{ $groupplant->meal->meal3 }}" {{ $mealchecked_3 }}
                                                     onclick="return false;">
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-success">
-                                                <input class="form-check-input meal-checkbox" type="checkbox" name="meal4[]" data-price="{{ $groupplant->meal->meal4 }}"
+                                                <input class="form-check-input meal-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][meal4][]" data-price="{{ $groupplant->meal->meal4 }}"
                                                     value="{{ $groupplant->meal->meal4 }}" {{ $mealchecked_4 }}
                                                     onclick="return false;">
                                             </div>
@@ -179,31 +184,41 @@
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-danger">
-                                                <input class="form-check-input mealx-checkbox" type="checkbox" name="mealx1[]" data-price="{{ $groupplant->meal->meal1 }}" data-day="{{ $dayFood->toDateString() }}"
-                                                    value="1">
+                                                <input class="form-check-input mealx-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][mealx1][]" data-price="{{ $groupplant->meal->meal1 }}"
+                                                    data-day="{{ $dayFood->toDateString() }}" value="1">
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-danger">
-                                                <input class="form-check-input mealx-checkbox" type="checkbox" name="mealx2[]" data-price="{{ $groupplant->meal->meal2 }}" data-day="{{ $dayFood->toDateString() }}"
-                                                    value="1">
+                                                <input class="form-check-input mealx-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][mealx2][]" data-price="{{ $groupplant->meal->meal2 }}"
+                                                    data-day="{{ $dayFood->toDateString() }}" value="1">
                                             </div>
                                         </td>
 
                                         <td>
                                             <div class="form-check form-check-inline form-check-danger">
-                                                <input class="form-check-input mealx-checkbox" type="checkbox" name="mealx3[]" data-price="{{ $groupplant->meal->meal3 }}" data-day="{{ $dayFood->toDateString() }}"
-                                                    value="1">
+                                                <input class="form-check-input mealx-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][mealx3][]" data-price="{{ $groupplant->meal->meal3 }}"
+                                                    data-day="{{ $dayFood->toDateString() }}" value="1">
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline form-check-danger">
-                                                <input class="form-check-input mealx-checkbox" type="checkbox" name="mealx4[]" data-price="{{ $groupplant->meal->meal4 }}" data-day="{{ $dayFood->toDateString() }}"
-                                                    value="1">
+                                                <input class="form-check-input mealx-checkbox" type="checkbox"
+                                                    name="days[{{ $index }}][mealx4][]" data-price="{{ $groupplant->meal->meal4 }}"
+                                                    data-day="{{ $dayFood->toDateString() }}" value="1">
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge rounded-pill bg-label-danger me-1 totalxmealcount" data-day="{{ $dayFood->toDateString() }}"></span>
+                                            <span class="badge rounded-pill bg-label-danger me-1 totalxmealcount"
+                                                data-day="{{ $dayFood->toDateString() }}"></span>
+                                                <input type="hidden" name="days[{{ $index }}][totalpricebf]" class="totalpricebf" value="0">
+                                                <input type="hidden" name="days[{{ $index }}][totalreject]" class="totalreject" value="0">
+                                                <input type="hidden"  name="days[{{ $index }}][totalprice]"  class="totalprice" value="0">
+                                                <input type="hidden"  name="days[{{ $index }}][mealid]"  value="{{ $groupplant->mealid }}">
+
                                         </td>
                                     </tr>
                                     <tr class="table-info sumallday">
@@ -227,17 +242,23 @@
                 </div>
             </div>
         @endforeach
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body alert-success row">
-                    <div class="col-md-6 text-end">รวม</div>
-                    <div class="col-md-6 text-end">0
-                        <input type="hidden" name="totalpricebf" value="0">
-                        <input type="hidden" name="totalreject" value="0">
-                        <input type="hidden" name="totalprice" value="0">
+        <div class="row mt-3">
+            <div class="col-sm-4">
+                <input type="hidden"  class="expense-value" name="costoffood"  id="costoffood" value="0">
+
+            </div>
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body alert-success row">
+                        <div class="col-md-6 text-end h5">รวม</div>
+                        <div class="col-md-6 text-end grandTotal h5">0
+
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
 
 

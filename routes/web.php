@@ -75,6 +75,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Route::resource('Expense', ExpenseController::class);
     Route::get('Expense', [ExpenseController::class, 'index'])->name('Expense.index');
     Route::get('Expense/{id}/create', [ExpenseController::class, 'create'])->name('Expense.create');
+    Route::get('/Expense/Heademp',[ExpenseController::class,'Heademp'])->name('Expense.heademp');
+    Route::get('/Expense/GetAllHeadEmp',[ExpenseController::class,'getAllHeadEmp'])->name('Expense.allheademp');
+    Route::post('/Expense/Upload',[ExpenseController::class,'upload'])->name('Expense.upload');
+    Route::post('/Expense/Save',[ExpenseController::class,'store'])->name('Expense.store');
     // HeadApprove
     // Route::resource('HeadApprove', HeadApprovedController::class);
     Route::get('HeadApprove', [HeadApprovedController::class, 'index'])->name('HeadApprove.index');
