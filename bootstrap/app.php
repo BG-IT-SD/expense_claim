@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckModuleAccess;
 use App\Http\Middleware\RememberLogin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'remember.login' => RememberLogin::class,
+            'check.module.access' => CheckModuleAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

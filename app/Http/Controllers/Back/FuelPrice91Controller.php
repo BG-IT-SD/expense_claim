@@ -121,8 +121,9 @@ class FuelPrice91Controller extends Controller
         ]);
 
         $update = FuelPrice91::find($id);
-        $update->dateprice = $request->data->dateprice;
-        $update->price = $request->data->price;
+        // dd($request->dateprice);
+        $update->dateprice = $request->dateprice;
+        $update->price = $request->price;
         $update->modified_by = Auth::id();
 
         try {
