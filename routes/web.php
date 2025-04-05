@@ -98,14 +98,31 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
         ->name('HeadApprove.index');
 
     // DriverClaim
-    Route::get('DriverClaim', [DriverClaimController::class, 'index'])
-        ->middleware('check.module.access:DriverClaim,Driver|Admin')
-        ->name('DriverClaim.index');
+    Route::prefix('DriverClaim')
+        ->name('DriverClaim.')
+        ->middleware('check.module.access:Driver,Staff|Admin|SuperAdmin')
+        ->group(function () {
+
+            Route::get('/', [DriverClaimController::class, 'index'])->name('index');
+
+            // ถ้ามี route เพิ่มเติมในอนาคต เช่น:
+            // Route::get('create', [DriverClaimController::class, 'create'])->name('create');
+            // Route::post('/', [DriverClaimController::class, 'store'])->name('store');
+        });
+
 
     // TechClaim
-    Route::get('TechClaim', [TechClaimController::class, 'index'])
-        ->middleware('check.module.access:TechClaim,Tech|Admin')
-        ->name('TechClaim.index');
+    Route::prefix('TechClaim')
+        ->name('TechClaim.')
+        ->middleware('check.module.access:Tech,Staff|Admin|SuperAdmin')
+        ->group(function () {
+
+            Route::get('/', [TechClaimController::class, 'index'])->name('index');
+
+            // เพิ่มในอนาคต (ถ้ามี):
+            // Route::get('create', [TechClaimController::class, 'create'])->name('create');
+            // Route::post('/', [TechClaimController::class, 'store'])->name('store');
+        });
 });
 
 
@@ -113,19 +130,19 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Backend
     // HR
     Route::prefix('HR')
-    ->name('HR.')
-    ->middleware('check.module.access:HR,Staff|Admin|SuperAdmin')
-    ->group(function () {
+        ->name('HR.')
+        ->middleware('check.module.access:HR,Staff|Admin|SuperAdmin')
+        ->group(function () {
 
-        Route::get('/', [HRController::class, 'index'])->name('index');
-        Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
+            Route::get('/', [HRController::class, 'index'])->name('index');
+            Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
 
-        // เพิ่มเติม: หากมี create, store, update, destroy ในอนาคต สามารถเพิ่มไว้ที่นี่ได้
-        // Route::get('create', [HRController::class, 'create'])->name('create');
-        // Route::post('/', [HRController::class, 'store'])->name('store');
-        // Route::put('{id}', [HRController::class, 'update'])->name('update');
-        // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
-    });
+            // เพิ่มเติม: หากมี create, store, update, destroy ในอนาคต สามารถเพิ่มไว้ที่นี่ได้
+            // Route::get('create', [HRController::class, 'create'])->name('create');
+            // Route::post('/', [HRController::class, 'store'])->name('store');
+            // Route::put('{id}', [HRController::class, 'update'])->name('update');
+            // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
+        });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')
         ->group(function () {

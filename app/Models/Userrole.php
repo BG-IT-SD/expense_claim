@@ -33,7 +33,7 @@ class Userrole extends Model
         return $this->belongsTo(Module::class, 'moduleid', 'id');
     }
 
-    public function Role()
+    public function role()
     {
         return $this->belongsTo(Role::class, 'roleid', 'id');
     }

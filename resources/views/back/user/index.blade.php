@@ -45,8 +45,9 @@
                                     <button class="btn btn-warning btn-sm btnedit"
                                         onclick="window.location.href='{{ route('User.edit', $user->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
-                                        edit</button> <button type="button" class="btn btn-danger btn-sm deleteuser"
-                                        data-id="{{ $user->id }}"><i class="mdi mdi-trash-can"></i></button>
+                                        edit</button>
+                                        {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
+                                        data-id="{{ $user->id }}"><i class="mdi mdi-trash-can"></i></button> --}}
                                 </td>
                             </tr>
                         @endforeach
