@@ -21,12 +21,15 @@ class UserroleController extends Controller
         $userId = $request->userid;
         $data = [];
         $result = [];
-        $userroles = Userrole::with('Module')->with('Role')->where('deleted', "0")->where('userid', "$userId")->get();
+        $userroles = Userrole::with('module', 'role')
+        ->where('deleted', 0)
+        ->where('userid', $userId)
+        ->get();
         foreach ($userroles as $userrole) {
             $data = [
                 'id' => $userrole->id,
-                'module' => $userrole->Module->modulename,
-                'role' => $userrole->Role->rolename,
+                'module' => $userrole->module->modulename,
+                'role' => $userrole->role->rolename,
                 'status' => $userrole->status == 1 ? '<span class="badge rounded-pill bg-success">Active</span>' : '<span class="badge rounded-pill bg-danger">Inactive</span>',
                 'action' => '<button class="btn btn-warning btn-sm btnroleedit"  data-id="' . $userrole->id . '"><i class="mdi mdi-pencil-circle-outline"></i> edit</button> <button type="button" class="btn btn-danger btn-sm deleterole"  data-id="' . $userrole->id . '"><i class="mdi mdi-trash-can"></i></button>',
             ];
