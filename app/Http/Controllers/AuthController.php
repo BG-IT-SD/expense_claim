@@ -110,7 +110,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'empid' => 'required|unique:users',
+            'empid' => [
+                'required',
+                Rule::unique('users')->where(function ($query) {
+                    return $query->where('deleted', 0)
+                                 ->where('status', 1);
+                }),
+            ],
             'password' => 'required|min:6',
             'repassword' => 'required|same:password',
         ]);
