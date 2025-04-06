@@ -44,18 +44,31 @@ class ExpenseController extends Controller
         $booking = Vbooking::with([
             'expense' => function ($q) use ($empid) {
                 $q->where('empid', $empid)
-                  ->with('latestApprove'); // ✅ include latest approve
+                    ->with('latestApprove'); // ✅ include latest approve
             }
         ])
-        ->where(function ($q) use ($empid) {
-            $q->where('booking_emp_id', $empid)
-              ->orWhere('passenger_empid', $empid);
-        })
-        ->get()
-        ->unique('id')
-        ->values();
+            ->where(function ($q) use ($empid) {
+                $q->where('booking_emp_id', $empid)
+                    ->orWhere('passenger_empid', $empid);
+            })
+            ->get()
+            ->unique('id')
+            ->values();
         // dd($booking[0]->expense->id ?? 'no expense');
         return view('front.expenses.list', compact('booking'));
+    }
+
+    public function history()
+    {
+        $currentEmpid = Auth::user()->empid;
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+            ->where('empid', $currentEmpid)
+            ->whereHas('latestApprove', function ($query) {
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5]);
+            })
+            ->get();
+
+        return view('front.expenses.history', compact('expenses'));
     }
 
     /**
@@ -172,7 +185,7 @@ class ExpenseController extends Controller
             'travelexpenses' => 'required',
             'gasolinecost' => 'required',
             'totalExpense' => 'required',
-            'files.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
 
@@ -246,7 +259,7 @@ class ExpenseController extends Controller
                 'email' => $request->head_email ?? '',
                 'approvename' => $request->head_name ?? '',
                 'emailstatus' => 1,
-                'statusappprove' => 0,
+                'statusapprove' => 0,
                 'login_token' => $token,
                 'token_expires_at' => now()->addDays(10),
             ]);
@@ -261,6 +274,22 @@ class ExpenseController extends Controller
             ];
 
 
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $filename = Str::random() . '.' . $file->getClientOriginalExtension();
+                    // $file->hashName();
+                    $path = $file->storeAs('images/expenses', $filename, 'public');
+
+                    ExpenseFile::create([
+                        'exid' => $expense->id,
+                        'path' => $path,
+                        'etc' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
             MailHelper::sendExternalMail(
                 $request->head_email,
                 'อนุมัติการเบิกเบี้ยเลี้ยง',
@@ -268,20 +297,6 @@ class ExpenseController extends Controller
                 $data,
                 'Expense Claim System'
             );
-
-            foreach ($request->file('files') as $file) {
-                $filename = Str::random() . '.' . $file->getClientOriginalExtension();
-                // $file->hashName();
-                $path = $file->storeAs('images/expenses', $filename, 'public');
-
-                ExpenseFile::create([
-                    'exid' => $expense->id,
-                    'path' => $path,
-                    'etc' => $file->getClientOriginalName(),
-                ]);
-            }
-
-            DB::commit();
 
             return response()->json([
                 'status' => 200,
@@ -342,7 +357,20 @@ class ExpenseController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $expense = Expense::with(['vbooking', 'user'])->findOrFail($id);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            ->get();
+        $departure_date = $expense->vbooking->departure_date
+            ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
+            : null;
+
+        $return_date = $expense->vbooking->return_date
+            ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+        return view('front.expenses.view', compact(['expense', 'reasons', 'departure_date', 'return_date', 'plants']));
     }
 
     /**

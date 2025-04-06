@@ -16,7 +16,7 @@ class Approve extends Model
         'email',
         'approvename',
         'emailstatus',
-        'statusappprove',
+        'statusapprove',
         'created_by',
         'modified_by',
         'status',

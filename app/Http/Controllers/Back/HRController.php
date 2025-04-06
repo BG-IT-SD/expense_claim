@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Expense;
 
 class HRController extends Controller
 {
@@ -12,7 +13,16 @@ class HRController extends Controller
      */
     public function index()
     {
-        return view('back.hr.list');
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        ->whereHas('latestApprove', function ($query) {
+            $query->whereIn('typeapprove', [1, 2,3]);
+                // ->where('statusapprove', 1);
+        })
+        ->get();
+
+        // dd($expenses);
+
+        return view('back.hr.list', compact('expenses'));
     }
 
     /**
@@ -45,7 +55,7 @@ class HRController extends Controller
     public function edit(string $id)
     {
 
-        return view('back.hr.frmapprovegrp',compact('id'));
+        return view('back.hr.frmapprovegrp', compact('id'));
     }
 
     /**

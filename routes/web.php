@@ -76,21 +76,37 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Map
 
     // Expense
-    Route::get('Expense', [ExpenseController::class, 'index'])
-        ->name('Expense.index');
+    Route::prefix('Expense')->name('Expense.')->group(function () {
 
-    Route::get('Expense/{id}/create', [ExpenseController::class, 'create'])
-        ->name('Expense.create');
+        // หน้าแสดงรายการ
+        Route::get('/', [ExpenseController::class, 'index'])
+            ->name('index');
 
-    Route::get('/Expense/Heademp', [ExpenseController::class, 'Heademp']);
+        //หน้าเพิ่มข้อมูล
+        Route::get('{id}/create', [ExpenseController::class, 'create'])
+            ->name('create');
 
-    Route::get('/Expense/GetAllHeadEmp', [ExpenseController::class, 'getAllHeadEmp'])
-        ->middleware('check.module.access:Expense,Admin');
+        // หน้าเลือกหัวหน้า
+        Route::get('/Heademp', [ExpenseController::class, 'Heademp']);
 
-    Route::post('/Expense/Upload', [ExpenseController::class, 'upload']);
+        // API ดึงหัวหน้า
+        Route::get('/GetAllHeadEmp', [ExpenseController::class, 'getAllHeadEmp']);
 
-    Route::post('/Expense/Save', [ExpenseController::class, 'store'])
-        ->name('Expense.store');
+        // อัปโหลดไฟล์
+        Route::post('/Upload', [ExpenseController::class, 'upload']);
+
+        //บันทึกข้อมูล
+        Route::post('/Save', [ExpenseController::class, 'store'])
+            ->name('store');
+
+        // ประวัติการเบิก
+        Route::get('/ExpensHistory',[ExpenseController::class,'history'])
+            ->name('history');
+
+        //ดูข้อมูลหลังบันทึก
+        Route::get('/view/{id}', [ExpenseController::class, 'show'])->name('show');
+
+    });
     // Expense
 
     // HeadApprove
@@ -119,7 +135,6 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             Route::get('/', [TechClaimController::class, 'index'])->name('index');
 
-            // เพิ่มในอนาคต (ถ้ามี):
             // Route::get('create', [TechClaimController::class, 'create'])->name('create');
             // Route::post('/', [TechClaimController::class, 'store'])->name('store');
         });
@@ -137,7 +152,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('/', [HRController::class, 'index'])->name('index');
             Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
 
-            // เพิ่มเติม: หากมี create, store, update, destroy ในอนาคต สามารถเพิ่มไว้ที่นี่ได้
+            // เพิ่มเติม: หากมี create, store, update, destroy
             // Route::get('create', [HRController::class, 'create'])->name('create');
             // Route::post('/', [HRController::class, 'store'])->name('store');
             // Route::put('{id}', [HRController::class, 'update'])->name('update');
@@ -221,12 +236,18 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     })->name('download.sample');
 
 
-
-    // อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)
-    Route::get('/approve/login', [ApproveLoginController::class, 'loginWithToken'])->name('approve.magic.login');
     Route::get('/approve/view/{id}', [ApproveController::class, 'show'])->name('approve.page');
     Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
+
+
 });
+
+    // อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)
+    Route::middleware('web')->group(function () {
+        Route::get('/approve/login', [ApproveLoginController::class, 'loginWithToken'])->name('approve.magic.login');
+    });
+
+
 
 
 

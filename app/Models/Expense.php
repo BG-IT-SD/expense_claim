@@ -52,6 +52,20 @@ class Expense extends Model
         ->latestOfMany(); // ✅ ดึง row ล่าสุด
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'empid', 'empid');
+    }
+    public function vbooking()
+    {
+        return $this->hasOne(Vbookingall::class, 'id', 'bookid');
+    }
+
+    public function approval()
+    {
+        return $this->hasOne(Approve::class, 'exid', 'id');
+    }
+
     public function Departureplant()
     {
         return $this->belongsTo(Plant::class, 'departureplant', 'id');

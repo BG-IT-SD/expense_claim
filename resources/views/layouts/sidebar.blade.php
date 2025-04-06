@@ -21,22 +21,22 @@
             <span class="menu-header-text" data-i18n="Normal">Normal</span>
         </li>
         <!-- Normal -->
-        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')) active open @endif ">
+        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')  || Route::is('Expense.history') || Route::is('Expense.show')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                 <div data-i18n="เบิกค่าใช้จ่าย">เบิกค่าใช้จ่าย</div>
 
             </a>
             <ul class="menu-sub">
-                {{-- <li class="menu-item @if (Route::is('Expense/main')) active @endif">
-                    <a href="{{ route('Expense/main') }}" class="menu-link">
-                        <div data-i18n="ฟอร์มการเบิก">ฟอร์มการเบิก</div>
-                    </a>
-                </li> --}}
                 <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')) active @endif">
                     <a href="{{ route('Expense.index') }}" class="menu-link">
                         <div data-i18n="รายการเบิก">รายการเบิก</div>
                         {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
+                    </a>
+                </li>
+                <li class="menu-item  @if (Route::is('Expense.history') || Route::is('Expense.show')) active @endif">
+                    <a href="{{ route('Expense.history') }}" class="menu-link">
+                        <div data-i18n="ประวัติการเบิก">ประวัติการเบิก</div>
                     </a>
                 </li>
             </ul>
@@ -85,7 +85,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="menu-item">
+            {{-- <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-file-check"></i>
                     <div data-i18n="การอนุมัติ">การอนุมัติ</div>
@@ -99,7 +99,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> --}}
         @endif
 
         @if (isset($userModuleRoles['AllSystems']) ||
@@ -143,7 +143,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="menu-item ">
+            {{-- <li class="menu-item ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-file-check"></i>
                     <div data-i18n="การอนุมัติ">การอนุมัติ</div>
@@ -157,7 +157,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> --}}
         @endif
 
         @if (isset($userModuleRoles['AllSystems']) ||
@@ -178,6 +178,11 @@
                         <a href="{{ route('HR.index') }}" class="menu-link">
                             <div data-i18n="รายการส่งเบิก">รายการส่งเบิก</div>
                             <div class="badge bg-danger rounded-pill ms-auto">2</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
                     </li>
                     <li class="menu-item">

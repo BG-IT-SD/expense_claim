@@ -49,13 +49,14 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="row">
+                                    {{-- <div class="row">
                                         <label class="col-sm-3 col-form-label text-sm-end"
-                                            for="formtabs-phone">Status</label>
+                                            for="formtabs-phone">Location</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-phone" class="form-control phone-mask" >
+                                            <input type="text" id="formtabs-phone" class="form-control phone-mask"
+                                                placeholder="" aria-label="658 799 8941">
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -84,7 +85,7 @@
                 <div class="card">
                     <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก</h5>
                     <div class="table-responsive text-nowrap2">
-                        <table class="table">
+                        <table class="table" id="ExpenseList">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Expense ID</th>
@@ -94,7 +95,7 @@
                                     <th>Location</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
-                                    {{-- <th>Approve Name</th> --}}
+                                    <th>Approve Name</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -121,55 +122,19 @@
                                         </td>
                                         <td>
                                             @if (!is_null($expense->latestApprove->statusapprove))
-                                                {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
+                                                {!! status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
                                                 {{-- {{ $expense->latestApprove->statusapprove.'type=>'.$expense->latestApprove->typeapprove }} --}}
                                             @endif
                                         </td>
-                                        {{-- <td >
-                                        @if ($expense->latestApprove->statusapprove >= 3)
-                                            {{ $expense->$latestApprove->approvename }}
-                                        @endif
-                                    </td> --}}
+                                        <td>
+                                            {!! $expense->latestApprove?->approvename ?? '-' !!}
+                                        </td>
                                         <td class="text-nowrap">
-                                            @if ($expense->latestApprove->statusapprove == 2)
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button>
-
-                                                <button class="btn btn-sm btn-danger"><span
-                                                        class="mdi mdi-trash-can-outline"></span></button>
-                                            @else
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                <button class="btn btn-sm btn-warning"
-                                                    onclick="window.location.href='{{ route('HR.edit', 1) }}'"><span
-                                                        class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
-                                                <button class="btn btn-sm btn-danger"><span
-                                                        class="mdi mdi-trash-can-outline"></span></button>
-                                            @endif
+                                            <a href="{{ route('Expense.show', $expense->id) }}" class="btn btn-sm btn-info" ><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
 
                                         </td>
                                     </tr>
                                 @endforeach
-
-
-                                {{-- <tr>
-                                    <td>EX20241101</td>
-                                    <td>09/11/2024 10:30 น.</td>
-                                    <td>11080</td>
-                                    <td>BGCG</td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Completed</span></td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Approved</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><span
-                                                class="mdi mdi-plus-box-multiple-outline"></span> </button>
-                                        <button class="btn btn-sm btn-warning"><span
-                                                class="mdi mdi-eye-circle-outline"></span> Detail</button>
-                                        <button class="btn btn-sm btn-danger"><span
-                                                class="mdi mdi-trash-can-outline"></span></button>
-                                    </td>
-                                </tr> --}}
 
                             </tbody>
                         </table>
@@ -178,73 +143,7 @@
             </div>
         </div>
     </div>
-
-    {{-- Modal --}}
-    <div class="modal fade" id="largeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel3">List Group Book ID : 11099</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {{-- body --}}
-                    <div class="card">
-                        {{-- <h5 class="card-header">Bordered Table</h5> --}}
-                        <div class="card-body">
-                            <div class="table-responsive text-nowrap">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Expense ID</th>
-                                            <th>Emp ID</th>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-
-                                        <tr>
-                                            <td>
-                                                EX20241102
-                                            </td>
-                                            <td>66000510</td>
-                                            <td>กมลวรรณ บรรชา</td>
-                                            <td><span class="badge rounded-pill bg-label-success me-1">Completed</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary"
-                                                    onclick="window.location.href='{{ route('HR.edit', 1) }}'"><span
-                                                        class="mdi mdi-check-circle-outline"></span> Approve</button>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>
-                                                {{-- EX20241102 --}}
-                                            </td>
-                                            <td>63000455</td>
-                                            <td>เสาวภา เข็มเหลือง</td>
-                                            <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
-                                            <td>
-
-                                            </td>
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- body --}}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
-
-                </div>
-            </div>
-        </div>
-    </div>
+@endsection
+@section('jscustom')
+<script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script>
 @endsection
