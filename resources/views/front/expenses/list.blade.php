@@ -83,7 +83,7 @@
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card">
-                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก</h5>
+                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก (ตั้งแต่วันเดินทาง ไม่เกิน 7 วัน)</h5>
                     <div class="table-responsive text-nowrap">
                         <table class="table" id="ExpenseList">
                             <thead class="table-dark">
@@ -115,8 +115,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if (!is_null($approve->statusappprove))
-                                                {!! status_approve_badge($approve->statusappprove, $approve->typeapprove) !!}
+                                            @if (!is_null($approve->statusapprove))
+                                                {!! status_approve_badge($approve->statusapprove, $approve->typeapprove) !!}
                                             @endif
 
                                         </td>

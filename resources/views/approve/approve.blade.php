@@ -105,14 +105,18 @@
 
                             </div>
                             <div class="col-sm-6 mb-3">
-                                <h4><strong>สถานะ:</strong> {!! status_approve_badge($approve->statusappprove, $approve->typeapprove) !!}</h4>
+                                <h4><strong>สถานะ:</strong> {!! status_approve_badge($approve->statusapprove, $approve->typeapprove) !!}</h4>
 
                             </div>
                             <div class="col-sm-6 mb-3">
                                 <h4><strong>ประเภท:</strong> {!! type_approve_text($approve->typeapprove) !!}</h4>
 
                             </div>
-                            @if ($approve->statusappprove == 0)
+                            <div class="col-sm-6 mb-3">
+                                <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid.' | '.$approve->approvename }}</h4>
+
+                            </div>
+                            @if ($approve->statusapprove == 0)
                                 <hr>
                                 <div class="col-sm-12 mb-3 text-center">
 

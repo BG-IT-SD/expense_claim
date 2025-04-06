@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-    @if ($booking->type_reserve == 4)
+    {{-- @if ($booking->type_reserve == 4) --}}
         {{-- น้ำมัน --}}
         <div class="alert alert-dark mb-3 mt-3">
             <h6 class="mb-0">ส่วนที่ 3</h6>
@@ -251,7 +251,7 @@
             </div>
         </div>
         {{-- น้ำมัน --}}
-    @endif
+    {{-- @endif --}}
     <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 3</h6>
         <small>รวมค่าใช้จ่าย</small>
@@ -327,15 +327,15 @@
                         <hr>
                         <div class="input-group input-group-merge">
                             <div class="form-floating form-floating-outline">
-                                @php
+                                {{-- @php
                                     $finalHEmail = '';
                                     $finalHName = '';
                                     $finalId = '';
-                                @endphp
+                                @endphp --}}
                                 <select id="headapprove" class="select2 form-select form-select-l"
                                     data-style="btn-default" tabindex="null">
                                     {{-- เงื่อนไขที่ 1 อนุมัติตัวเองกรณี level >= 10 และอยู่ในกลุ่มเลขา --}}
-                                    @if ($headlevel >= 10 || $approve_g > 0)
+                                    {{-- @if ($headlevel >= 10 || $approve_g > 0)
                                         @php
                                             $finalHEmail = $empemail;
                                             $finalHName = $empfullname;
@@ -343,24 +343,24 @@
                                         @endphp
                                         <option value="{{ $empid }}">{{ $empemail . ' | ' . $empfullname }}
                                         </option>
-                                    @else
+                                    @else --}}
                                         {{-- เงื่อนไขที่ 2 level < 10 --}}
-                                        @if ($headempid == '')
+                                        {{-- @if ($headempid == '') --}}
                                             {{-- เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
-                                            <option value="">เลือกผู้อนุมัติ</option>
-                                        @else
+                                            {{-- <option value="">เลือกผู้อนุมัติ</option> --}}
+                                        {{-- @else --}}
                                             {{-- งื่อนไขที่ 4 มีหัวหน้า --}}
-                                            @if ($headlevel > 10)
+                                            {{-- @if ($headlevel > 10) --}}
                                                 {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
-                                                <option value="">เลือกผู้อนุมัติ</option>
-                                            @else
+                                                {{-- <option value="">เลือกผู้อนุมัติ</option> --}}
+                                            {{-- @else
                                                 @php
                                                     $finalHEmail = $heademail;
                                                     $finalHName = $headname;
                                                     $finalId = $headempid;
-                                                @endphp
+                                                @endphp --}}
                                                 {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
-                                                <option value="{{ $headempid }}">
+                                                {{-- <option value="{{ $headempid }}">
                                                     {{ $heademail . ' | ' . $headname }}
                                                 </option>
                                             @endif
@@ -375,7 +375,7 @@
                                 <input type="hidden" name="head_name" id="head_name" value="{{ $finalHName }}"
                                     class="form-control form-control-input">
                                 <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
-                                    class="form-control form-control-input">
+                                    class="form-control form-control-input"> --}}
                             </div>
 
                         </div>

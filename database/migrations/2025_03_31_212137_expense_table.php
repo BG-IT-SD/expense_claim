@@ -127,7 +127,7 @@ return new class extends Migration
             $table->string('email',255);
             $table->string('approvename',255);
             $table->tinyInteger('emailstatus')->nullable();
-            $table->tinyInteger('statusappprove');
+            $table->tinyInteger('statusapprove');
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('deleted')->default(0);
             $table->integer('created_by');
