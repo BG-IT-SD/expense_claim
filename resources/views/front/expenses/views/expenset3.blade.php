@@ -65,42 +65,49 @@
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="publictransportfare" name="publictransportfare" min="0"
-                    class="form-control" value="0">
+                    class="form-control" value="{{ $expense->publictransportfare }}">
                 <label for="publictransportfare">รถโดยสารสาธารณะทั่วไป / บาท</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="expresswaytoll" name="expresswaytoll" min="0" class="form-control"
-                    value="0">
+                    value="{{ $expense->expresswaytoll }}">
                 <label for="expresswaytoll">ค่าทางด่วน / บาท</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="otherexpenses" name="otherexpenses" min="0" class="form-control"
-                    value="0">
+                    value="{{ $expense->otherexpenses }}">
                 <label for="otherexpenses">ค่าใช้จ่ายอื่นๆ / บาท</label>
             </div>
         </div>
         <div class="col-sm-12">
             <div class="card ">
-                <h5 class="card-header">Upload ไฟล์หลักฐาน</h5>
+                <h5 class="card-header">ไฟล์หลักฐาน</h5>
                 <div class="card-body row">
-                    {{-- <div id="dropzone-multi" class="dropzone needsclick">
-                        <div class="dz-message needsclick">
-                            Drop files here or click to upload
-                            <span class="note needsclick">(This is just a demo dropzone. Selected files are not actually
-                                uploaded.)</span>
-                        </div>
-                    </div> --}}
-                    <!-- input แบบ multiple -->
-                    {{-- <div class="mb-3">
-                        <label for="fileInput" class="form-label">Upload ไฟล์หลักฐาน</label>
-                        <input type="file" name="files[]" id="fileInput" class="form-control" multiple>
-                        <div id="fileList" class="mt-2"></div>
-                    </div> --}}
-                    <div class="col-md-8">
+
+
+                    @if ($files && $files->count() > 0)
+                        <ul class="list-group">
+                            @foreach ($files as $key => $file)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <a href="{{ asset('storage/' . $file->path) }}" target="_blank">
+                                        <i class="mdi mdi-file-document-outline text-primary"></i>
+                                        {{ 'file_' . ($key + 1) }}
+                                    </a>
+                                    <span
+                                        class="badge bg-info">{{ strtoupper(pathinfo($file->etc, PATHINFO_EXTENSION)) }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-muted">ไม่มีไฟล์แนบ</p>
+                    @endif
+
+
+                    {{-- <div class="col-md-8">
                         <div id="file-container">
                             <div class="file-row mb-2 d-flex gap-2 align-items-center">
                                 <input type="file" name="files[]" class="form-control w-75">
@@ -110,7 +117,7 @@
                     </div>
                     <div class="col-md-4"><button type="button" id="add-file"
                             class="btn btn-secondary mb-3">เพิ่มไฟล์</button>
-                    </div>
+                    </div> --}}
 
 
 
@@ -118,7 +125,7 @@
             </div>
         </div>
     </div>
-    {{-- @if ($booking->type_reserve == 4) --}}
+    @if ($expense->vbooking->type_reserve == 4)
         {{-- น้ำมัน --}}
         <div class="alert alert-dark mb-3 mt-3">
             <h6 class="mb-0">ส่วนที่ 3</h6>
@@ -251,7 +258,7 @@
             </div>
         </div>
         {{-- น้ำมัน --}}
-    {{-- @endif --}}
+    @endif
     <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 3</h6>
         <small>รวมค่าใช้จ่าย</small>
@@ -273,123 +280,143 @@
                     <tr>
                         <td>ค่าอาหาร</td>
                         <td><span
-                                class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">0</span>
+                                class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">{{ $expense->costoffood }}</span>
                         </td>
                     </tr>
                     <tr>
                         <td>ค่าเดินทาง และ อื่นๆ</td>
-                        <td><span class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">0</span>
+                        <td><span
+                                class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ $expense->travelexpenses }}</span>
                             <input type="hidden" class="expense-value" id="travelexpenses" name="travelexpenses"
-                                value="0">
+                                value="{{ $expense->travelexpenses }}">
                         </td>
                     </tr>
                     <tr>
                         <td>ค่าน้ำมัน</td>
-                        <td><span class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">0</span>
+                        <td><span
+                                class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ $expense->gasolinecost }}</span>
                             <input type="hidden" class="expense-value" id="gasolinecost" name="gasolinecost"
-                                value="0">
+                                value="{{ $expense->gasolinecost }}">
                         </td>
                     </tr>
                     <tr>
                         <td>รวม</td>
-                        <td><span class="btn rounded-pill btn-success waves-effect waves-light totalExpense">0</span>
-                            <input type="hidden" id="totalExpense" name="totalExpense" value="0">
+                        <td><span
+                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense">{{ $expense->totalprice }}</span>
+                            <input type="hidden" id="totalExpense" name="totalExpense"
+                                value="{{ $expense->totalprice }}">
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        {{-- Apporve for Head --}}
-        {{--
-
-        เงื่อนไขที่ 1 อนุมัติตัวเองกรณี level >= 10 และอยู่ในกลุ่มเลขา
-        if($oHeadEmp['head_emp_id'] == "41000014" || $LEVEL >= 10 || $approve_g > 0){
-        }else{
-            เงื่อนไขที่ 2 level < 10
-            if($oHeadEmp['head_emp_id'] == ""){
-            เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7
-            }else{
-             เงื่อนไขที่ 4 มีหัวหน้า
-                if($head_Level > 10){
-                เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7
-                }else{
-                เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp
-                }
-            }
-        }
-        --}}
+        {{-- Apporve Timeline --}}
         <div class="row g-4">
             <div class="col-sm-12">
                 <div class="card shadow-none bg-transparent border border-primary mb-3">
                     <div class="card-body">
-                        <h5 class="card-title "><span class="badge rounded-pill bg-primary">อนุมัติการเบิก</span>
+                        <h5 class="card-title "><span
+                                class="badge rounded-pill bg-primary">สถานะลำดับการอนุมัติ</span>
                         </h5>
-                        <hr>
-                        <div class="input-group input-group-merge">
-                            <div class="form-floating form-floating-outline">
-                                {{-- @php
-                                    $finalHEmail = '';
-                                    $finalHName = '';
-                                    $finalId = '';
-                                @endphp --}}
-                                <select id="headapprove" class="select2 form-select form-select-l"
-                                    data-style="btn-default" tabindex="null">
-                                    {{-- เงื่อนไขที่ 1 อนุมัติตัวเองกรณี level >= 10 และอยู่ในกลุ่มเลขา --}}
-                                    {{-- @if ($headlevel >= 10 || $approve_g > 0)
-                                        @php
-                                            $finalHEmail = $empemail;
-                                            $finalHName = $empfullname;
-                                            $finalId = $empid;
-                                        @endphp
-                                        <option value="{{ $empid }}">{{ $empemail . ' | ' . $empfullname }}
-                                        </option>
-                                    @else --}}
-                                        {{-- เงื่อนไขที่ 2 level < 10 --}}
-                                        {{-- @if ($headempid == '') --}}
-                                            {{-- เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
-                                            {{-- <option value="">เลือกผู้อนุมัติ</option> --}}
-                                        {{-- @else --}}
-                                            {{-- งื่อนไขที่ 4 มีหัวหน้า --}}
-                                            {{-- @if ($headlevel > 10) --}}
-                                                {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
-                                                {{-- <option value="">เลือกผู้อนุมัติ</option> --}}
-                                            {{-- @else
-                                                @php
-                                                    $finalHEmail = $heademail;
-                                                    $finalHName = $headname;
-                                                    $finalId = $headempid;
-                                                @endphp --}}
-                                                {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
-                                                {{-- <option value="{{ $headempid }}">
-                                                    {{ $heademail . ' | ' . $headname }}
-                                                </option>
-                                            @endif
+                        {{-- <hr> --}}
+                        <div class="timeline-horizontal">
+                            @foreach ($approvals as $index => $item)
+                                <div class="timeline-step">
+                                    <div class="circle">
+                                        {{ $index + 1 }}
+                                    </div>
+                                    <div class="label">{!! type_approve_text($item->typeapprove) !!}</div>
+                                    <div class="approver">{{ $item->approvename }}</div>
+                                    <div class="status-badge">
+                                        @if ($item->statusapprove == 1)
+                                            <span class="badge bg-success">อนุมัติแล้ว</span>
+                                        @elseif ($item->statusapprove == 2)
+                                            <span class="badge bg-danger">ไม่อนุมัติ</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark">รออนุมัติ</span>
                                         @endif
-
-                                    @endif
-
-                                </select>
-                                <label for="password">ผู้อนุมัติ</label>
-                                <input type="hidden" name="head_email" id="head_email" value="{{ $finalHEmail }}"
-                                    class="form-control form-control-input">
-                                <input type="hidden" name="head_name" id="head_name" value="{{ $finalHName }}"
-                                    class="form-control form-control-input">
-                                <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
-                                    class="form-control form-control-input"> --}}
-                            </div>
-
+                                    </div>
+                                    <div class="timestamp">
+                                        {{ \Carbon\Carbon::parse($item->updated_at)->format('d/m/Y H:i') }}
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
+
+
                     </div>
                 </div>
             </div>
         </div>
+        {{-- End Apporve Timeline --}}
+        @if ($isView == 1)
+            {{-- Apporve for Head --}}
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="card shadow-none bg-transparent border border-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title "><span class="badge rounded-pill bg-primary">ผู้ตรวจสอบ</span>
+                            </h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <h4><span class="badge bg-label-dark h4"><span class="mdi mdi-account-check h4"></span> {{ $finalId .' | '.$finalHName.' | '.$finalHEmail }}</span></h4>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
+                                        class="form-control form-control-input" >
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="head_email" id="head_email"
+                                        value="{{ $finalHEmail }}" class="form-control form-control-input">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="head_name" id="head_name"
+                                        value="{{ $finalHName }}" class="form-control form-control-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{-- Next Step --}}
+
+                <div class="col-sm-6">
+                    <div class="card shadow-none bg-transparent border border-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title "><span class="badge rounded-pill bg-primary">ลำดับอนุมัติถัดไป</span>
+                            </h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <h4><span class="badge bg-label-dark h4"><span class="mdi mdi-account-switch h4"></span> {{ $finalIdNext .' | '.$finalHNameNext.' | '.$finalHEmailNext }}</span></h4>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="nexthead_id" id="nexthead_id" value="{{ $finalIdNext }}"
+                                        class="form-control form-control-input" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="nexthead_email" id="nexthead_email"
+                                        value="{{ $finalHEmailNext }}" class="form-control form-control-input">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="nexthead_name" id="nexthead_name"
+                                        value="{{ $finalHNameNext }}" class="form-control form-control-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
         {{-- End Apporve for Head --}}
         <div class="col-12 d-flex justify-content-between">
-            <button class="btn btn-outline-secondary btn-prev waves-effect">
+            <button type="button" class="btn btn-outline-secondary btn-prev waves-effect">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
                 <span class="align-middle d-sm-inline-block d-none">Previous</span>
             </button>
-            <button class="btn btn-primary btn-submit waves-effect waves-light">Submit</button>
+            @if ($isView == 1)
+                <button class="btn btn-primary btn-submit waves-effect waves-light"><span class="mdi mdi-content-save-check"></span> ยืนยันตรวจสอบข้อมูล</button>
+            @endif
         </div>
     </div>
 </div>
