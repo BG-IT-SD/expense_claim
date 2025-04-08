@@ -128,7 +128,7 @@
                                         <td>
                                             {{-- เบิกได้ภายใน 7 วันหลังการเดินทาง --}}
                                             @if (!is_null($expense->id))
-                                            <button class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</button>
+                                                <a href="{{ route('Expense.show', $expense->id) }}" class="btn btn-sm btn-info" ><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                             @else
                                                 <button class="btn btn-sm btn-primary"
                                                     onclick="window.location.href='{{ route('Expense.create', $booking->id) }}'"><span
@@ -186,3 +186,4 @@
     @endif
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script>
 @endsection
+

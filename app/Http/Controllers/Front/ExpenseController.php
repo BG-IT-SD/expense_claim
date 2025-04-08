@@ -91,7 +91,7 @@ class ExpenseController extends Controller
         $PlantStart = $booking->bu;
         $bu = Auth::user()->bu;
         $level = 1;
-        $empLevel = $this->LevelEmp($empid);
+        $empLevel = LevelEmp($empid);
         // ession('level')
         if ($empLevel <= 7) {
             $level = 1;
@@ -149,12 +149,43 @@ class ExpenseController extends Controller
         // Loop by day (you can change the interval to '1 week', '1 month', etc.)
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
 
-        // หัวหน้างานอนุมัติ
-        $oHeademp = Heademp::where('account_number', $empid)->first();
-        $headempid = $oHeademp?->head_emp_id ?? "";
-        $headlevel = $this->LevelEmp($headempid);
-        $heademail =  $oHeademp?->head_email;
-        $headname = $oHeademp?->name_head . '  ' . $oHeademp?->surname_head;
+        // // หัวหน้างานอนุมัติ
+        // $oHeademp = Heademp::where('account_number', $empid)->first();
+        // $headempid = $oHeademp?->head_emp_id ?? "";
+        // $headlevel = LevelEmp($headempid);
+        // $heademail =  $oHeademp?->head_email;
+        // $headname = $oHeademp?->name_head . '  ' . $oHeademp?->surname_head;
+        // ดึงข้อมูลหัวหน้างานจาก API
+
+        $url = "https://www.bgiglass.com/CorporateManagement/?r=api/getHeadEmp&empid={$empid}";
+
+        // ดึง JSON จากลิงก์ API
+        $response = @file_get_contents($url);
+
+        if ($response === false) {
+            // จัดการกรณี API call fail
+            $headempid = "";
+            $headlevel = "";
+            $heademail = "";
+            $headname = "";
+        } else {
+            $json = json_decode($response, true);
+
+            if (!empty($json['status']) && !empty($json['data'])) {
+                $data = $json['data'];
+
+                $headempid = $data['head_emp_id'] ?? "";
+                $headlevel = LevelEmp($headempid); // เรียกฟังก์ชันเดิมได้
+                $heademail = $data['head_email'] ?? "";
+                $headname = trim(($data['name_head'] ?? '') . ' ' . ($data['surname_head'] ?? ''));
+            } else {
+                // กรณีไม่พบข้อมูล
+                $headempid = "";
+                $headlevel = "";
+                $heademail = "";
+                $headname = "";
+            }
+        }
         // กลุ่มเลขา
         $approve_g = ApproveGroup::where('empid', $empid)->count();
 
@@ -185,6 +216,7 @@ class ExpenseController extends Controller
             'travelexpenses' => 'required',
             'gasolinecost' => 'required',
             'totalExpense' => 'required',
+            // ถ้ามีใช้จ่ายอื่นๆให้บังคับกรอกไฟล์
             'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
@@ -357,6 +389,8 @@ class ExpenseController extends Controller
      */
     public function show(string $id)
     {
+        // ส่งตัวแปรบอกว่าเป็นหน้า view
+        $isView = 0;
         $expense = Expense::with(['vbooking', 'user'])->findOrFail($id);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
@@ -369,8 +403,51 @@ class ExpenseController extends Controller
             ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
             : null;
 
+        $empid = $expense->empid;
+        $bu = BuEmp($empid);
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // dd($empLevel);
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+        $startDate = Carbon::parse($expense->vbooking->departure_date);
+        $endDate = Carbon::parse($expense->vbooking->return_date);
+        $startTime = Carbon::parse($expense->vbooking->departure_time);
+        $endTime = Carbon::parse($expense->vbooking->return_time);
+
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
+        $approvals = Approve::where('exid', $expense->id)
+        ->where('deleted', 0)
+        ->where('status', 1)
+        ->orderBy('typeapprove')
+        ->get();
+
+        $files = ExpenseFile::where('exid', $expense->id)
+        ->where('deleted', 0)
+        ->where('status', 1)
+        ->get();
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
-        return view('front.expenses.view', compact(['expense', 'reasons', 'departure_date', 'return_date', 'plants']));
+        return view('front.expenses.view', compact(['expense','empid' ,'reasons', 'departure_date', 'return_date', 'plants', 'Alldayfood', 'expenseFoods', 'groupplant','approvals','files','isView','startDate','endDate','startTime','endTime','bu']));
     }
 
     /**
@@ -476,10 +553,10 @@ class ExpenseController extends Controller
         })->where('deleted', 0)->value('kilometer') ?? 0;
     }
 
-    private function LevelEmp($id)
-    {
-        $vAllemp = Valldataemp::where('CODEMPID', "$id")->first();
-        $level = $vAllemp?->NUMLVL ?? "";
-        return  $level;
-    }
+    // private function LevelEmp($id)
+    // {
+    //     $vAllemp = Valldataemp::where('CODEMPID', "$id")->first();
+    //     $level = $vAllemp?->NUMLVL ?? "";
+    //     return  $level;
+    // }
 }

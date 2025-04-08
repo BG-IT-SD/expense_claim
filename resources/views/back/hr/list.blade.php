@@ -90,7 +90,7 @@
                                     <th>Expense ID</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
-                                    <th>ID | Name</th>
+                                    <th>ID | Name | BU</th>
                                     <th>Location</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
@@ -111,7 +111,7 @@
                                         </td>
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
-                                            {{ $expense->empid . ' | ' . $expense->user->fullname }}
+                                            {{ $expense->empid . ' | ' . $expense->user->fullname .' | '.$expense->user->bu }}
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
@@ -143,7 +143,7 @@
                                                     data-bs-toggle="modal" data-bs-target="#largeModal"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
                                                 <button class="btn btn-sm btn-warning"
-                                                    onclick="window.location.href='{{ route('HR.edit', 1) }}'"><span
+                                                    onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
                                                         class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
                                                 <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button>

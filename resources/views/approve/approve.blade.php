@@ -116,6 +116,12 @@
                                 <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid.' | '.$approve->approvename }}</h4>
 
                             </div>
+                            @if ($approve->typeapprove == 4)
+                            <div class="col-sm-6 mb-3">
+                                <h4><strong>ผู้อนุมัติขั้นถัดไป:</strong> {{ $nextempid.' | '.$nextfullname }}</h4>
+
+                            </div>
+                            @endif
                             @if ($approve->statusapprove == 0)
                                 <hr>
                                 <div class="col-sm-12 mb-3 text-center">
@@ -128,7 +134,16 @@
                                                 <h3>เหตุผลที่ไม่อนุมัติ</h3>
                                             </label>
                                             <textarea name="reason" id="reason" class="form-control" rows="3"></textarea>
+
                                         </div>
+                                        <input type="hidden" id="typeapprove" name="typeapprove" value="{{ $approve->typeapprove }}">
+                                        <input type="hidden" name="expenseempid" id="expenseempid" value="{{ $expense->empid }}">
+                                        <input type="hidden" name="expenseempid" id="expenseempid" value="{{ $expense->empid }}">
+                                        <input type="hidden" name="nextempid" id="nextempid" value="{{ $nextempid }}">
+                                        <input type="hidden" name="nextfullname" id="nextfullname" value="{{ $nextfullname }}">
+                                        <input type="hidden" name="nextemail" id="nextemail" value="{{ $nextemail }}">
+                                        <input type="hidden" name="departuredate" id="departuredate" value="{{ $departure_date . ' - ' . $return_date }}">
+                                        <input type="hidden" name="approvename" id="approvename" value="{{ $approve->approvename }}">
                                         <button type="button" name="action" value="approve" class="btn btn-success"
                                             id="btnApprove">
                                             <span class="mdi mdi-check-circle"></span> อนุมัติ</button>

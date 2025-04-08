@@ -194,11 +194,11 @@
             </div>
         @endif
         <div class="col-12 d-flex justify-content-between">
-            <button class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
+            <button type="button" class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
                 <span class="align-middle d-sm-inline-block d-none">Previous</span>
             </button>
-            <button class="btn btn-primary btn-next waves-effect waves-light">
+            <button type="button" class="btn btn-primary btn-next waves-effect waves-light">
                 <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
                 <i class="mdi mdi-arrow-right"></i>
             </button>

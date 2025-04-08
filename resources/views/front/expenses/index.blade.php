@@ -134,6 +134,62 @@
             font-size: 13px;
             font-weight: 300;
         }
+
+        /* popup */
+        .block-description {
+        color: #ff4c51;
+        margin-bottom: 16px;
+      }
+
+      .block-item {
+        border: 2px solid #ffffff;
+        border-radius: 30px;
+        background: linear-gradient(270deg, #0F4CAF 0%, #A5C7FF 100%);
+        box-shadow: 0 0.375rem 1rem 0 rgba(51, 55, 63, 0.12);
+        letter-spacing: 1px;
+      }
+
+      .block-item .block-plant {
+        display: grid;
+        gap: 16px;
+        background: #f0f8ff;
+        border-radius: 20px;
+        padding: 16px;
+      }
+
+      .block-item .block-content {
+        padding-left: 20px;
+      }
+
+
+      .block-item .name {
+        color: #000000;
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .block-item p {
+        color: #ffffff;
+      }
+
+      .block-title {
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        color: #000000;
+      }
+
+      .block-item .block-plant .img-logo {
+        border-bottom-style: solid;
+        padding-bottom: 16px;
+        color: #ffffff;
+      }
+
+      .email {
+        font-size: 22px;
+      }
+
+
     </style>
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
@@ -296,3 +352,5 @@
         // window.initMap = initMap;
     </script>
 @endsection
+
+

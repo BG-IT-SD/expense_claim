@@ -10,8 +10,8 @@
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                            <h5>Default</h5>
-                        </div> -->
+                                    <h5>Default</h5>
+                                </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="bs-stepper-content">
-                        <form id="expensefrmview" method="POST" enctype="multipart/form-data">
+                        <form action="#" id="expensefrmview" method="POST" enctype="multipart/form-data">
                             @csrf
                             {{-- hidden --}}
                             {{-- <input type="hidden" name="extype" value="{{ $typegroup }}">
@@ -134,6 +134,67 @@
             font-size: 13px;
             font-weight: 300;
         }
+
+        /* timeline approve */
+        .timeline-horizontal {
+            position: relative;
+            display: flex;
+            justify-content: flex-start; /* 👈 เปลี่ยนจาก space-between เป็น flex-start */
+            align-items: flex-start;
+            flex-wrap: nowrap;
+            gap: 50px; /* เพิ่มระยะห่างระหว่างจุด */
+            padding: 30px 10px;
+        }
+
+        .timeline-horizontal::before {
+            content: "";
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #ccc;
+            z-index: 0;
+        }
+
+        .timeline-step {
+            position: relative;
+            text-align: center;
+            z-index: 1;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .timeline-step .circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            line-height: 40px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #0F4CAF;
+        }
+
+        .timeline-step .status-badge {
+            margin-top: 5px;
+        }
+
+        .timeline-step .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .timeline-step .label {
+            font-size: 14px;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .timeline-step .approver {
+            font-size: 13px;
+            color: #555;
+        }
     </style>
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
@@ -168,7 +229,7 @@
     {{-- <script src="{{ asset('template/assets/js/form-wizard-numbered.js') }}"></script> --}}
     <script src="{{ asset('template/assets/js/form-wizard-validation.js') }}"></script>
 
-    {{-- <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script> --}}
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step-view.js']) }}"></script>
 
     <script>

@@ -155,7 +155,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             // เพิ่มเติม: หากมี create, store, update, destroy
             // Route::get('create', [HRController::class, 'create'])->name('create');
             // Route::post('/', [HRController::class, 'store'])->name('store');
-            // Route::put('{id}', [HRController::class, 'update'])->name('update');
+             Route::put('{id}', [HRController::class, 'update'])->name('update');
             // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
         });
 
