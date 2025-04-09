@@ -149,9 +149,13 @@ class HRController extends Controller
         // $finalHNameNext = $nextStepApprove["fullname"];
         // $finalIdNext = $nextStepApprove["empid"];
 
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
+
+        $finalHEmailNext = 'Saowapha.K@bgiglass.com';
+        $finalHNameNext = 'เสาวภา เข็มเหลือง';
+        $finalIdNext = '63000455';
 
         return view('back.hr.frmapprovegrp', compact(['expense','empid', 'reasons', 'departure_date', 'return_date', 'plants', 'Alldayfood', 'expenseFoods', 'groupplant','approvals','files','isView','startDate','endDate','startTime','endTime','bu' ,'finalHEmail','finalHName','finalId','finalHEmailNext','finalHNameNext','finalIdNext']));
     }

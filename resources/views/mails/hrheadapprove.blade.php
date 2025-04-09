@@ -62,7 +62,7 @@
                 </td>
             </tr>
             <tr>
-                @if ($type == 1)
+                {{-- @if ($type == 1) --}}
                     <td class="email-body">
                         <p><strong>เรียน คุณ {{ $name }}</strong></p>
                         <p><strong>เรื่อง ขอความอนุเคราะห์ เพื่อทำการเบิกเบี้ยเลี้ยงหรือค่าใช้จ่ายในการเดินทาง</strong>
@@ -74,8 +74,8 @@
                         <br>
                         <p><strong>ขอแสดงความนับถือ</strong></p>
                     </td>
-                @else
-                @endif
+                {{-- @else --}}
+                {{-- @endif --}}
 
             </tr>
             <tr>

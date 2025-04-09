@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-    @if ($booking->type_reserve == 4)
+    {{-- @if ($booking->type_reserve == 4) --}}
         {{-- น้ำมัน --}}
         <div class="alert alert-dark mb-3 mt-3">
             <h6 class="mb-0">ส่วนที่ 3</h6>
@@ -137,7 +137,7 @@
                     <label class="form-check-label" for="inlineRadio222">ไม่ประสงค์เบิกน้ำมัน</label>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: none;">
+            <div class="col-sm-12" style="display: block;">
                 <div class="card">
                     <div class="row">
                         <div class="col-sm-6">
@@ -165,67 +165,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @foreach ($ratefuels as $ratefuel)
                                     <tr>
                                         <td>
                                             <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
+                                                <input class="form-check-input checkfuel" type="checkbox"
+                                                    value="1">
                                             </div>
                                         </td>
-                                        <td>45.04 - 50.03</td>
-                                        <td>6</td>
+                                        <td>{{ $ratefuel->startrate .' - '.$ratefuel->endrate }}</td>
+                                        <td>{{ $ratefuel->bathperkm }}</td>
                                     </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>40.04 - 45.03</td>
-                                        <td>5.5</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3" checked="checked">
-                                            </div>
-                                        </td>
-                                        <td>30.05 - 40.03</td>
-                                        <td>5</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>25.05 - 30.04</td>
-                                        <td>4.5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>20.05 - 25.04</td>
-                                        <td>4</td>
-                                    </tr>
-
-
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: none;">
+            <div class="col-sm-12" style="display: block;">
                 <table class="table table-bordered text-center">
                     <thead>
                         <tr class="table-danger">
@@ -251,7 +209,7 @@
             </div>
         </div>
         {{-- น้ำมัน --}}
-    @endif
+    {{-- @endif --}}
     <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 3</h6>
         <small>รวมค่าใช้จ่าย</small>

@@ -23,8 +23,10 @@ use App\Models\Approve;
 use App\Models\Expense;
 use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
+use App\Models\Fuelprice;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class ExpenseController extends Controller
 {
@@ -186,14 +188,17 @@ class ExpenseController extends Controller
                 $headname = "";
             }
         }
+        //  dd($response);
         // กลุ่มเลขา
         $approve_g = ApproveGroup::where('empid', $empid)->count();
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status",1)->where("deleted",0)->orderByDesc('startrate')->get();
 
         // dd($approve_g);
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants','ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 echo 'ไม่ใช้ประเภทคนทั่วไป [พขร ช่าง admin ทำการเบิก]';
             }
