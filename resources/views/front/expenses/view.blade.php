@@ -85,7 +85,7 @@
 
     </div>
     </div>
-    @include('front.expenses.modal')
+    {{-- @include('front.expenses.modal') --}}
 @endsection
 @section('csscustom')
     <style>

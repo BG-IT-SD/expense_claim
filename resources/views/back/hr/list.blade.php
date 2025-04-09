@@ -145,8 +145,8 @@
                                                 <button class="btn btn-sm btn-warning"
                                                     onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
                                                         class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
-                                                <button class="btn btn-sm btn-danger"><span
-                                                        class="mdi mdi-trash-can-outline"></span></button>
+                                                {{-- <button class="btn btn-sm btn-danger"><span
+                                                        class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @endif
 
                                         </td>
