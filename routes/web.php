@@ -22,6 +22,7 @@ use App\Http\Controllers\Front\HeadApprovedController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\TechClaimController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\UpdatefuelController;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -257,5 +258,5 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
 
 // Update API น้ำมัน
-
+Route::get('Updatefuel/index',[UpdatefuelController::class,'index'])->name('updatefuel.index');
 // Update API น้ำมัน
