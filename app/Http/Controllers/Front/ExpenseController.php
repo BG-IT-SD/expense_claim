@@ -452,7 +452,10 @@ class ExpenseController extends Controller
             ->first();
 
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
-        return view('front.expenses.view', compact(['expense','empid' ,'reasons', 'departure_date', 'return_date', 'plants', 'Alldayfood', 'expenseFoods', 'groupplant','approvals','files','isView','startDate','endDate','startTime','endTime','bu']));
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status",1)->where("deleted",0)->orderByDesc('startrate')->get();
+
+        return view('front.expenses.view', compact(['expense','empid' ,'reasons', 'departure_date', 'return_date', 'plants','ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant','approvals','files','isView','startDate','endDate','startTime','endTime','bu']));
     }
 
     /**

@@ -172,60 +172,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>45.04 - 50.03</td>
-                                        <td>6</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>40.04 - 45.03</td>
-                                        <td>5.5</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3" checked="checked">
-                                            </div>
-                                        </td>
-                                        <td>30.05 - 40.03</td>
-                                        <td>5</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>25.05 - 30.04</td>
-                                        <td>4.5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3"
-                                                    value="option3">
-                                            </div>
-                                        </td>
-                                        <td>20.05 - 25.04</td>
-                                        <td>4</td>
-                                    </tr>
-
-
+                                    @foreach ($ratefuels as $ratefuel)
+                                        <tr>
+                                            <td>
+                                                <div class="form-check form-check-inline form-check-primary">
+                                                    <input class="form-check-input checkfuel" type="checkbox"
+                                                        value="1">
+                                                </div>
+                                            </td>
+                                            <td>{{ $ratefuel->startrate . ' - ' . $ratefuel->endrate }}</td>
+                                            <td>{{ $ratefuel->bathperkm }}</td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -360,11 +318,13 @@
                             <hr>
                             <div class="row">
                                 <div class="col-md-12 text-center">
-                                    <h4><span class="badge bg-label-dark h4"><span class="mdi mdi-account-check h4"></span> {{ $finalId .' | '.$finalHName.' | '.$finalHEmail }}</span></h4>
+                                    <h4><span class="badge bg-label-dark h4"><span
+                                                class="mdi mdi-account-check h4"></span>
+                                            {{ $finalHName . ' | ' . $finalHEmail }}</span></h4>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
-                                        class="form-control form-control-input" >
+                                        class="form-control form-control-input">
                                 </div>
                                 <div class="col-md-4">
                                     <input type="hidden" name="head_email" id="head_email"
@@ -378,21 +338,24 @@
                         </div>
                     </div>
                 </div>
-            {{-- Next Step --}}
+                {{-- Next Step --}}
 
                 <div class="col-sm-6">
                     <div class="card shadow-none bg-transparent border border-primary mb-3">
                         <div class="card-body">
-                            <h5 class="card-title "><span class="badge rounded-pill bg-primary">ลำดับอนุมัติถัดไป</span>
+                            <h5 class="card-title "><span
+                                    class="badge rounded-pill bg-primary">ลำดับอนุมัติถัดไป</span>
                             </h5>
                             <hr>
                             <div class="row">
                                 <div class="col-md-12 text-center">
-                                    <h4><span class="badge bg-label-dark h4"><span class="mdi mdi-account-switch h4"></span> {{ $finalIdNext .' | '.$finalHNameNext.' | '.$finalHEmailNext }}</span></h4>
+                                    <h4><span class="badge bg-label-dark h4"><span
+                                                class="mdi mdi-account-switch h4"></span>
+                                            {{ $finalHNameNext . ' | ' . $finalHEmailNext }}</span></h4>
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="hidden" name="nexthead_id" id="nexthead_id" value="{{ $finalIdNext }}"
-                                        class="form-control form-control-input" readonly>
+                                    <input type="hidden" name="nexthead_id" id="nexthead_id"
+                                        value="{{ $finalIdNext }}" class="form-control form-control-input" readonly>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="hidden" name="nexthead_email" id="nexthead_email"
@@ -415,8 +378,49 @@
                 <span class="align-middle d-sm-inline-block d-none">Previous</span>
             </button>
             @if ($isView == 1)
-                <button class="btn btn-primary btn-submit waves-effect waves-light"><span class="mdi mdi-content-save-check"></span> ยืนยันตรวจสอบข้อมูล</button>
+                <div class="demo-inline-spacing">
+                    <button type="button" id="rejectbtn" class="btn btn-danger waves-effect waves-light"><span
+                            class="mdi mdi-file-cancel"></span> ไม่ผ่านการตรวจสอบ</button>
+                    <button class="btn btn-primary btn-submit waves-effect waves-light"><span
+                            class="mdi mdi-content-save-check"></span> ยืนยันตรวจสอบข้อมูล</button>
+                </div>
             @endif
         </div>
     </div>
 </div>
+
+{{-- Reject --}}
+@if ($isView == 1)
+<div class="modal fade" id="popUpReject" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <form action="" id="rejectfrm" method="POST">
+                    @csrf
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="rejectremark">
+                                <h4>เหตุผลที่ยกเลิก</h4>
+                            </label>
+                            <textarea name="rejectremark" id="rejectremark" class="form-control" cols="30" rows="10"></textarea>
+                            <input type="hidden" id="rejectidexpense" name="rejectidexpense"
+                                value="{{ $expense->id }}">
+                            <input type="hidden" name="head_emailrj" id="head_emailrj" value="{{ $finalHEmail }}"
+                                class="form-control form-control-input">
+                            <input type="hidden" name="head_namerj" id="head_namerj" value="{{ $finalHName }}"
+                                class="form-control form-control-input">
+                            <input type="hidden" name="head_idrj" id="head_idrj" value="{{ $finalId }}"
+                                class="form-control form-control-input">
+                        </div>
+                        <hr>
+                        <div class="col-md-12 text-end">
+                            <button type="button" class="btn btn-primary btnreject">ยืนยัน</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif

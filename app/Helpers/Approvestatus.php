@@ -16,7 +16,7 @@ if (!function_exists('status_approve_badge')) {
             return match ($status) {
                 0 => '<span class="badge bg-warning text-dark"><span class="mdi mdi-clock-time-eight"></span>ยังไม่ตรวจสอบ</span>',
                 1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>ตรวจสอบแล้ว</span>',
-                2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ตรวจสอบ</span>',
+                2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ผ่านการตรวจสอบ</span>',
                 default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
             };
         }
@@ -78,7 +78,7 @@ if (!function_exists('hr_status_approve_badge')) {
             return match ($status) {
                 0 => '<span class="badge bg-warning text-dark"><span class="mdi mdi-clock-time-eight"></span>ยังไม่ตรวจสอบ</span>',
                 1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>ตรวจสอบแล้ว</span>',
-                2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ตรวจสอบ</span>',
+                2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ผ่านการตรวจสอบ</span>',
                 default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
             };
         }
