@@ -82,6 +82,25 @@ class ApproveController extends Controller
         $approve->remark = $reason; // หรือ reject_reason
         $approve->save();
 
+        // ✅ ส่งเมลเฉพาะกรณี reject
+        // if ($request->action === 'reject') {
+        //     $data = [
+        //         'type' => $typeapprove,
+        //         'name' => $approvename,
+        //         'empid' => $expenseempid,
+        //         'departuredate' => $departuredate,
+        //         'remark' => $reason,
+        //     ];
+
+        //     MailHelper::sendExternalMail(
+        //         $approve->email, // ผู้รับ คือ ผู้ขอเบิก
+        //         'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
+        //         'mails.reject', // ชื่อ blade view mail
+        //         $data,
+        //         'Expense Claim System EX'.$approve->exid,
+        //     );
+        // }
+
         $nextempid = '';
         $nextemail = '';
         $nextfullname = '';
@@ -130,7 +149,7 @@ class ApproveController extends Controller
                     'อนุมัติการเบิกเบี้ยเลี้ยง',
                     'mails.hrheadapprove',
                     $data,
-                    'Expense Claim System'
+                    'Expense Claim System EX'.$approve->exid,
                 );
             }
         }
@@ -142,64 +161,64 @@ class ApproveController extends Controller
     }
 
 
-    public function confirmNextStep(Request $request, $id)
-    {
-        $approve = Approve::findOrFail($id);
+    // public function confirmNextStep(Request $request, $id)
+    // {
+    //     $approve = Approve::findOrFail($id);
 
-        if ($approve->statusapprove !== 0) {
-            return back()->with('error', 'คุณได้ดำเนินการไปแล้ว');
-        }
+    //     if ($approve->statusapprove !== 0) {
+    //         return back()->with('error', 'คุณได้ดำเนินการไปแล้ว');
+    //     }
 
-        if (now()->greaterThan($approve->token_expires_at)) {
-            return back()->with('error', 'ลิงก์หมดอายุแล้ว');
-        }
+    //     if (now()->greaterThan($approve->token_expires_at)) {
+    //         return back()->with('error', 'ลิงก์หมดอายุแล้ว');
+    //     }
 
-        $approve->statusapprove = $request->action === 'approve' ? 1 : 2;
-        $approve->save();
+    //     $approve->statusapprove = $request->action === 'approve' ? 1 : 2;
+    //     $approve->save();
 
-        // ✅ หากอนุมัติสำเร็จ → สร้าง approve ถัดไป
-        if ($approve->statusapprove === 1) {
-            // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (บัญชี)
-            $nextType = $approve->typeapprove + 1;
+    //     // ✅ หากอนุมัติสำเร็จ → สร้าง approve ถัดไป
+    //     if ($approve->statusapprove === 1) {
+    //         // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (บัญชี)
+    //         $nextType = $approve->typeapprove + 1;
 
-            $nextEmpId = '66000111';
-            $nextEmail = 'accounting@company.com';
-            $nextName = 'บัญชีตรวจสอบ';
+    //         $nextEmpId = '66000111';
+    //         $nextEmail = 'accounting@company.com';
+    //         $nextName = 'บัญชีตรวจสอบ';
 
-            $token = Str::random(64);
-            $nextApprove = Approve::create([
-                'exid' => $approve->exid,
-                'typeapprove' => $nextType,
-                'empid' => $nextEmpId,
-                'email' => $nextEmail,
-                'approvename' => $nextName,
-                'emailstatus' => 1,
-                'statusapprove' => 0,
-                'login_token' => $token,
-                'token_expires_at' => now()->addDays(10),
-            ]);
+    //         $token = Str::random(64);
+    //         $nextApprove = Approve::create([
+    //             'exid' => $approve->exid,
+    //             'typeapprove' => $nextType,
+    //             'empid' => $nextEmpId,
+    //             'email' => $nextEmail,
+    //             'approvename' => $nextName,
+    //             'emailstatus' => 1,
+    //             'statusapprove' => 0,
+    //             'login_token' => $token,
+    //             'token_expires_at' => now()->addDays(10),
+    //         ]);
 
-            // ✅ ส่งอีเมลลิงก์อนุมัติรอบถัดไป
-            $link = route('approve.magic.login', ['token' => $token]);
+    //         // ✅ ส่งอีเมลลิงก์อนุมัติรอบถัดไป
+    //         $link = route('approve.magic.login', ['token' => $token]);
 
-            $data = [
-                'type' => $nextType,
-                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
-                'name' => $nextName,
-                'full_name' => $approve->approvename,
-                'departuredate' => $approve->expense?->departuredate ?? '',
-                'link' => $link,
-            ];
+    //         $data = [
+    //             'type' => $nextType,
+    //             'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
+    //             'name' => $nextName,
+    //             'full_name' => $approve->approvename,
+    //             'departuredate' => $approve->expense?->departuredate ?? '',
+    //             'link' => $link,
+    //         ];
 
-            MailHelper::sendExternalMail(
-                $nextEmail,
-                'อนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
-                'mails.exapprove',
-                $data,
-                'Expense Claim System'
-            );
-        }
+    //         MailHelper::sendExternalMail(
+    //             $nextEmail,
+    //             'อนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
+    //             'mails.exapprove',
+    //             $data,
+    //             'Expense Claim System'
+    //         );
+    //     }
 
-        return back()->with('success', 'บันทึกผลอนุมัติเรียบร้อย');
-    }
+    //     return back()->with('success', 'บันทึกผลอนุมัติเรียบร้อย');
+    // }
 }

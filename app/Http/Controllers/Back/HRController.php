@@ -171,13 +171,13 @@ class HRController extends Controller
         // $finalHNameNext = $nextStepApprove["fullname"];
         // $finalIdNext = $nextStepApprove["empid"];
 
-        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        // $finalHNameNext = 'กมลวรรณ บรรชา';
-        // $finalIdNext = '66000510';
+        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        $finalHNameNext = 'กมลวรรณ บรรชา';
+        $finalIdNext = '66000510';
 
-        $finalHEmailNext = 'Saowapha.K@bgiglass.com';
-        $finalHNameNext = 'เสาวภา เข็มเหลือง';
-        $finalIdNext = '63000455';
+        // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
+        // $finalHNameNext = 'เสาวภา เข็มเหลือง';
+        // $finalIdNext = '63000455';
 
         return view('back.hr.frmapprovegrp', compact(['expense', 'empid', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
@@ -242,6 +242,7 @@ class HRController extends Controller
             //  End มื้ออาหาร
             // บันทึก Approve
             $token = Str::random(64);
+            $token2 = Str::random(64);
             $approve = Approve::create([
                 'exid' => $id,
                 'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
@@ -250,8 +251,8 @@ class HRController extends Controller
                 'approvename' => $request->head_name ?? '',
                 'emailstatus' => 1,
                 'statusapprove' => 1,
-                //  'login_token' => $token,
-                //  'token_expires_at' => now()->addDays(10),
+                 'login_token' => $token,
+                 'token_expires_at' => now()->addDays(10),
             ]);
 
             $approve_nextstep = Approve::create([
@@ -262,14 +263,14 @@ class HRController extends Controller
                 'approvename' => $request->nexthead_name ?? '',
                 'emailstatus' => 1,
                 'statusapprove' => 0,
-                'login_token' => $token,
+                'login_token' => $token2,
                 'token_expires_at' => now()->addDays(10),
             ]);
 
             // End บันทึก Approve
             DB::commit();
             // Sent Mail
-            $link = route('approve.magic.login', ['token' => $approve->login_token]);
+            $link = route('approve.magic.login', ['token' => $token2]);
             $data = [
                 'type' => 1,
                 'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
@@ -285,7 +286,7 @@ class HRController extends Controller
                 'อนุมัติการเบิกเบี้ยเลี้ยง',
                 'mails.hrapprove', // ชื่อ blade view
                 $data,
-                'Expense Claim System'
+                'Expense Claim System EX'.$id,
             );
             //End Sent Mail
 
