@@ -412,6 +412,13 @@
                                 class="form-control form-control-input">
                             <input type="hidden" name="head_idrj" id="head_idrj" value="{{ $finalId }}"
                                 class="form-control form-control-input">
+                                <input type="hidden" name="departuredaterj" id="departuredaterj" value="{{ $departure_date.' - '. $return_date}}"
+                                class="form-control form-control-input">
+                                <input type="hidden" name="empemailrj" id="empemailrj" value="{{ $expense->user->email }}"
+                                class="form-control form-control-input">
+                                <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname }}"
+                                class="form-control form-control-input">
+
                         </div>
                         <hr>
                         <div class="col-md-12 text-end">

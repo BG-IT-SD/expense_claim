@@ -317,6 +317,9 @@ class HRController extends Controller
             ]);
 
             $id = $request->rejectidexpense ?? "";
+            $empfullname = $request->empfullname ?? "";
+            $departuredaterj = $request->departuredaterj ?? "";
+            $empemailrj = $request->empemailrj ?? "";
 
             if ($id != "") {
                 $approve = Approve::create([
@@ -331,6 +334,23 @@ class HRController extends Controller
                 ]);
 
                 if ($approve) {
+                    // ส่งเมลเฉพาะกรณี reject
+                    $data = [
+                        'headname' => $request->head_namerj ?? '', // คนที่ reject
+                        'name' => $empfullname, // user
+                        'expenseid' => $approve->exid, //exid
+                        'departuredate' => $departuredaterj,
+                        'remark' => $request->rejectremark,
+                    ];
+
+                    MailHelper::sendExternalMail(
+                        $empemailrj, // ผู้รับ คือ ผู้ขอเบิก
+                        'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
+                        'mails.reject', // ชื่อ blade view mail
+                        $data,
+                        'Expense Claim System EX'.$id,
+                    );
+
                     return response()->json([
                         'status' => 200,
                         'message' => 'ยกเลิกข้อมูลเรียบร้อยแล้ว',

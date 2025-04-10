@@ -138,12 +138,15 @@
                                         </div>
                                         <input type="hidden" id="typeapprove" name="typeapprove" value="{{ $approve->typeapprove }}">
                                         <input type="hidden" name="expenseempid" id="expenseempid" value="{{ $expense->empid }}">
-                                        <input type="hidden" name="expenseempid" id="expenseempid" value="{{ $expense->empid }}">
                                         <input type="hidden" name="nextempid" id="nextempid" value="{{ $nextempid }}">
                                         <input type="hidden" name="nextfullname" id="nextfullname" value="{{ $nextfullname }}">
                                         <input type="hidden" name="nextemail" id="nextemail" value="{{ $nextemail }}">
                                         <input type="hidden" name="departuredate" id="departuredate" value="{{ $departure_date . ' - ' . $return_date }}">
                                         <input type="hidden" name="approvename" id="approvename" value="{{ $approve->approvename }}">
+                                        <input type="hidden" name="expenseid" id="expenseid" value="{{ $expense->prefix . $expense->id }}">
+                                        <input type="hidden" name="empemail" id="empemail" value="{{ $expense->user->email }}">
+                                        <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname }}">
+
                                         <button type="button" name="action" value="approve" class="btn btn-success"
                                             id="btnApprove">
                                             <span class="mdi mdi-check-circle"></span> อนุมัติ</button>
