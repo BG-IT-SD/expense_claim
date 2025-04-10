@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Whoops\Run;
 
 // Auth
 Route::get('/', [AuthController::class, 'index'])->name('login');
@@ -151,11 +152,13 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             Route::get('/', [HRController::class, 'index'])->name('index');
             Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
-
+            Route::get('view/{id}/{type}', [HRController::class, 'edit'])->name('view');
+            Route::get('approved',[HRController::class,'history'])->name('approved');
             // เพิ่มเติม: หากมี create, store, update, destroy
             // Route::get('create', [HRController::class, 'create'])->name('create');
             // Route::post('/', [HRController::class, 'store'])->name('store');
              Route::put('{id}', [HRController::class, 'update'])->name('update');
+             Route::post('reject', [HRController::class, 'reject'])->name('reject');
             // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
         });
 

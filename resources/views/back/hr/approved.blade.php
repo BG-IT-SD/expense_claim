@@ -53,7 +53,7 @@
                                         <label class="col-sm-3 col-form-label text-sm-end"
                                             for="formtabs-phone">Status</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-phone" class="form-control phone-mask">
+                                            <input type="text" id="formtabs-phone" class="form-control phone-mask" >
                                         </div>
                                     </div>
                                 </div>
@@ -101,7 +101,7 @@
                             <tbody class="table-border-bottom-0">
                                 @foreach ($expenses as $key => $expense)
                                     <tr>
-                                        <td>{{ $expense->prefix . $expense->id }}</td>
+                                        <td>{{ $expense->prefix.$expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                 'd/m/Y H:i',
@@ -111,7 +111,7 @@
                                         </td>
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
-                                            {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . $expense->user->bu }}
+                                            {{ $expense->empid . ' | ' . $expense->user->fullname .' | '.$expense->user->bu }}
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
@@ -135,20 +135,19 @@
                                                 <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
                                                     data-bs-toggle="modal" data-bs-target="#largeModal"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                    class="btn btn-sm btn-info"><span
-                                                        class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @else
                                                 <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
                                                     data-bs-toggle="modal" data-bs-target="#largeModal"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                <button class="btn btn-sm btn-warning"
+                                                {{-- <button class="btn btn-sm btn-warning"
                                                     onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
-                                                        class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
+                                                        class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button> --}}
+                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 {{-- <button class="btn btn-sm btn-danger"><span
-                                                    class="mdi mdi-trash-can-outline"></span></button> --}}
+                                                        class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @endif
 
                                         </td>
@@ -249,18 +248,4 @@
             </div>
         </div>
     </div>
-@endsection
-@section('jscustom')
-    @if (session('message'))
-        <script>
-            Swal.fire({
-                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
-                icon: {!! json_encode(session('class')) !!},
-                customClass: {
-                    confirmButton: 'btn btn-primary waves-effect waves-light'
-                },
-                buttonsStyling: false
-            });
-        </script>
-    @endif
 @endsection

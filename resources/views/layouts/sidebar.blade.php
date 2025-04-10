@@ -167,7 +167,7 @@
                 <span class="menu-header-text" data-i18n="HR">HR</span>
             </li>
             <!-- HR -->
-            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit')) active open @endif ">
+            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-check-outline"></i>
                     <div data-i18n="HR">HR</div>
@@ -180,8 +180,8 @@
                             <div class="badge bg-danger rounded-pill ms-auto">2</div>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item @if (Route::is('HR.approved')) active @endif">
+                        <a href="{{ route('HR.approved') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
                     </li>

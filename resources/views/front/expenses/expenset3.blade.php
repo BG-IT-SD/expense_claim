@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-    {{-- @if ($booking->type_reserve == 4) --}}
+    @if ($booking->type_reserve == 4)
         {{-- น้ำมัน --}}
         <div class="alert alert-dark mb-3 mt-3">
             <h6 class="mb-0">ส่วนที่ 3</h6>
@@ -137,7 +137,7 @@
                     <label class="form-check-label" for="inlineRadio222">ไม่ประสงค์เบิกน้ำมัน</label>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: block;">
+            <div class="col-sm-12" style="display: none;">
                 <div class="card">
                     <div class="row">
                         <div class="col-sm-6">
@@ -183,7 +183,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: block;">
+            <div class="col-sm-12" style="display: none;">
                 <table class="table table-bordered text-center">
                     <thead>
                         <tr class="table-danger">
@@ -209,7 +209,7 @@
             </div>
         </div>
         {{-- น้ำมัน --}}
-    {{-- @endif --}}
+    @endif
     <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 3</h6>
         <small>รวมค่าใช้จ่าย</small>
