@@ -332,7 +332,7 @@ class ExpenseController extends Controller
                 'อนุมัติการเบิกเบี้ยเลี้ยง',
                 'mails.exapprove', // ชื่อ blade view
                 $data,
-                'Expense Claim System'
+                'Expense Claim System EX'.$expense->id,
             );
 
             return response()->json([
