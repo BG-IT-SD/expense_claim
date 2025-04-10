@@ -55,7 +55,9 @@ class ApproveController extends Controller
         $expenseempid = $request->input('expenseempid');
         $departuredate = $request->input('departuredate');
         $approvename = $request->input('approvename');
-
+        $expenseid = $request->input('expenseid');
+        $empemail = $request->input('empemail');
+        $empfullname = $request->input('empfullname');
 
         if ($approve->statusapprove !== 0) {
             return back()->with([
@@ -83,23 +85,23 @@ class ApproveController extends Controller
         $approve->save();
 
         // ✅ ส่งเมลเฉพาะกรณี reject
-        // if ($request->action === 'reject') {
-        //     $data = [
-        //         'type' => $typeapprove,
-        //         'name' => $approvename,
-        //         'empid' => $expenseempid,
-        //         'departuredate' => $departuredate,
-        //         'remark' => $reason,
-        //     ];
+        if ($request->action === 'reject') {
+            $data = [
+                'headname' => $approvename, // คนที่ reject
+                'name' => $empfullname, // user
+                'expenseid' => $approve->exid, //exid
+                'departuredate' => $departuredate,
+                'remark' => $reason,
+            ];
 
-        //     MailHelper::sendExternalMail(
-        //         $approve->email, // ผู้รับ คือ ผู้ขอเบิก
-        //         'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
-        //         'mails.reject', // ชื่อ blade view mail
-        //         $data,
-        //         'Expense Claim System EX'.$approve->exid,
-        //     );
-        // }
+            MailHelper::sendExternalMail(
+                $empemail, // ผู้รับ คือ ผู้ขอเบิก
+                'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
+                'mails.reject', // ชื่อ blade view mail
+                $data,
+                'Expense Claim System EX'.$approve->exid,
+            );
+        }
 
         $nextempid = '';
         $nextemail = '';
