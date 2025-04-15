@@ -18,6 +18,7 @@ use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
 use App\Models\Fuelprice;
 use App\Models\Groupplant;
+use App\Models\Passenger;
 use App\Models\Plant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -251,8 +252,8 @@ class HRController extends Controller
                 'approvename' => $request->head_name ?? '',
                 'emailstatus' => 1,
                 'statusapprove' => 1,
-                 'login_token' => $token,
-                 'token_expires_at' => now()->addDays(10),
+                'login_token' => $token,
+                'token_expires_at' => now()->addDays(10),
             ]);
 
             $approve_nextstep = Approve::create([
@@ -286,7 +287,7 @@ class HRController extends Controller
                 'อนุมัติการเบิกเบี้ยเลี้ยง',
                 'mails.hrapprove', // ชื่อ blade view
                 $data,
-                'Expense Claim System EX'.$id,
+                'Expense Claim System EX' . $id,
             );
             //End Sent Mail
 
@@ -309,8 +310,7 @@ class HRController extends Controller
     }
 
     public function reject(Request $request)
-    {
-        {
+    { {
             $request->validate([
                 'rejectremark' => 'required',
                 'rejectidexpense' => 'required'
@@ -348,7 +348,7 @@ class HRController extends Controller
                         'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
                         'mails.reject', // ชื่อ blade view mail
                         $data,
-                        'Expense Claim System EX'.$id,
+                        'Expense Claim System EX' . $id,
                     );
 
                     return response()->json([
@@ -380,5 +380,50 @@ class HRController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function showPassengerList($bookid)
+    {
+        try {
+            $passengers = Passenger::where('booking_id', $bookid)->get();
+
+            foreach ($passengers as $p) {
+                // ดึงข้อมูล expense โดยเชื่อมด้วย bookid และ empid
+                $expense = Expense::where('bookid', $p->booking_id)
+                    ->where('empid', $p->passenger_empid)
+                    ->first();
+
+                $p->expense = $expense;
+
+                // ถ้ามี expense แล้ว ค่อยดึง approve
+                if ($expense) {
+                    $lastApprove = Approve::where('exid', $expense->id)
+                        ->orderByDesc('id')
+                        ->first();
+
+                    if ($lastApprove) {
+                        // เพิ่ม text หลังจากกำหนด lastapprove แล้ว
+                        $lastApprove->status_text = status_approve_badge(
+                            $lastApprove->statusapprove,
+                            $lastApprove->typeapprove
+                        );
+
+                        $lastApprove->type_text = type_approve_text(
+                            $lastApprove->typeapprove
+                        );
+
+                        $p->expense->lastapprove = $lastApprove;
+                    }
+                }
+
+            }
+
+
+            return response()->json($passengers);
+        } catch (\Exception $e) {
+            // \Log::error('Error fetching passenger list: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

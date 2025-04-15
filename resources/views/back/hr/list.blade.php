@@ -132,8 +132,9 @@
                                     </td> --}}
                                         <td class="text-nowrap">
                                             @if ($expense->latestApprove->statusapprove == 2)
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
+                                                <button class="btn btn-sm btn-info btn-passenger" type="button"
+                                                    class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#modalGroup" data-bookid="{{ $expense->bookid }}"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
                                                 <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
                                                     class="btn btn-sm btn-info"><span
@@ -141,14 +142,21 @@
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @else
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
+                                                <button class="btn btn-sm btn-info btn-passenger" type="button"
+                                                    class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#modalGroup" data-bookid="{{ $expense->bookid }}"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                <button class="btn btn-sm btn-warning"
-                                                    onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
-                                                        class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
-                                                {{-- <button class="btn btn-sm btn-danger"><span
+                                                @if ($expense->latestApprove->typeapprove == 1 && $expense->latestApprove->statusapprove == 0)
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                @else
+                                                    <button class="btn btn-sm btn-warning"
+                                                        onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
+                                                            class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button>
+                                                    {{-- <button class="btn btn-sm btn-danger"><span
                                                     class="mdi mdi-trash-can-outline"></span></button> --}}
+                                                @endif
                                             @endif
 
                                         </td>
@@ -182,69 +190,32 @@
     </div>
 
     {{-- Modal --}}
-    <div class="modal fade" id="largeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+    <div class="modal fade" id="modalGroup" tabindex="-1">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel3">List Group Book ID : 11099</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">List Group Book ID : <span id="bookid-title"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    {{-- body --}}
-                    <div class="card">
-                        {{-- <h5 class="card-header">Bordered Table</h5> --}}
-                        <div class="card-body">
-                            <div class="table-responsive text-nowrap">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Expense ID</th>
-                                            <th>Emp ID</th>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-
-                                        <tr>
-                                            <td>
-                                                EX20241102
-                                            </td>
-                                            <td>66000510</td>
-                                            <td>กมลวรรณ บรรชา</td>
-                                            <td><span class="badge rounded-pill bg-label-success me-1">Completed</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary"
-                                                    onclick="window.location.href='{{ route('HR.edit', 1) }}'"><span
-                                                        class="mdi mdi-check-circle-outline"></span> Approve</button>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>
-                                                {{-- EX20241102 --}}
-                                            </td>
-                                            <td>63000455</td>
-                                            <td>เสาวภา เข็มเหลือง</td>
-                                            <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
-                                            <td>
-
-                                            </td>
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- body --}}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>EXPENSE ID</th>
+                                <th>EMP ID</th>
+                                <th>NAME</th>
+                                <th>TYPE</th>
+                                <th>STATUS</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="passenger-table-body">
+                            <!-- loaded by ajax -->
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
-
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
                 </div>
             </div>
         </div>
@@ -263,4 +234,64 @@
             });
         </script>
     @endif
+    <script>
+        $(document).on('click', '.btn-passenger', function() {
+            let bookid = $(this).data('bookid');
+
+            $.get(`/HR/passenger-list/${bookid}`, function(res) {
+                let html = '';
+                res.forEach((item) => {
+                    let expenseId = item.expense?.id ?? '-';
+                    let empid = item.passenger_empid;
+                    let name = item.passenger_name;
+
+                    let last = item.expense?.lastapprove ?? null;
+                    let statusText = last?.status_text ?? '-';
+                    let typeText = last?.type_text ?? '-';
+
+                    let actionBtn = '';
+                    let viewUrl = `/HR/view/${expenseId}/0`; // expenseId มาจาก item.expense?.id
+
+                    if (last) {
+                        const type = parseInt(last.typeapprove);
+                        const status = parseInt(last.statusapprove);
+
+                        // เงื่อนไขแสดงปุ่ม Approve
+                        if ((type === 1 && (status === 1)) || (type === 3 &&
+                                status === 0)) {
+                            actionBtn = `<button class="btn btn-sm btn-success">✔ APPROVE</button>`;
+                        }
+
+                        // เงื่อนไขแสดงปุ่ม View
+                        if ((type === 3 && status === 2) || (type === 1 && status === 0) || type >
+                            3) {
+                            actionBtn = `<a href="${viewUrl}" class="btn btn-sm btn-info">
+                    <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                 </a>`;
+                        }
+
+                        // เงื่อนไขแสดงปุ่ม View
+                        if (status === 2) {
+                            actionBtn = `<a href="${viewUrl}" class="btn btn-sm btn-info">
+                    <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                 </a>`;
+                        }
+                    }
+
+                    html += `
+            <tr>
+                <td>${expenseId}</td>
+                <td>${empid}</td>
+                <td>${name}</td>
+                <td>${typeText}</td>
+                <td>${statusText}</td>
+                <td>${actionBtn}</td>
+            </tr>`;
+                });
+
+                $('#passenger-table-body').html(html);
+                $('#modalGroup').modal('show');
+            });
+        });
+    </script>
 @endsection
