@@ -335,6 +335,8 @@ class ExpenseController extends Controller
                 'Expense Claim System EX'.$expense->id,
             );
 
+            logAction('add', 'Expense', 'บันทึกการเบิก EX'.$expense->id);
+
             return response()->json([
                 'status' => 200,
                 'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว',

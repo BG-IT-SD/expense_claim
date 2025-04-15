@@ -161,6 +161,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
              Route::put('{id}', [HRController::class, 'update'])->name('update');
              Route::post('reject', [HRController::class, 'reject'])->name('reject');
             // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
+            Route::get('passenger-list/{bookid}', [HRController::class, 'showPassengerList']);
         });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')

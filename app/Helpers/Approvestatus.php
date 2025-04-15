@@ -4,6 +4,9 @@ use App\Models\Approve;
 use App\Models\ApproveStaff;
 use App\Models\User;
 use App\Models\Valldataemp;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 if (!function_exists('status_approve_badge')) {
     function status_approve_badge($status, $type = null)
@@ -121,16 +124,21 @@ if(!function_exists('Approvestep')){
         $fullname = "";
         $empid = "";
 
+
         if($type == 1){
 
             if($bu == 'BG' || $bu == 'BGE' || $bu == 'BGER' || $bu == 'BGA'){
                 $group = 1;
                 $step = $nextstep;
-            }elseif($bu == 'BGC' || $bu == 'KBI' || $bu == 'BGCP'){
+            }elseif($bu == 'KBI' || $bu == 'BGCP'){
                 $group = 2;
                 $step = $nextstep;
             }elseif($bu == 'PTI'){
                 $group = 3;
+                $step = $nextstep;
+            }elseif($bu == 'BGC'){
+            // check BGC By BG Codeemp 011-010 | BGC
+                $group = 1;
                 $step = $nextstep;
             }
 
@@ -154,6 +162,23 @@ if(!function_exists('Approvestep')){
             "empid" => $empid,
         ];
 
+    }
+}
+
+if (!function_exists('logAction')) {
+    function logAction($action, $model = null, $description = null)
+    {
+        $user = Auth::user();
+
+        ActivityLog::create([
+            'action'      => $action,
+            'model'       => $model,
+            'description' => $description,
+            'user_id'     => $user?->empid ?? 'guest',
+            'user_name'   => $user?->fullname ?? 'guest',
+            'ip_address'  => Request::ip(),
+            'url'         => Request::fullUrl(),
+        ]);
     }
 }
 
