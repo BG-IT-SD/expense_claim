@@ -56,6 +56,14 @@ class TechClaimController extends Controller
 
     public function history(){
 
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        ->where('extype', 3)
+        ->whereHas('latestApprove', function ($query) {
+            $query->whereIn('typeapprove', [1, 2, 3, 4, 5]);
+        })
+        ->get();
+
+    return view('front.techclaim.history', compact('expenses'));
     }
 
     /**
