@@ -10,7 +10,7 @@ class GroupSpecial extends Model
 {
     use HasFactory;
     protected $table = 'group_specials';
-    protected $fillable = ['typeid', 'empid', 'fullname', 'position', 'created_by', 'modified_by', 'status', 'deleted'];
+    protected $fillable = ['typeid', 'empid', 'fullname', 'position','groupapprove', 'created_by', 'modified_by', 'status', 'deleted'];
 
     public function Typegroup()
     {

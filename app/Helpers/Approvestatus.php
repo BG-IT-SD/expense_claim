@@ -117,7 +117,7 @@ if (!function_exists('BuEmp')) {
 
 if(!function_exists('Approvestep')){
 
-    function Approvestep($bu,$type,$nextstep){
+    function Approvestep($bu,$type,$nextstep,$groups = null){
         $step = "";
         $group = "";
         $email = "";
@@ -141,20 +141,25 @@ if(!function_exists('Approvestep')){
                 $group = 1;
                 $step = $nextstep;
             }
-
-            $nextApprove = ApproveStaff::where("group",$group)
-            ->where("step",$step)
-            ->where("deleted",0)
-            ->where("status",1)
-            ->first();
-
-            $email = $nextApprove->email;
-            $fullname = $nextApprove->fullname;
-            $empid = $nextApprove->empid;
-
         }elseif($type == 2){
-
+            $group = $groups;
+            $step = $nextstep;
+        }elseif($type ==3){
+            $group = $groups;
+            $step = $nextstep;
         }
+
+        $nextApprove = ApproveStaff::where('extype',$type)
+        ->where("group",$group)
+        ->where("step",$step)
+        ->where("deleted",0)
+        ->where("status",1)
+        ->first();
+// dd($nextstep);
+        $email = $nextApprove->email;
+        $fullname = $nextApprove->fullname;
+        $empid = $nextApprove->empid;
+
 
         return [
             "email" => $email,
