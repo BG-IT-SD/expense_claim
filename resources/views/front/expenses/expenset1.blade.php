@@ -13,7 +13,7 @@
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="text" id="expense_t2" class="form-control" value="{{ $departure_date }}" disabled>
-                <input type="hidden" name="departuredatemail" value="{{ $departure_date.' - '. $return_date}}">
+                <input type="hidden" name="departuredatemail" value="{{ $departure_date . ' - ' . $return_date }}">
                 <label for="expense_t2">วันเวลาที่ออกปฏิบัติงาน</label>
             </div>
         </div>
@@ -46,6 +46,23 @@
                         aria-describedby="confirm-password2">
                     --}}
                     @if ($booking->locationid == 12)
+                        @if ($booking->type_reserve == 1)
+                            @php
+                                $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
+                            @endphp
+                            <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
+                                data-style="btn-default" tabindex="null" disabled>
+                                @foreach ($plants as $plant)
+                                    <option value="{{ $plant->id }}"
+                                        {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>
+                                        {{ $plant->plantname }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="departureplant" value="{{ $selectedPlant?->id }}">
+                            <label for="departureplant">รายละเอียดสถานที่</label>
+                        @else
+                        @endif
                     @else
                         @php
                             $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
@@ -110,8 +127,12 @@
                 <div class="form-floating form-floating-outline">
                     <select id="returnfrom" name="returnfrom" class="form-control w-100 text-dark"
                         data-style="btn-default" tabindex="null">
-                        @if ($booking->type_reserve == 4 && $booking->locationid != 12)
+                        @if ($booking->type_reserve == 4 && $booking->locationid == 12)
+                            {{-- รถส่วนตัวและนอกสถานที่ --}}
+                            <option value="2">สถานที่อื่นๆ</option>
+                        @elseif($booking->type_reserve == 4 && $booking->locationid != 12)
                             <option value="1">บริษัท</option>
+                        @elseif($booking->type_reserve == 1 && $booking->locationid == 12)
                             <option value="2">สถานที่อื่นๆ</option>
                         @else
                             <option value="1">บริษัท</option>
@@ -128,10 +149,18 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     @if ($booking->locationid == 12)
+                        @if ($booking->type_reserve == 1)
+                            <input type="text" class="form-control" name="returnfromtext2"
+                                value="{{ $booking->location_name }}" disabled>
+                            <input type="hidden" class="form-control" name="returnfromtext"
+                                value="{{ $booking->location_name }}">
+                            <label for="returnfromtext2">รายละเอียดสถานที่</label>
+                        @else
+                        @endif
                     @else
-                    @php
-                     $selectedReturnPlant = $plants->firstWhere('plantname', $booking->locationbu);
-                    @endphp
+                        @php
+                            $selectedReturnPlant = $plants->firstWhere('plantname', $booking->locationbu);
+                        @endphp
                         <select id="returnplant2" name="returnplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)

@@ -21,7 +21,7 @@
             <span class="menu-header-text" data-i18n="Normal">Normal</span>
         </li>
         <!-- Normal -->
-        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')  || Route::is('Expense.history') || Route::is('Expense.show')) active open @endif ">
+        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')  || Route::is('Expense.history')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                 <div data-i18n="เบิกค่าใช้จ่าย">เบิกค่าใช้จ่าย</div>
@@ -34,7 +34,7 @@
                         {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
                     </a>
                 </li>
-                <li class="menu-item  @if (Route::is('Expense.history') || Route::is('Expense.show')) active @endif">
+                <li class="menu-item  @if (Route::is('Expense.history')) active @endif">
                     <a href="{{ route('Expense.history') }}" class="menu-link">
                         <div data-i18n="ประวัติการเบิก">ประวัติการเบิก</div>
                     </a>
@@ -108,7 +108,7 @@
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="Other Tech">Other Tech</span>
             </li>
-            <li class="menu-item @if (Route::is('TechClaim.index') || Route::is('TechClaim.create')) active open @endif ">
+            <li class="menu-item @if (Route::is('TechClaim.index') || Route::is('TechClaim.create') || Route::is('TechClaim.history')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                     <div data-i18n="เบิกค่าใช้จ่ายช่าง">เบิกค่าใช้จ่ายช่าง</div>
