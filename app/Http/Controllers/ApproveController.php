@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MailHelper;
 use App\Models\Approve;
+use App\Models\GroupSpecial;
 use App\Models\User;
 use App\Models\Vbooking;
 use App\Models\Vbookingall;
@@ -16,6 +17,10 @@ class ApproveController extends Controller
 {
     public function show($id)
     {
+        $nextempid = '';
+        $nextemail = '';
+        $nextfullname = '';
+        $nextStepApprove = '';
         $nextempid = '';
         $nextemail = '';
         $nextfullname = '';
@@ -34,15 +39,33 @@ class ApproveController extends Controller
         $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
 
         $bu = $user->bu;
-        if($approve->typeapprove == 4){
-            $nextStepApprove = Approvestep($bu,1,2);
-            $nextempid = $nextStepApprove['empid'];
-            $nextemail = $nextStepApprove['email'];
-            $nextfullname = $nextStepApprove['fullname'];
+        // เช็คกลุ่ม
 
+        $groupapprove = GroupSpecial::where('empid',$expense->empid)->where('deleted',0)->first();
+        $groupData = $groupapprove->groupapprove ?? 1;
+        $extype = $expense->extype ?? 1;
+        if($extype == 3){
+            if ($approve->typeapprove == 2) {
+
+                $nextStepApprove = Approvestep($bu, $extype , 2,$groupData);
+                $nextempid = $nextStepApprove['empid'];
+                $nextemail = $nextStepApprove['email'];
+                $nextfullname = $nextStepApprove['fullname'];
+
+            }
+        }else{
+            if ($approve->typeapprove == 4) {
+
+                $nextStepApprove = Approvestep($bu, $extype , 2);
+                $nextempid = $nextStepApprove['empid'];
+                $nextemail = $nextStepApprove['email'];
+                $nextfullname = $nextStepApprove['fullname'];
+
+            }
         }
 
-        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date','nextempid','nextemail','nextfullname'));
+
+        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date', 'nextempid', 'nextemail', 'nextfullname'));
     }
 
 
@@ -99,7 +122,7 @@ class ApproveController extends Controller
                 'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
                 'mails.reject', // ชื่อ blade view mail
                 $data,
-                'Expense Claim System EX'.$approve->exid,
+                'Expense Claim System EX' . $approve->exid,
             );
         }
 
@@ -107,7 +130,7 @@ class ApproveController extends Controller
         $nextemail = '';
         $nextfullname = '';
 
-        if ($approve->typeapprove == 4) {
+        if ($approve->typeapprove == 4 || $approve->typeapprove == 2) {
             // ✅ หากอนุมัติสำเร็จ สร้าง approve ถัดไป
             if ($approve->statusapprove === 1) {
 
@@ -118,7 +141,12 @@ class ApproveController extends Controller
                 $nextemail = 'kamolwan.b@bgiglass.com';
                 $nextfullname = 'กมลวรรณ บรรชา';
                 // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (HR ผุู้จัดการฝ่าย)
-                $nextType = $approve->typeapprove + 1;
+                if($approve->typeapprove == 2){
+                    $nextType = 1;
+                }else{
+                    $nextType = $approve->typeapprove + 1;
+                }
+
 
                 $token = Str::random(64);
                 $nextApprove = Approve::create([
@@ -151,7 +179,7 @@ class ApproveController extends Controller
                     'อนุมัติการเบิกเบี้ยเลี้ยง',
                     'mails.hrheadapprove',
                     $data,
-                    'Expense Claim System EX'.$approve->exid,
+                    'Expense Claim System EX' . $approve->exid,
                 );
             }
         }

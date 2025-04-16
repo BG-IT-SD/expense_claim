@@ -132,7 +132,7 @@ class HRController extends Controller
         $approvals = Approve::where('exid', $expense->id)
             ->where('deleted', 0)
             ->where('status', 1)
-            ->orderBy('typeapprove')
+            ->orderBy('id')
             ->get();
 
         $files = ExpenseFile::where('exid', $expense->id)

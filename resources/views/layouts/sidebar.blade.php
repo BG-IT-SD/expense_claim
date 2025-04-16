@@ -108,7 +108,7 @@
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="Other Tech">Other Tech</span>
             </li>
-            <li class="menu-item ">
+            <li class="menu-item @if (Route::is('TechClaim.index') || Route::is('TechClaim.create')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                     <div data-i18n="เบิกค่าใช้จ่ายช่าง">เบิกค่าใช้จ่ายช่าง</div>
@@ -120,15 +120,20 @@
                         <div data-i18n="ฟอร์มการเบิก">ฟอร์มการเบิก</div>
                     </a>
                 </li> --}}
-                    <li class="menu-item">
+                    <li class="menu-item @if (Route::is('TechClaim.index') || Route::is('TechClaim.create')) active @endif">
                         <a href="{{ route('TechClaim.index') }}" class="menu-link">
                             <div data-i18n="รายการเบิก">รายการเบิก</div>
                             <div class="badge bg-danger rounded-pill ms-auto">3</div>
                         </a>
                     </li>
+                    <li class="menu-item  @if (Route::is('TechClaim.history')) active @endif">
+                        <a href="{{ route('TechClaim.history') }}" class="menu-link">
+                            <div data-i18n="ประวัติการเบิก">ประวัติการเบิก</div>
+                        </a>
+                    </li>
                 </ul>
             </li>
-            <li class="menu-item ">
+            {{-- <li class="menu-item ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-note-search"></i>
                     <div data-i18n="ตรวจสอบข้อมูล">ตรวจสอบข้อมูล</div>
@@ -142,7 +147,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> --}}
             {{-- <li class="menu-item ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-file-check"></i>

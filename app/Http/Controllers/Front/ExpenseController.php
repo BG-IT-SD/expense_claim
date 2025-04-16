@@ -78,13 +78,13 @@ class ExpenseController extends Controller
      */
     public function create($id)
     {
+
         $booking = Vbooking::find($id);
         $empid = Auth::user()->empid;
         $empemail = Auth::user()->email;
         $empfullname = Auth::user()->fullname;
         // $booking->booking_emp_id ?? "";
         // MailHelper::SendMail('kamolwan.b@bgiglass.com', 'Subject from API', 'Some body text', 'dddd');
-
 
         $typegroup = 1;
         $totalDistance = 0;
@@ -100,15 +100,19 @@ class ExpenseController extends Controller
         } else {
             $level = 2;
         }
+
         // เช็คประเภทuser
-        $groupspecial = GroupSpecial::where('empid', $empid)->get();
-        if ($groupspecial->isNotEmpty()) {
-            if ($groupspecial->id == 1 || $groupspecial->id == 2) {
+        $groupspecial = GroupSpecial::where('empid', $empid)->first();
+        // dd($groupspecial);
+        if ($groupspecial) {
+            if ($groupspecial->typeid == 1 || $groupspecial->typeid == 2) {
                 $typegroup = 2;
             } else {
                 $typegroup = 3;
             }
         }
+
+        // dd($typegroup);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             // ->whereIn('id', [2, 4, 7, 9, 10, 11])
@@ -200,7 +204,9 @@ class ExpenseController extends Controller
             if ($typegroup == 1) {
                 return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants','ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
-                echo 'ไม่ใช้ประเภทคนทั่วไป [พขร ช่าง admin ทำการเบิก]';
+                $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
+                return view('front.expenses.error',compact('message'));
+
             }
         }
     }
@@ -210,7 +216,6 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        $fullname = Auth::user()->fullname;
         $request->validate([
             'bookid' => 'required',
             'empid' => 'required',
@@ -225,6 +230,17 @@ class ExpenseController extends Controller
             'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
+
+        $typeapp = 1;
+        $fullname = Auth::user()->fullname;
+
+        if($request->extype == 3){
+            $typeapp = 2;
+            $fullname = "$request->empfullname_tech";
+        }else{
+            $typeapp = 1;
+            $fullname = Auth::user()->fullname;
+        }
 
         try {
             DB::beginTransaction();
@@ -291,7 +307,7 @@ class ExpenseController extends Controller
             $token = Str::random(64);
             $approve = Approve::create([
                 'exid' => $expense->id,
-                'typeapprove' => 1, //ประเภทที่ 1 รอหัวหน้าอนุมัติ
+                'typeapprove' => $typeapp, //ประเภทที่ 1 รอหัวหน้าอนุมัติ //ประเภทที่ 2 ผุ้จัดการส่วนตรวจสอบ
                 'empid' => $request->head_id,
                 'email' => $request->head_email ?? '',
                 'approvename' => $request->head_name ?? '',
@@ -430,7 +446,7 @@ class ExpenseController extends Controller
         $approvals = Approve::where('exid', $expense->id)
         ->where('deleted', 0)
         ->where('status', 1)
-        ->orderBy('typeapprove')
+        ->orderBy('id')
         ->get();
 
         $files = ExpenseFile::where('exid', $expense->id)

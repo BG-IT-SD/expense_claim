@@ -116,7 +116,7 @@
                                 <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid.' | '.$approve->approvename }}</h4>
 
                             </div>
-                            @if ($approve->typeapprove == 4)
+                            @if ($approve->typeapprove == 4 || $approve->typeapprove == 2)
                             <div class="col-sm-6 mb-3">
                                 <h4><strong>ผู้อนุมัติขั้นถัดไป:</strong> {{ $nextempid.' | '.$nextfullname }}</h4>
 

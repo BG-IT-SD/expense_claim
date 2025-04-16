@@ -136,8 +136,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
         ->group(function () {
 
             Route::get('/', [TechClaimController::class, 'index'])->name('index');
-
-            // Route::get('create', [TechClaimController::class, 'create'])->name('create');
+            Route::get('/{bookid}/{empid}/create', [TechClaimController::class, 'create'])->name('create');
+            Route::get('history', [TechClaimController::class, 'history'])->name('history');
             // Route::post('/', [TechClaimController::class, 'store'])->name('store');
         });
 });
