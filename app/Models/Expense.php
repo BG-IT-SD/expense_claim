@@ -56,6 +56,10 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class, 'empid', 'empid');
     }
+    public function tech()
+    {
+        return $this->belongsTo(GroupSpecial::class, 'empid', 'empid');
+    }
     public function vbooking()
     {
         return $this->hasOne(Vbookingall::class, 'id', 'bookid');

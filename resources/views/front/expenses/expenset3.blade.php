@@ -334,6 +334,7 @@
                                     class="form-control form-control-input">
                                 <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
                                     class="form-control form-control-input">
+                                    <input type="hidden" name="empleveldata" id="empleveldata" value="{{ $empLevel }}">
                             </div>
 
                         </div>

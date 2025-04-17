@@ -111,7 +111,12 @@
                                         </td>
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
-                                            {{ $expense->empid . ' | ' . $expense->user->fullname .' | '.$expense->user->bu }}
+                                            @if ($expense->extype == 2 || $expense->extype == 3)
+                                                 {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
+                                            @else
+                                                {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . $expense->user->bu }}
+                                            @endif
+
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
