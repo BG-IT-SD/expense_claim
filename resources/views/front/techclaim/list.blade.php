@@ -1,6 +1,6 @@
 @extends('layouts.template')
 @section('content')
-{{-- @dd($userModuleRoles) --}}
+    {{-- @dd($userModuleRoles) --}}
     <div class="container-xxl flex-grow-1 container-p-y">
         {{-- Search --}}
         <div class="row">
@@ -83,7 +83,8 @@
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card">
-                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก (ตั้งแต่วันเดินทาง ไม่เกิน 7 วัน)</h5>
+                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก (ตั้งแต่วันเดินทาง ไม่เกิน 7 วัน)
+                    </h5>
                     <div class="table-responsive text-nowrap">
                         <table class="table" id="ExpenseList">
                             <thead class="table-dark">
@@ -100,7 +101,7 @@
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
-                                @foreach ($booking as $booking)
+                                @foreach ($bookings as $booking)
                                     @php
                                         $expense = optional($booking->expense);
                                         $approve = optional($expense->latestApprove);
@@ -108,48 +109,41 @@
                                         $fullnameFromUser = $expense->user->fullname ?? null;
                                         $fullnameFromGroup = $groupEmpIds[$empidToShow] ?? '-';
                                     @endphp
-                                    {{-- @if ($expense->latestApprove->) --}}
+
                                     <tr>
                                         <td>{{ $expense->prefix . $expense->id }}</td>
-                                        <td class="text-wrap">
-                                            {{ $empidToShow . ' | ' . ($fullnameFromUser ?? $fullnameFromGroup) }}
-                                        </td>
+                                        <td class="text-wrap">{{ $empidToShow . ' | ' . ($fullnameFromUser ?? $fullnameFromGroup) }}</td>
                                         <td>{{ $booking->departure_date . ' - ' . $booking->return_date }}</td>
                                         <td>{{ $booking->id }}</td>
                                         <td>{{ $booking->location_name }}</td>
                                         <td>
-                                            @if (!is_null($approve->typeapprove))
+                                            @if (!is_null($expense->id) && !is_null($approve->typeapprove))
                                                 {!! type_approve_text($approve->typeapprove) !!}
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if (!is_null($approve->statusapprove))
-                                                {!! status_approve_badge($approve->statusapprove, $approve->typeapprove) !!}
-                                            @endif
-
-                                        </td>
-                                        {{-- <td>
-                                            @if (!is_null($approve->approvename))
-                                                {{ $approve->approvename }}
-                                            @endif
-                                        </td> --}}
-                                        <td>
-
-                                            @if (!is_null($expense->id))
-                                                <a href="{{ route('Expense.show', $expense->id) }}" target="_blank" class="btn btn-sm btn-info" ><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                             @else
-                                            <a href="{{ route('TechClaim.create', ['bookid' => $booking->id, 'empid' => $empidToShow]) }}"
-                                                target="_blank"
-                                                class="btn btn-sm btn-primary">
-                                                <span class="mdi mdi-pencil-circle-outline"></span> เบิก
-                                             </a>
-
+                                                -
                                             @endif
-
+                                        </td>
+                                        <td>
+                                            @if (!is_null($expense->id) && !is_null($approve->statusapprove))
+                                                {!! status_approve_badge($approve->statusapprove, $approve->typeapprove) !!}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if (!is_null($expense->id))
+                                                <a href="{{ route('Expense.show', $expense->id) }}" target="_blank"
+                                                    class="btn btn-sm btn-info">
+                                                    <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                                                </a>
+                                            @else
+                                                <a href="{{ route('TechClaim.create', ['bookid' => $booking->id, 'empid' => $empidToShow]) }}"
+                                                    target="_blank" class="btn btn-sm btn-primary">
+                                                    <span class="mdi mdi-pencil-circle-outline"></span> เบิก
+                                                </a>
+                                            @endif
                                         </td>
                                     </tr>
-                                    {{-- @endif --}}
-
                                 @endforeach
 
                             </tbody>
@@ -175,4 +169,3 @@
     @endif
     {{-- <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script> --}}
 @endsection
-

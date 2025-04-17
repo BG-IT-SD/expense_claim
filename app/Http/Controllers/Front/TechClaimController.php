@@ -35,28 +35,29 @@ class TechClaimController extends Controller
      */
     public function index()
     {
+
         $groupEmpIds = GroupSpecial::where('typeid', 3)->pluck('fullname', 'empid')->toArray();
 
-        $booking = Vbooking::with([
-            'expense' => function ($q) use ($groupEmpIds) {
-                $q->whereIn('empid', array_keys($groupEmpIds)) // << ต้อง array_keys
-                  ->with(['latestApprove', 'user']);
-            }
-        ])
-        ->where(function ($q) use ($groupEmpIds) {
-            $q->whereIn('booking_emp_id', array_keys($groupEmpIds)) // << ต้อง array_keys
-              ->orWhereIn('passenger_empid', array_keys($groupEmpIds));
-        })
-        ->get();
-        // ->unique('id')
-        // ->values();
+        $bookings = Vbooking::where(function ($q) use ($groupEmpIds) {
+                $q->whereIn('booking_emp_id', array_keys($groupEmpIds))
+                  ->orWhereIn('passenger_empid', array_keys($groupEmpIds));
+            })
+            ->get();
 
-        return view('front.techclaim.list', compact('booking', 'groupEmpIds'));
+        // ผูก expense ทีละรายการด้วย passenger_empid
+        foreach ($bookings as $booking) {
+            $booking->expense = Expense::where('bookid', $booking->id)
+                ->where('empid', $booking->passenger_empid)
+                ->with(['latestApprove', 'user'])
+                ->first();
+        }
+
+        return view('front.techclaim.list', compact('bookings', 'groupEmpIds'));
     }
 
     public function history(){
 
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
         ->where('extype', 3)
         ->whereHas('latestApprove', function ($query) {
             $query->whereIn('typeapprove', [1, 2, 3, 4, 5]);
@@ -152,8 +153,14 @@ class TechClaimController extends Controller
         $heademail = "";
         $headname = "";
         $groupapprove = GroupSpecial::where('empid',$empid)->where('deleted',0)->first();
+        $level = LevelEmp($empid);
         $groupData = $groupapprove->groupapprove ?? 1;
-        $nextStepApprove = Approvestep($bu,3,1,$groupData);
+        if($level > 7){
+            $nextStep = 2;
+        }else{
+            $nextStep = 1;
+        }
+        $nextStepApprove = Approvestep($bu,3,$nextStep,$groupData);
         // dd($nextStepApprove);
         // $heademail = $nextStepApprove["email"];
         // $headname = $nextStepApprove["fullname"];

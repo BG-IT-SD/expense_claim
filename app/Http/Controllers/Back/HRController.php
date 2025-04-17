@@ -30,9 +30,9 @@ class HRController extends Controller
      */
     public function index()
     {
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user','tech'])
             ->whereHas('latestApprove', function ($query) {
-                $query->whereIn('typeapprove', [1, 2, 3]);
+                $query->whereIn('typeapprove', [1,3]);
                 // ->where('statusapprove', 1);
             })
             ->get();
@@ -44,7 +44,7 @@ class HRController extends Controller
 
     public function history()
     {
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user','tech'])
             ->whereHas('latestApprove', function ($query) {
                 $query->whereIn('typeapprove', [4, 5]);
                 // ->where('statusapprove', 1);

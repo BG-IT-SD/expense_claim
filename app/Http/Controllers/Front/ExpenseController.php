@@ -78,7 +78,8 @@ class ExpenseController extends Controller
      */
     public function create($id)
     {
-
+        // $vhead = $this->getHeadEmp(66000510);
+        // dd($vhead) ;
         $booking = Vbooking::find($id);
         $empid = Auth::user()->empid;
         $empemail = Auth::user()->email;
@@ -163,50 +164,34 @@ class ExpenseController extends Controller
         // $headname = $oHeademp?->name_head . '  ' . $oHeademp?->surname_head;
         // ดึงข้อมูลหัวหน้างานจาก API
 
-        $url = "https://www.bgiglass.com/CorporateManagement/?r=api/getHeadEmp&empid={$empid}";
-
         // ดึง JSON จากลิงก์ API
-        $response = @file_get_contents($url);
+        $response = $this->getHeadEmp($empid);
 
-        if ($response === false) {
-            // จัดการกรณี API call fail
+        if (!is_array($response) || ($response['code'] ?? null) !== 200) {
             $headempid = "";
             $headlevel = "";
             $heademail = "";
             $headname = "";
         } else {
-            $json = json_decode($response, true);
-
-            if (!empty($json['status']) && !empty($json['data'])) {
-                $data = $json['data'];
-
-                $headempid = $data['head_emp_id'] ?? "";
-                $headlevel = LevelEmp($headempid); // เรียกฟังก์ชันเดิมได้
-                $heademail = $data['head_email'] ?? "";
-                $headname = trim(($data['name_head'] ?? '') . ' ' . ($data['surname_head'] ?? ''));
-            } else {
-                // กรณีไม่พบข้อมูล
-                $headempid = "";
-                $headlevel = "";
-                $heademail = "";
-                $headname = "";
-            }
+            $headempid = $response['head_emp_id'] ?? "";
+            $headlevel = LevelEmp($headempid);
+            $heademail = $response['head_email'] ?? "";
+            $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
         }
-        //  dd($response);
+        //  dd($headempid);
         // กลุ่มเลขา
         $approve_g = ApproveGroup::where('empid', $empid)->count();
         // ราคาน้ำมัน
-        $ratefuels = Fuelprice::where("status",1)->where("deleted",0)->orderByDesc('startrate')->get();
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
         // dd($approve_g);
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants','ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
-                return view('front.expenses.error',compact('message'));
-
+                return view('front.expenses.error', compact('message'));
             }
         }
     }
@@ -234,10 +219,16 @@ class ExpenseController extends Controller
         $typeapp = 1;
         $fullname = Auth::user()->fullname;
 
-        if($request->extype == 3){
-            $typeapp = 2;
+        if ($request->extype == 3) {
+            // ถ้า Level มากกว่า 7 ส่ง type 1
+            if($request->empleveldata > 7){
+                $typeapp = 1;
+            }else{
+                $typeapp = 2;
+            }
+
             $fullname = "$request->empfullname_tech";
-        }else{
+        } else {
             $typeapp = 1;
             $fullname = Auth::user()->fullname;
         }
@@ -348,10 +339,10 @@ class ExpenseController extends Controller
                 'อนุมัติการเบิกเบี้ยเลี้ยง',
                 'mails.exapprove', // ชื่อ blade view
                 $data,
-                'Expense Claim System EX'.$expense->id,
+                'Expense Claim System EX' . $expense->id,
             );
 
-            logAction('add', 'Expense', 'บันทึกการเบิก EX'.$expense->id);
+            logAction('add', 'Expense', 'บันทึกการเบิก EX' . $expense->id);
 
             return response()->json([
                 'status' => 200,
@@ -444,15 +435,15 @@ class ExpenseController extends Controller
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
         $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
         $approvals = Approve::where('exid', $expense->id)
-        ->where('deleted', 0)
-        ->where('status', 1)
-        ->orderBy('id')
-        ->get();
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
 
         $files = ExpenseFile::where('exid', $expense->id)
-        ->where('deleted', 0)
-        ->where('status', 1)
-        ->get();
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->get();
 
         // Food
         $groupplant = Groupplant::with([
@@ -471,9 +462,9 @@ class ExpenseController extends Controller
 
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
         // ราคาน้ำมัน
-        $ratefuels = Fuelprice::where("status",1)->where("deleted",0)->orderByDesc('startrate')->get();
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        return view('front.expenses.view', compact(['expense','empid' ,'reasons', 'departure_date', 'return_date', 'plants','ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant','approvals','files','isView','startDate','endDate','startTime','endTime','bu']));
+        return view('front.expenses.view', compact(['expense', 'empid', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
     }
 
     /**
@@ -579,10 +570,29 @@ class ExpenseController extends Controller
         })->where('deleted', 0)->value('kilometer') ?? 0;
     }
 
-    // private function LevelEmp($id)
-    // {
-    //     $vAllemp = Valldataemp::where('CODEMPID', "$id")->first();
-    //     $level = $vAllemp?->NUMLVL ?? "";
-    //     return  $level;
-    // }
+    public function getHeadEmp($empid)
+{
+    $url = 'https://notify.bgc.co.th/api/helper/vheademp';
+    $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsInNEYXRlTm93IjoiMjAyNS0wNC0xNyAxMDoxOToyMyJ9.eyJBcHBJRCI6IjExIiwiaUFkbWluSWQiOiIzIiwic0RhdGVOb3ciOiIyMDI1LTA0LTE3IDEwOjE5OjIzIn0.buvrdlbp4CZQRw0EWuqXGhgF8W9BXBgy5CjXGiLpGMo';
+
+    $response = Http::withOptions([
+        'verify' => false,
+    ])->withHeaders([
+        'Content-Type' => 'application/json',
+        'Authorization' => 'Bearer ' . $token,
+    ])->post($url, [
+        'Account_number' => $empid
+    ]);
+
+    if ($response->successful()) {
+        return $response->json();
+    }
+
+    // ถ้า error
+    return [
+        'status' => false,
+        'message' => 'ไม่สามารถดึงข้อมูลได้',
+        'error' => $response->body(),
+    ];
+}
 }

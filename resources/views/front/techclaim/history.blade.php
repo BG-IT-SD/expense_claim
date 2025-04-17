@@ -112,7 +112,7 @@
                                         </td>
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
-                                            {{ $expense->empid . ' | ' . $expense->user->fullname }}
+                                            {{ $expense->empid . ' | ' . $expense->tech->fullname }}
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
