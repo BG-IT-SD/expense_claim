@@ -137,20 +137,20 @@
                                     </td> --}}
                                         <td class="text-nowrap">
                                             @if ($expense->latestApprove->statusapprove == 2)
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
+                                                {{-- <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
                                                     data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                        class="mdi mdi-plus-box-multiple-outline"></span></button> --}}
+                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @else
-                                                <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
+                                                {{-- <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
                                                     data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button>
+                                                        class="mdi mdi-plus-box-multiple-outline"></span></button> --}}
                                                 {{-- <button class="btn btn-sm btn-warning"
                                                     onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
                                                         class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button> --}}
-                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @endif
