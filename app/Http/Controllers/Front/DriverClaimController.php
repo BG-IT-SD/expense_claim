@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\GroupSpecial;
 use Illuminate\Http\Request;
 
 class DriverClaimController extends Controller
@@ -12,7 +13,9 @@ class DriverClaimController extends Controller
      */
     public function index()
     {
-        return view('front.expenses.list');
+        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted",0)->where("status",1)->get();
+
+        return view('front.driver.list',compact('drivers'));
     }
 
     /**

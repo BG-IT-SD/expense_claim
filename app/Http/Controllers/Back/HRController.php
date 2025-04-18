@@ -35,6 +35,7 @@ class HRController extends Controller
                 $query->whereIn('typeapprove', [1,3]);
                 // ->where('statusapprove', 1);
             })
+            ->whereIn('extype', [1,3])
             ->get();
 
         // dd($expenses);
@@ -49,6 +50,7 @@ class HRController extends Controller
                 $query->whereIn('typeapprove', [4, 5]);
                 // ->where('statusapprove', 1);
             })
+            ->whereIn('extype', [1,3])
             ->get();
 
         return view('back.hr.approved', compact('expenses'));

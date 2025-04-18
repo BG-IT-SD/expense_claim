@@ -185,6 +185,12 @@
                             <div class="badge bg-danger rounded-pill ms-auto">2</div>
                         </a>
                     </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="รายการส่งเบิก พขร.">รายการส่งเบิก พขร.</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
+                        </a>
+                    </li>
                     <li class="menu-item @if (Route::is('HR.approved')) active @endif">
                         <a href="{{ route('HR.approved') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>

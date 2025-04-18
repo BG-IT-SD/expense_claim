@@ -24,6 +24,7 @@ class ExpenseFood extends Model
         'totalreject',
         'totalprice',
         'used_date',
+        'bookid',
         'created_by',
         'modified_by',
         'status',
