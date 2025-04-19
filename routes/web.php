@@ -122,10 +122,12 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
         ->group(function () {
 
             Route::get('/', [DriverClaimController::class, 'index'])->name('index');
+            Route::get('/search-booking', [DriverClaimController::class, 'searchBooking'])->name('searchBooking');
+            Route::post('/create', [DriverClaimController::class, 'create'])->name('create');
 
             // ถ้ามี route เพิ่มเติมในอนาคต เช่น:
             // Route::get('create', [DriverClaimController::class, 'create'])->name('create');
-            // Route::post('/', [DriverClaimController::class, 'store'])->name('store');
+            Route::post('/', [DriverClaimController::class, 'store'])->name('store');
         });
 
 

@@ -6,6 +6,7 @@ use App\Helpers\MailHelper;
 use App\Models\Approve;
 use App\Models\GroupSpecial;
 use App\Models\User;
+use App\Models\Valldataemp;
 use App\Models\Vbooking;
 use App\Models\Vbookingall;
 use Carbon\Carbon;
@@ -38,7 +39,7 @@ class ApproveController extends Controller
         $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
         $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
 
-        $bu = $user->bu;
+        $bu = BuEmp($expense->empid);
         // เช็คกลุ่ม
 
         $groupapprove = GroupSpecial::where('empid',$expense->empid)->where('deleted',0)->first();
@@ -64,8 +65,16 @@ class ApproveController extends Controller
             }
         }
 
+        $exMail = '';
+        $exName = '';
+        if($extype == 2 || $extype == 3){
+            $vAllemp = Valldataemp::where('CODEMPID', $expense->empid)->where('STAEMP', '!=', '9')->first();
+            $exMail = $vAllemp->EMAIL;
+            $exName = $vAllemp->NAMFIRSTT . ' ' . $vAllemp->NAMLASTT;
+        }
 
-        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date', 'nextempid', 'nextemail', 'nextfullname'));
+
+        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date', 'nextempid', 'nextemail', 'nextfullname','exName','exMail'));
     }
 
 

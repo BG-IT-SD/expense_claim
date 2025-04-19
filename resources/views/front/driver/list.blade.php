@@ -10,8 +10,23 @@
                         <h5 class="mb-0"><span class="mdi mdi-file-search-outline"></span> ค้นหาข้อมูล</h5>
                     </div>
                     <div class="card-body">
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <strong>สำเร็จ!</strong> {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
 
-                        <form>
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>Error!</strong> {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        <form id="searchForm">
                             <div class="row g-3">
                                 <div class="col-md-9">
                                     <div class="row">
@@ -34,7 +49,7 @@
                                 <div class="col-md-6">
                                     <div class="row justify-content-end">
                                         <div class="col-sm-9">
-                                            <button type="button"
+                                            <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span>ค้นหา</button>
                                         </div>
@@ -46,6 +61,12 @@
                     </div>
                 </div>
             </div>
+
+            <div id="resultArea">
+                <!-- จะโหลดรายการเบิกรถมาแสดงตรงนี้ -->
+
+            </div>
+
         </div>
     </div>
 @endsection
@@ -58,6 +79,23 @@
 @endsection
 @section('jscustom')
     <script>
-        $('#drivers').select2();
+        $(document).ready(function() {
+            $('#drivers').select2();
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+
+                const empid = $('#drivers').val();
+                if (!empid) return;
+
+                $.get('/DriverClaim/search-booking', {
+                    empid
+                }, function(res) {
+                    $('#resultArea').html(res); // แสดงผล HTML ที่ได้จาก controller
+                }).fail(function() {
+                    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                });
+            });
+
+        });
     </script>
 @endsection
