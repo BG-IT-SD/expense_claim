@@ -25,6 +25,7 @@ class ExpenseFood extends Model
         'totalprice',
         'used_date',
         'bookid',
+        'remark',
         'created_by',
         'modified_by',
         'status',

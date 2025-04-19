@@ -21,7 +21,9 @@
                                 {{ $expense->prefix . $expense->id }}</h3>
                         </div>
                         <div class="card-body row">
+                            @if ($expense->extype == 2)
 
+                            @else
                             <div class="col-sm-6 mb-3">
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="expense_t1" class="form-control"
@@ -36,6 +38,8 @@
                                     <label for="expense_t2">วันเวลาที่ออกปฎิบัติงาน</label>
                                 </div>
                             </div>
+                            @endif
+
                             {{-- <div class="col-sm-6 mb-3">
                                 <div class="form-floating form-floating-outline">
                                     <input type="text" id="expense_t1" class="form-control" value="" disabled>
@@ -144,8 +148,8 @@
                                         <input type="hidden" name="departuredate" id="departuredate" value="{{ $departure_date . ' - ' . $return_date }}">
                                         <input type="hidden" name="approvename" id="approvename" value="{{ $approve->approvename }}">
                                         <input type="hidden" name="expenseid" id="expenseid" value="{{ $expense->prefix . $expense->id }}">
-                                        <input type="hidden" name="empemail" id="empemail" value="{{ $expense->user->email }}">
-                                        <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname }}">
+                                        <input type="hidden" name="empemail" id="empemail" value="{{ $expense->user->email ?? $exMail }}">
+                                        <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname ?? $exName  }}">
 
                                         <button type="button" name="action" value="approve" class="btn btn-success"
                                             id="btnApprove">

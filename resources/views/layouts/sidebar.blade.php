@@ -65,7 +65,7 @@
                 <span class="menu-header-text" data-i18n="Other Driver">Other Driver</span>
             </li>
             <!-- Driver and Tech -->
-            <li class="menu-item @if (Route::is('DriverClaim.index')) active open @endif ">
+            <li class="menu-item @if (Route::is('DriverClaim.index') || Route::is('DriverClaim.create')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                     <div data-i18n="เบิกค่าใช้จ่ายพขร.">เบิกค่าใช้จ่ายพขร.</div>
@@ -77,10 +77,10 @@
                         <div data-i18n="ฟอร์มการเบิก">ฟอร์มการเบิก</div>
                     </a>
                 </li> --}}
-                    <li class="menu-item @if (Route::is('DriverClaim.index')) active @endif">
+                    <li class="menu-item @if (Route::is('DriverClaim.index')  || Route::is('DriverClaim.create')) active @endif">
                         <a href="{{ route('DriverClaim.index') }}" class="menu-link">
                             <div data-i18n="รายการเบิก">รายการเบิก</div>
-                            <div class="badge bg-danger rounded-pill ms-auto">2</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
                         </a>
                     </li>
                 </ul>

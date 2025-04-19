@@ -109,8 +109,11 @@ if (!function_exists('LevelEmp')) {
 
 if (!function_exists('BuEmp')) {
     function BuEmp($empid){
-        $user = User::where('empid', "$empid")->where('status', 1)->where('deleted', 0)->first();
-        $bu = $user?->bu ?? "";
+        // $user = User::where('empid', "$empid")->where('status', 1)->where('deleted', 0)->first();
+        $user = Valldataemp::where('CODEMPID', $empid)
+            ->where('STAEMP', '!=', '9')
+            ->first();
+        $bu = $user?->alias_name ?? "";
         return  $bu;
     }
 }
