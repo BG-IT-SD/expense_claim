@@ -128,6 +128,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             // ถ้ามี route เพิ่มเติมในอนาคต เช่น:
             // Route::get('create', [DriverClaimController::class, 'create'])->name('create');
             Route::post('/', [DriverClaimController::class, 'store'])->name('store');
+            Route::get('history',[DriverClaimController::class,'history'])->name('history');
+            Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
         });
 
 
@@ -164,6 +166,14 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
              Route::post('reject', [HRController::class, 'reject'])->name('reject');
             // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
             Route::get('passenger-list/{bookid}', [HRController::class, 'showPassengerList']);
+            Route::get('hrdriver',[HRController::class,'hrdriver'])->name('hrdriver');
+            Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
+            Route::put('/claimdriver/update/{id}', [HRController::class, 'updateClaimDriver'])->name('claimdriverupdate');
+            Route::get('driverapproved',[HRController::class,'driverhistory'])->name('driverapproved');
+
+
+
+
         });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')

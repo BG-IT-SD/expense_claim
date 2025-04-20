@@ -4,7 +4,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
             <div class="col-xxl">
-                <div class="card mb-4 p-5">
+                <div class="card mb-4">
                     <div class="card-header">
                         <h4>
                             เบิกมื้ออาหารของ {{ $driver_empid . ' | ' . $driver_name }}
@@ -78,16 +78,8 @@
                                                         <strong>Booking ที่เกี่ยวข้อง:</strong>
                                                         <ul>
                                                             @foreach ($groupedTimeRanges[$dayKey]['details'] as $b)
-                                                            <li>
-                                                                ID: {{ $b['id'] }} | {{ $b['location_name'] }}
-                                                                @if (isset($b['start']) && isset($b['end']))
-                                                                    <br>
-                                                                    <span class="text-muted small">
-                                                                        เวลาเดินทาง: {{ $b['start']->format('H:i') }} - {{ $b['end']->format('H:i') }}
-                                                                    </span>
-                                                                @endif
-                                                            </li>
-                                                        @endforeach
+                                                                <li>ID: {{ $b['id'] }} | {{ $b['location_name'] }}</li>
+                                                            @endforeach
                                                         </ul>
                                                     </div>
                                                 @endif
@@ -137,10 +129,10 @@
                                     </div>
                                 </div>
                                 @foreach ($groupedTimeRanges[$dayKey]['details'] as $detail)
-                                <input type="hidden"
+                                <input type="text"
                                     name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][id]"
                                     value="{{ $detail['id'] }}">
-                                <input type="hidden"
+                                <input type="text"
                                     name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][location_name]"
                                     value="{{ $detail['location_name'] }}">
                                 @endforeach
