@@ -35,7 +35,7 @@ class ApproveController extends Controller
         $expense = $approve->expense;
         $user = User::where('empid', $expense->empid)->first(); // กรณีมี user
         $booking = Vbookingall::where('id', $expense->bookid)->first();
-        // dd($booking);
+        // dd($expense);
         $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
         $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
 
@@ -45,6 +45,7 @@ class ApproveController extends Controller
         $groupapprove = GroupSpecial::where('empid',$expense->empid)->where('deleted',0)->first();
         $groupData = $groupapprove->groupapprove ?? 1;
         $extype = $expense->extype ?? 1;
+
         if($extype == 3){
             if ($approve->typeapprove == 2) {
 
@@ -55,15 +56,22 @@ class ApproveController extends Controller
 
             }
         }else{
+            // dd($extype);
             if ($approve->typeapprove == 4) {
+                if($extype == 2){
+                    $nextStepApprove = Approvestep($bu, 1 , 2);
+                }else{
+                    $nextStepApprove = Approvestep($bu, $extype , 2);
+                }
 
-                $nextStepApprove = Approvestep($bu, $extype , 2);
                 $nextempid = $nextStepApprove['empid'];
                 $nextemail = $nextStepApprove['email'];
                 $nextfullname = $nextStepApprove['fullname'];
 
             }
         }
+
+
 
         $exMail = '';
         $exName = '';
@@ -177,7 +185,7 @@ class ApproveController extends Controller
                     'type' => $nextType,
                     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
                     'name' => $nextfullname,
-                    'full_name' => $approve->approvename,
+                    'full_name' => $empfullname,
                     'departuredate' => $departuredate ?? '',
                     'check_hr' => $approvename,
                     'link' => $link,

@@ -28,6 +28,18 @@ class DriverClaimController extends Controller
         return view('front.driver.list', compact('drivers'));
     }
 
+    public function history(){
+        $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
+        ->whereHas('latestApprove', function ($query) {
+            $query->whereIn('typeapprove', [1,3,4,5]);
+            // ->where('statusapprove', 1);
+        })
+        ->whereIn('extype', [2])
+        ->get();
+        $page = 'DriverClaim.show';
+        return view('back.hr.historydv', compact('expenses','page'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -61,6 +73,8 @@ class DriverClaimController extends Controller
                         'details' => [[
                             'id' => $booking->id,
                             'location_name' => $booking->location_name,
+                            'start' => $start,
+                            'end' => $end,
                         ]],
                     ];
                 } else {
@@ -175,7 +189,7 @@ class DriverClaimController extends Controller
 
                 $total = $meal1 + $meal2 + $meal3 + $meal4;
 
-                // ✅ ต้องเรียงใหม่ก่อนใช้
+                //ต้องเรียงใหม่ก่อนใช้
                 $bookingsThatDay = $groupedTimeRanges[$usedDate]['details'] ?? [];
 
                 $sortedBookingIds = collect($bookingsThatDay)->sortBy('id')->values();
@@ -187,8 +201,8 @@ class DriverClaimController extends Controller
                     : null;
 
 
-                // ✅ บันทึก expense_food
-                ExpenseFood::create([
+                //บันทึก expense_food
+                $expenseFood = ExpenseFood::create([
                     'exid' => $expense->id,
                     'mealid' => 2,
                     'meal1' => $meal1,
@@ -201,11 +215,12 @@ class DriverClaimController extends Controller
                     'totalpricebf' => $total,
                     'totalprice' => $total,
                 ]);
-                // ✅ บันทึก log
+                //บันทึก log
                 foreach ($sortedBookingIds as $booking) {
                     ExpenseLog::create([
                         'exid' => $expense->id,
                         'bookid' => $booking['id'],
+                        'foodid' => $expenseFood->id,
                         'empid' => $empid,
                         'type' => 2,
                         'remark' => 'เบิกค่าอาหารวันที่ ' . $usedDate,
@@ -268,9 +283,56 @@ class DriverClaimController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id,$type = null)
     {
-        //
+        $expense = Expense::with(['foods', 'logs', 'bookings'])->findOrFail($id);
+
+        $driver_empid = $expense->empid;
+        $driver_name = optional($expense->employee)->fullname ?? '-'; // สมมติว่ามี relation employee
+
+        // เตรียมข้อมูลวันที่ที่เบิก
+        $Alldayfood = $expense->foods->pluck('used_date')->unique()->sort()->map(function ($date) {
+            return \Carbon\Carbon::parse($date);
+        });
+
+        $groupedTimeRanges = [];
+
+        foreach ($expense->foods as $food) {
+            $dayKey = $food->used_date;
+
+            if (!isset($groupedTimeRanges[$dayKey])) {
+                $groupedTimeRanges[$dayKey] = [
+                    'start' => Carbon::createFromTimeString('06:00'),
+                    'end' => Carbon::createFromTimeString('23:59'),
+                    'details' => [],
+                ];
+            }
+
+            $groupedTimeRanges[$dayKey]['details'][] = [
+                'id' => $food->bookid,
+                'location_name' => optional($food->booking)->location_name ?? '-',
+            ];
+        }
+
+        // ราคา
+        $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
+
+        // คนอนุมัติ
+        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        $finalHNameNext = 'กมลวรรณ บรรชา';
+        $finalIdNext = '66000510';
+
+        return view('front.driver.show', compact(
+            'expense',
+            'driver_empid',
+            'driver_name',
+            'Alldayfood',
+            'groupedTimeRanges',
+            'prices',
+            'finalHEmailNext',
+            'finalHNameNext',
+            'finalIdNext'
+        ));
     }
 
     /**

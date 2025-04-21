@@ -52,6 +52,19 @@ class Expense extends Model
         ->latestOfMany(); // ✅ ดึง row ล่าสุด
     }
 
+    public function bookings()
+    {
+        return $this->belongsTo(Vbookmanage::class, 'bookid', 'id');
+    }
+    public function logs()
+    {
+        return $this->hasMany(ExpenseLog::class, 'exid', 'id');
+    }
+    public function foods()
+    {
+        return $this->hasMany(ExpenseFood::class, 'exid', 'id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'empid', 'empid');

@@ -33,6 +33,15 @@ class ExpenseFood extends Model
     ];
 
 
+    public function logs()
+    {
+        return $this->hasMany(ExpenseLog::class, 'foodid', 'id');
+    }
+    public function booking()
+    {
+        return $this->belongsTo(Vbookmanage::class, 'bookid', 'id');
+    }
+
     public function Mealid()
     {
         return $this->belongsTo(Pricepermeal::class, 'mealid', 'id');

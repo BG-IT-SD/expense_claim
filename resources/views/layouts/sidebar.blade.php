@@ -65,7 +65,7 @@
                 <span class="menu-header-text" data-i18n="Other Driver">Other Driver</span>
             </li>
             <!-- Driver and Tech -->
-            <li class="menu-item @if (Route::is('DriverClaim.index') || Route::is('DriverClaim.create')) active open @endif ">
+            <li class="menu-item @if (Route::is('DriverClaim.index') || Route::is('DriverClaim.create') || Route::is('DriverClaim.history')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                     <div data-i18n="เบิกค่าใช้จ่ายพขร.">เบิกค่าใช้จ่ายพขร.</div>
@@ -80,6 +80,12 @@
                     <li class="menu-item @if (Route::is('DriverClaim.index')  || Route::is('DriverClaim.create')) active @endif">
                         <a href="{{ route('DriverClaim.index') }}" class="menu-link">
                             <div data-i18n="รายการเบิก">รายการเบิก</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
+                        </a>
+                    </li>
+                    <li class="menu-item @if (Route::is('DriverClaim.history')) active @endif">
+                        <a href="{{ route('DriverClaim.history') }}" class="menu-link">
+                            <div data-i18n="ประวัติการเบิก">ประวัติการเบิก</div>
                             {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
                         </a>
                     </li>
@@ -123,7 +129,7 @@
                     <li class="menu-item @if (Route::is('TechClaim.index') || Route::is('TechClaim.create')) active @endif">
                         <a href="{{ route('TechClaim.index') }}" class="menu-link">
                             <div data-i18n="รายการเบิก">รายการเบิก</div>
-                            <div class="badge bg-danger rounded-pill ms-auto">3</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">3</div> --}}
                         </a>
                     </li>
                     <li class="menu-item  @if (Route::is('TechClaim.history')) active @endif">
@@ -172,7 +178,7 @@
                 <span class="menu-header-text" data-i18n="HR">HR</span>
             </li>
             <!-- HR -->
-            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view')) active open @endif ">
+            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view') || Route::is('HR.hrdriver') || Route::is('HR.driverapproved')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-check-outline"></i>
                     <div data-i18n="HR">HR</div>
@@ -182,12 +188,6 @@
                     <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit')) active @endif">
                         <a href="{{ route('HR.index') }}" class="menu-link">
                             <div data-i18n="รายการส่งเบิก">รายการส่งเบิก</div>
-                            <div class="badge bg-danger rounded-pill ms-auto">2</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <div data-i18n="รายการส่งเบิก พขร.">รายการส่งเบิก พขร.</div>
                             {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
                         </a>
                     </li>
@@ -195,6 +195,23 @@
                         <a href="{{ route('HR.approved') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
+                    </li>
+                    <li class="menu-header fw-medium mt-4">
+                        <span class="menu-header-text" data-i18n="สำหรับ พขร.">สำหรับ พขร.</span>
+                    </li>
+                    <li class="menu-item @if (Route::is('HR.hrdriver')) active @endif">
+                        <a href="{{ route('HR.hrdriver') }}" class="menu-link">
+                            <div data-i18n="รายการส่งเบิก พขร.">รายการส่งเบิก พขร.</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
+                        </a>
+                    </li>
+                    <li class="menu-item @if (Route::is('HR.driverapproved')) active @endif">
+                        <a href="{{ route('HR.driverapproved') }}" class="menu-link">
+                            <div data-i18n="รายการอนุมัติแล้ว พขร.">รายการอนุมัติแล้ว พขร.</div>
+                        </a>
+                    </li>
+                    <li class="menu-header fw-medium mt-4">
+                        <span class="menu-header-text" data-i18n="รายงาน">รายงาน</span>
                     </li>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
