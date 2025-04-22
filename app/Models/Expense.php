@@ -28,6 +28,10 @@ class Expense extends Model
         'totaldistance',
         'latitude',
         'longitude',
+        'latitude_b',
+        'longitude_b',
+        'map_a_name',
+        'map_b_name',
         'checktoil',
         'fuel91id',
         'fuelpricesid',
@@ -52,6 +56,14 @@ class Expense extends Model
         ->latestOfMany(); // ✅ ดึง row ล่าสุด
     }
 
+    public function fuelprice()
+    {
+        return $this->belongsTo(Fuelprice::class, 'fuelpricesid', 'id');
+    }
+    public function fuel()
+    {
+        return $this->belongsTo(FuelPrice91::class, 'fuel91id', 'id');
+    }
     public function bookings()
     {
         return $this->belongsTo(Vbookmanage::class, 'bookid', 'id');

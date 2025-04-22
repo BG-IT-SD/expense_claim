@@ -46,7 +46,7 @@
                         aria-describedby="confirm-password2">
                     --}}
                     @if ($booking->locationid == 12)
-                        @if ($booking->type_reserve == 1)
+                        @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
                             @php
                                 $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
                             @endphp
@@ -84,30 +84,66 @@
             </div>
         </div>
         {{-- Map --}}
-        <div class="col-sm-12" style="display:none;" id="MapDistanceModal">
-            <input id="origin-input" class="controls" type="text" placeholder="Enter an origin location" />
+        @if ($booking->type_reserve == 4)
+            <!-- เฉพาะเมื่อ type_reserve == 4 -->
+            <div class="container mt-3 mb-3">
+                <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
+                <div class="mb-3">
+                    <label for="origin">ต้นทาง</label>
+                    <input id="origin" class="form-control" type="text" placeholder="เช่น สยามพารากอน">
+                </div>
+                <div class="mb-3">
+                    <label for="destination">ปลายทาง</label>
+                    <input id="destination" class="form-control" type="text" placeholder="เช่น เซ็นทรัลเวิลด์">
+                </div>
+                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
 
-            <input id="destination-input" class="controls" type="text" placeholder="Enter a destination location" />
+                <div class="mt-3">
+                    <strong>ระยะทาง:</strong> <span id="distance"></span>
+                </div>
 
-            <div id="mode-selector" class="controls">
-                <input type="radio" name="type" id="changemode-walking" checked="checked" />
-                <label for="changemode-walking">Walking</label>
-
-                <input type="radio" name="type" id="changemode-transit" />
-                <label for="changemode-transit">Transit</label>
-
-                <input type="radio" name="type" id="changemode-driving" />
-                <label for="changemode-driving">Driving</label>
+                <div id="map" style="height: 400px;" class="mt-4"></div>
+                {{-- เก็บ ละติจูด ลองติจูด และชื้อปลายทางและต้นทาง --}}
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="latitude_b" id="latitude_b">
+                <input type="hidden" name="longitude_b" id="longitude_b">
+                <input type="hidden" name="map_a_name" id="map_a_name">
+                <input type="hidden" name="map_b_name" id="map_b_name">
             </div>
+            {{-- <div class="container mt-3 mb-3">
+                <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
 
-            {{-- <div id="map"></div>
+                <div class="mb-3">
+                    <label for="origin">ต้นทาง</label>
+                    <gmp-place-autocomplete id="origin"></gmp-place-autocomplete>
+                    <input type="hidden" name="origin_value" id="origin_value">
+                </div>
 
+                <div class="mb-3">
+                    <label for="destination">ปลายทาง</label>
+                    <gmp-place-autocomplete id="destination"></gmp-place-autocomplete>
+                    <input type="hidden" name="destination_value" id="destination_value">
+                </div>
+
+                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
+
+                <div class="mt-3">
+                    <strong>ระยะทาง:</strong> <span id="distance"></span>
+                </div>
+
+                <div id="map" style="height: 400px;" class="mt-4"></div>
+
+            </div> --}}
+        @endif
+
+
+        {{-- Map --}}
+    </div>
+    {{--
             <script
                 src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap&libraries=places&v=weekly"
                 defer></script> --}}
-        </div>
-        {{-- Map --}}
-    </div>
 
     <div class="alert alert-primary mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 1</h6>
@@ -132,7 +168,7 @@
                             <option value="2">สถานที่อื่นๆ</option>
                         @elseif($booking->type_reserve == 4 && $booking->locationid != 12)
                             <option value="1">บริษัท</option>
-                        @elseif($booking->type_reserve == 1 && $booking->locationid == 12)
+                        @elseif(($booking->type_reserve == 1 || $booking->type_reserve == 3) && $booking->locationid == 12)
                             <option value="2">สถานที่อื่นๆ</option>
                         @else
                             <option value="1">บริษัท</option>
@@ -149,7 +185,7 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     @if ($booking->locationid == 12)
-                        @if ($booking->type_reserve == 1)
+                        @if ($booking->type_reserve == 1 || $booking->type_reserve == 3 || $booking->type_reserve == 4)
                             <input type="text" class="form-control" name="returnfromtext2"
                                 value="{{ $booking->location_name }}" disabled>
                             <input type="hidden" class="form-control" name="returnfromtext"
@@ -189,13 +225,25 @@
             </div>
         </div>
         <div class="col-sm-6">
-            <div class="form-floating form-floating-outline">
-                <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
-                    value="{{ $totalDistance }}" disabled>
-                <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
-                    value="{{ $totalDistance }}">
-                <label for="totaldistance">ระยะทางไป-กลับ</label>
-            </div>
+            @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
+                <div class="form-floating form-floating-outline">
+                    <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
+                        value="{{ $totalDistance }}" disabled>
+                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                        value="{{ $totalDistance }}">
+                    <label for="totaldistance_text">ระยะทางไป-กลับ</label>
+                </div>
+            @else
+                <div class="form-floating form-floating-outline">
+                    <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
+                        value="0" disabled>
+                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                        value="0">
+                    <input type="hidden" id="totaldistancemax" name="totaldistancemax" class="form-control"
+                        value="{{ $totalDistance }}">
+                    <label for="totaldistance_text">ระยะทางไป-กลับ</label>
+                </div>
+            @endif
         </div>
     </div>
     <div class="alert alert-primary mb-3 mt-3">

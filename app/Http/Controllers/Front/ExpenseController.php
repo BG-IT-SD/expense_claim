@@ -24,6 +24,7 @@ use App\Models\Expense;
 use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
 use App\Models\Fuelprice;
+use App\Models\FuelPrice91;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -157,13 +158,6 @@ class ExpenseController extends Controller
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         // // หัวหน้างานอนุมัติ
-        // $oHeademp = Heademp::where('account_number', $empid)->first();
-        // $headempid = $oHeademp?->head_emp_id ?? "";
-        // $headlevel = LevelEmp($headempid);
-        // $heademail =  $oHeademp?->head_email;
-        // $headname = $oHeademp?->name_head . '  ' . $oHeademp?->surname_head;
-        // ดึงข้อมูลหัวหน้างานจาก API
-
         // ดึง JSON จากลิงก์ API
         $response = $this->getHeadEmp($empid);
 
@@ -184,11 +178,72 @@ class ExpenseController extends Controller
         // ราคาน้ำมัน
         $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        // dd($approve_g);
+        // น้ำมัน
+        $data_oil_price = '';
+        $data_message = '';
+        $travel_date = '';
+        $price_used_date = '';
+        $rate_id = '';
+        $bath_per_km = '';
+        $oilid = '';
+        if (($booking->type_reserve == 4)) {
+
+
+            $travelDate = Carbon::parse($booking->departure_date)->startOfDay();
+
+            // หาราคาที่น้อยกว่าหรือเท่ากับวันเดินทาง
+            $fuelBefore = FuelPrice91::where('status', 1)
+                ->where('deleted', 0)
+                ->whereDate('dateprice', '<=', $travelDate)
+                ->orderByDesc('dateprice')
+                ->first();
+
+            if (!$fuelBefore) {
+                return response()->json(['message' => 'ไม่พบราคาก่อนวันเดินทาง']);
+            }
+
+            // หาราคาที่มากกว่าวันที่เจอ (คือ row ถัดไป)
+            $fuelAfter = FuelPrice91::where('status', 1)
+                ->where('deleted', 0)
+                ->whereDate('dateprice', '>', $fuelBefore->dateprice)
+                ->orderBy('dateprice')
+                ->first();
+
+            // ตรวจสอบว่า travelDate อยู่ระหว่าง fuelBefore กับ fuelAfter หรือไม่มี fuelAfter
+            if (!$fuelAfter || $travelDate < Carbon::parse($fuelAfter->dateprice)) {
+                $oilPrice = $fuelBefore->price;
+                $oilPriceID = $fuelBefore->id;
+            } else {
+                return response()->json(['message' => 'วันที่เดินทางอยู่นอกช่วงราคาน้ำมันที่มีข้อมูล']);
+            }
+
+            // หาช่วงราคาที่ oilPrice ตกอยู่ในนั้น
+            $rate = Fuelprice::where('status', 1)
+                ->where('deleted', 0)
+                ->where('startrate', '<=', $oilPrice)
+                ->where('endrate', '>=', $oilPrice)
+                ->first();
+
+            if (!$rate) {
+
+                    $data_oil_price = $oilPrice;
+                    $data_message = 'ไม่พบช่วงราคาครอบคลุม';
+
+            }
+
+                $travel_date = $travelDate->format('d/m/Y');
+                $data_oil_price = $oilPrice;
+                $price_used_date = Carbon::parse($fuelBefore->dateprice)->format('d/m/Y');
+                $rate_id = $rate->id;
+                $bath_per_km = $rate->bathperkm;
+                $oilid = $oilPriceID;
+        }
+
+
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels','travel_date','oilid','data_oil_price','price_used_date','rate_id','bath_per_km','data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
@@ -221,9 +276,9 @@ class ExpenseController extends Controller
 
         if ($request->extype == 3) {
             // ถ้า Level มากกว่า 7 ส่ง type 1
-            if($request->empleveldata > 7){
+            if ($request->empleveldata > 7) {
                 $typeapp = 1;
-            }else{
+            } else {
                 $typeapp = 2;
             }
 
@@ -245,6 +300,13 @@ class ExpenseController extends Controller
             $nextNumber = $latestId ? ((int)substr($latestId->id, 8)) + 1 : 1;
             $newId = $todayPrefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
+            $request->merge([
+                'latitude' => $request->latitude ? round((float) $request->latitude, 8) : null,
+                'longitude' => $request->longitude ? round((float) $request->longitude, 8) : null,
+                'latitude_b' => $request->latitude_b ? round((float) $request->latitude_b, 8) : null,
+                'longitude_b' => $request->longitude_b ? round((float) $request->longitude_b, 8) : null,
+            ]);
+
             $expense = Expense::create([
                 'id' => $newId,
                 'prefix' => "EX",
@@ -259,11 +321,15 @@ class ExpenseController extends Controller
                 'returnfromtext' => $request->returnfromtext ?? null,
                 'returntime' => $request->returntime,
                 'totaldistance' => $request->totaldistance,
-                'latitude' => null,
-                'longitude' => null,
-                'checktoil' => 0,
-                'fuel91id' => null,
-                'fuelpricesid' => null,
+                'latitude' =>  $request->latitude,
+                'longitude' =>  $request->longitude,
+                'latitude_b' =>  $request->latitude_b,
+                'longitude_b' =>  $request->longitude_b,
+                'map_a_name' =>  $request->map_a_name ?? null,
+                'map_b_name' =>  $request->map_b_name ?? null,
+                'checktoil' =>  $request->checktoil ?? 0,
+                'fuel91id' =>  $request->fuel91id ?? null,
+                'fuelpricesid' =>  $request->fuelpricesid ?? null,
                 'publictransportfare' => $request->publictransportfare ?? 0,
                 'expresswaytoll' => $request->expresswaytoll ?? 0,
                 'otherexpenses' => $request->otherexpenses ?? 0,
@@ -405,7 +471,7 @@ class ExpenseController extends Controller
     {
         // ส่งตัวแปรบอกว่าเป็นหน้า view
         $isView = 0;
-        $expense = Expense::with(['vbooking', 'user'])->findOrFail($id);
+        $expense = Expense::with(['vbooking', 'user','fuel','fuelprice'])->findOrFail($id);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             ->get();
@@ -571,28 +637,28 @@ class ExpenseController extends Controller
     }
 
     public function getHeadEmp($empid)
-{
-    $url = 'https://notify.bgc.co.th/api/helper/vheademp';
-    $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsInNEYXRlTm93IjoiMjAyNS0wNC0xNyAxMDoxOToyMyJ9.eyJBcHBJRCI6IjExIiwiaUFkbWluSWQiOiIzIiwic0RhdGVOb3ciOiIyMDI1LTA0LTE3IDEwOjE5OjIzIn0.buvrdlbp4CZQRw0EWuqXGhgF8W9BXBgy5CjXGiLpGMo';
+    {
+        $url = 'https://notify.bgc.co.th/api/helper/vheademp';
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsInNEYXRlTm93IjoiMjAyNS0wNC0xNyAxMDoxOToyMyJ9.eyJBcHBJRCI6IjExIiwiaUFkbWluSWQiOiIzIiwic0RhdGVOb3ciOiIyMDI1LTA0LTE3IDEwOjE5OjIzIn0.buvrdlbp4CZQRw0EWuqXGhgF8W9BXBgy5CjXGiLpGMo';
 
-    $response = Http::withOptions([
-        'verify' => false,
-    ])->withHeaders([
-        'Content-Type' => 'application/json',
-        'Authorization' => 'Bearer ' . $token,
-    ])->post($url, [
-        'Account_number' => $empid
-    ]);
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
+        ])->post($url, [
+            'Account_number' => $empid
+        ]);
 
-    if ($response->successful()) {
-        return $response->json();
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        // ถ้า error
+        return [
+            'status' => false,
+            'message' => 'ไม่สามารถดึงข้อมูลได้',
+            'error' => $response->body(),
+        ];
     }
-
-    // ถ้า error
-    return [
-        'status' => false,
-        'message' => 'ไม่สามารถดึงข้อมูลได้',
-        'error' => $response->body(),
-    ];
-}
 }

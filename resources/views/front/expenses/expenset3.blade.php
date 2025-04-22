@@ -127,24 +127,30 @@
         <div class="row g-4">
             <div class="col-sm-12 text-center">
                 <div class="form-check form-check-inline mt-3">
-                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio111"
-                        value="option111">
-                    <label class="form-check-label" for="inlineRadio111">ประสงค์เบิกน้ำมัน</label>
+                    <input class="form-check-input checktoil" type="radio" name="checktoil" id="checktoil_1"
+                        value="1">
+                    <label class="form-check-label" for="checktoil_1">ประสงค์เบิกน้ำมัน</label>
                 </div>
                 <div class="form-check form-check-inline mt-3">
-                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio222"
-                        value="option222" checked="checked">
-                    <label class="form-check-label" for="inlineRadio222">ไม่ประสงค์เบิกน้ำมัน</label>
+                    <input class="form-check-inpu checktoilt" type="radio" name="checktoil" id="checktoil_2"
+                        value="2" checked="checked">
+                    <label class="form-check-label" for="checktoil_2">ไม่ประสงค์เบิกน้ำมัน</label>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: none;">
+            <div class="col-sm-12" style="display: none;" id="rateoil">
                 <div class="card">
                     <div class="row">
                         <div class="col-sm-6">
                             <h5 class="card-header">Rate อัตราค่าน้ำมัน</h5>
                         </div>
                         <div class="col-sm-6 pt-3">
-                            <h5><span class="badge rounded-pill bg-label-primary me-1">34.12</span>
+
+                            <h5><span class="badge rounded-pill bg-label-danger me-1">วันที่การเดินทาง :
+                                    {{ $departure_date }}</span>
+                            </h5>
+                            <h5><span class="badge rounded-pill bg-label-primary me-1">ราคาน้ำมัน ณ วันนั้น :
+                                    {{ $data_oil_price }}</span>
+                                    <input type="hidden" name="fuel91id" value="{{ $oilid }}">
                             </h5>
                         </div>
                     </div>
@@ -166,16 +172,18 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($ratefuels as $ratefuel)
-                                    <tr>
-                                        <td>
-                                            <div class="form-check form-check-inline form-check-primary">
-                                                <input class="form-check-input checkfuel" type="checkbox"
-                                                    value="1">
-                                            </div>
-                                        </td>
-                                        <td>{{ $ratefuel->startrate .' - '.$ratefuel->endrate }}</td>
-                                        <td>{{ $ratefuel->bathperkm }}</td>
-                                    </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="form-check form-check-inline form-check-primary">
+                                                    <input class="form-check-input checkfuel" type="checkbox"
+                                                        value="{{ $ratefuel->id }}"
+                                                        {{ isset($rate_id) && $ratefuel->id == $rate_id ? 'checked' : '' }}
+                                                        onclick="return false;">
+                                                </div>
+                                            </td>
+                                            <td>{{ $ratefuel->startrate . ' - ' . $ratefuel->endrate }}</td>
+                                            <td>{{ $ratefuel->bathperkm }}</td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -183,7 +191,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12" style="display: none;">
+            <div class="col-sm-12" style="display: none;" id="allsumoil">
                 <table class="table table-bordered text-center">
                     <thead>
                         <tr class="table-danger">
@@ -200,9 +208,13 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>70.7</td>
-                            <td>5</td>
-                            <td>707</td>
+                            <td> <h5><span class="badge rounded-pill bg-danger lastkm"> </span></h5></td>
+                            <td>
+                                <h5><span class="badge rounded-pill bg-danger">{{ $bath_per_km }} บาท</span></h5>
+                                <input type="hidden" id="bath_per_km" name="bath_per_km" value="{{ $bath_per_km }}">
+                                <input type="hidden" id="fuelpricesid" name="fuelpricesid"
+                                    value="{{ $rate_id }}"></td>
+                            <td><h5><span class="badge rounded-pill bg-success pricesuccess"> </span></h5></td>
                         </tr>
                     </tbody>
                 </table>
@@ -230,8 +242,7 @@
                 <tbody>
                     <tr>
                         <td>ค่าอาหาร</td>
-                        <td><span
-                                class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">0</span>
+                        <td><span class="btn rounded-pill btn-primary waves-effect waves-light totallastfood">0</span>
                         </td>
                     </tr>
                     <tr>
@@ -334,7 +345,8 @@
                                     class="form-control form-control-input">
                                 <input type="hidden" name="head_id" id="head_id" value="{{ $finalId }}"
                                     class="form-control form-control-input">
-                                    <input type="hidden" name="empleveldata" id="empleveldata" value="{{ $empLevel }}">
+                                <input type="hidden" name="empleveldata" id="empleveldata"
+                                    value="{{ $empLevel }}">
                             </div>
 
                         </div>
