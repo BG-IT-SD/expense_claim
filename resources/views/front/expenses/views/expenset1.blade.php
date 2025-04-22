@@ -48,7 +48,7 @@
                         aria-describedby="confirm-password2"> --}}
 
                     @if ($expense->vbooking->locationid == 12)
-                        @if ($expense->vbooking->type_reserve == 1)
+                        @if ($expense->vbooking->type_reserve == 1 || $expense->vbooking->type_reserve == 3)
                             @php
                                 $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
                             @endphp
@@ -87,28 +87,26 @@
             </div>
         </div>
         {{-- Map --}}
-        <div class="col-sm-12" style="display:none;" id="MapDistanceModal">
-            <input id="origin-input" class="controls" type="text" placeholder="Enter an origin location" />
-
-            <input id="destination-input" class="controls" type="text" placeholder="Enter a destination location" />
-
-            <div id="mode-selector" class="controls">
-                <input type="radio" name="type" id="changemode-walking" checked="checked" />
-                <label for="changemode-walking">Walking</label>
-
-                <input type="radio" name="type" id="changemode-transit" />
-                <label for="changemode-transit">Transit</label>
-
-                <input type="radio" name="type" id="changemode-driving" />
-                <label for="changemode-driving">Driving</label>
-            </div>
-
-            {{-- <div id="map"></div>
-
-            <script
-                src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap&libraries=places&v=weekly"
-                defer></script> --}}
+        @if ($expense->vbooking->type_reserve == 4)
+        <div class="col-sm-3">
+            <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่ จาก google map</span>
         </div>
+        <div class="col-sm-9">
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t7" class="form-control" value="{{ $expense->map_a_name ?? "" }}"
+                    disabled>
+                <label for="expense_t7">สถานที่ต้นทาง</label>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t8" class="form-control" value="{{ $expense->map_b_name ?? "" }}" disabled>
+                <label for="expense_t8">สถานที่ปลายทาง</label>
+            </div>
+        </div>
+        @endif
         {{-- Map --}}
     </div>
 
@@ -153,7 +151,7 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     @if ($expense->vbooking->locationid == 12)
-                        @if ($expense->vbooking->type_reserve == 1)
+                        @if ($expense->vbooking->type_reserve == 1 || $expense->vbooking->type_reserve == 3 || $expense->vbooking->type_reserve == 4)
                             <input type="text" class="form-control" name="returnfromtext2"
                                 value="{{ $expense->vbooking->location_name }}" disabled>
                             <input type="hidden" class="form-control" name="returnfromtext"

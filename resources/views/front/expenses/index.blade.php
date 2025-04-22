@@ -10,8 +10,8 @@
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                            <h5>Default</h5>
-                        </div> -->
+                                                                                                <h5>Default</h5>
+                                                                                            </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -66,6 +66,8 @@
                             <input type="hidden" name="empid" value="{{ $empid }}">
                             <input type="hidden" name="locationbu" value="{{ $booking->locationbu }}">
                             <input type="hidden" name="locationid" value="{{ $booking->locationid }}">
+                            <input type="hidden" name="checktypereserve" id="checktypereserve"
+                                value="{{ $booking->type_reserve }}">
                             {{-- hidden --}}
                             <!-- Tab1 Details -->
                             @include('front.expenses.expenset1')
@@ -89,6 +91,23 @@
 @endsection
 @section('csscustom')
     <style>
+        /* #map {
+                                            height: 400px;
+                                            width: 100%;
+                                            margin-top: 20px;
+                                        }
+
+                                        gmpx-place-autocomplete {
+                                            display: block;
+                                            margin: 10px 0;
+                                            width: 100%;
+                                            max-width: 600px;
+                                        }
+
+                                        #mode-selector {
+                                            margin: 10px 0;
+                                        } */
+
         #map {
             height: 500px;
         }
@@ -135,61 +154,61 @@
             font-weight: 300;
         }
 
+
         /* popup */
         .block-description {
-        color: #ff4c51;
-        margin-bottom: 16px;
-      }
-
-      .block-item {
-        border: 2px solid #ffffff;
-        border-radius: 30px;
-        background: linear-gradient(270deg, #0F4CAF 0%, #A5C7FF 100%);
-        box-shadow: 0 0.375rem 1rem 0 rgba(51, 55, 63, 0.12);
-        letter-spacing: 1px;
-      }
-
-      .block-item .block-plant {
-        display: grid;
-        gap: 16px;
-        background: #f0f8ff;
-        border-radius: 20px;
-        padding: 16px;
-      }
-
-      .block-item .block-content {
-        padding-left: 20px;
-      }
+            color: #ff4c51;
+            margin-bottom: 16px;
+        }
 
 
-      .block-item .name {
-        color: #000000;
-        font-size: 22px;
-        font-weight: 600;
-      }
+        .block-item {
+            border: 2px solid #ffffff;
+            border-radius: 30px;
+            background: linear-gradient(270deg, #0F4CAF 0%, #A5C7FF 100%);
+            box-shadow: 0 0.375rem 1rem 0 rgba(51, 55, 63, 0.12);
+            letter-spacing: 1px;
+        }
 
-      .block-item p {
-        color: #ffffff;
-      }
+        .block-item .block-plant {
+            display: grid;
+            gap: 16px;
+            background: #f0f8ff;
+            border-radius: 20px;
+            padding: 16px;
+        }
 
-      .block-title {
-        text-transform: uppercase;
-        font-weight: 600;
-        letter-spacing: 1.2px;
-        color: #000000;
-      }
-
-      .block-item .block-plant .img-logo {
-        border-bottom-style: solid;
-        padding-bottom: 16px;
-        color: #ffffff;
-      }
-
-      .email {
-        font-size: 22px;
-      }
+        .block-item .block-content {
+            padding-left: 20px;
+        }
 
 
+        .block-item .name {
+            color: #000000;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .block-item p {
+            color: #ffffff;
+        }
+
+        .block-title {
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: #000000;
+        }
+
+        .block-item .block-plant .img-logo {
+            border-bottom-style: solid;
+            padding-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .email {
+            font-size: 22px;
+        }
     </style>
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
@@ -223,134 +242,191 @@
 
     {{-- <script src="{{ asset('template/assets/js/form-wizard-numbered.js') }}"></script> --}}
     <script src="{{ asset('template/assets/js/form-wizard-validation.js') }}"></script>
-
+    {{-- <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/map.js']) }}"></script> --}}
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step.js']) }}"></script>
 
-    <script>
-        // function initMap() {
-        //     const map = new google.maps.Map(document.getElementById("map"), {
-        //         mapTypeControl: false,
-        //         center: {
-        //             lat: 13.736717,
-        //             lng: 100.523186
-        //         }, // Default: Bangkok
-        //         zoom: 13,
-        //     });
+    @if ($booking->type_reserve == 4)
+        <script>
+            // let map, directionsService, directionsRenderer;
 
-        //     new AutocompleteDirectionsHandler(map);
-        // }
+            // function initMap() {
+            //     map = new google.maps.Map(document.getElementById("map"), {
+            //         zoom: 13,
+            //         center: { lat: 13.7563, lng: 100.5018 }, // Bangkok
+            //     });
+            //     directionsService = new google.maps.DirectionsService();
+            //     directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+            // }
 
-        // class AutocompleteDirectionsHandler {
-        //     map;
-        //     originPlaceId;
-        //     destinationPlaceId;
-        //     travelMode;
-        //     directionsService;
-        //     directionsRenderer;
-        //     constructor(map) {
-        //         this.map = map;
-        //         this.originPlaceId = "";
-        //         this.destinationPlaceId = "";
-        //         this.travelMode = google.maps.TravelMode.WALKING;
-        //         this.directionsService = new google.maps.DirectionsService();
-        //         this.directionsRenderer = new google.maps.DirectionsRenderer();
-        //         this.directionsRenderer.setMap(map);
+            let map, directionsService, directionsRenderer;
+            let autocompleteOrigin, autocompleteDestination;
+            let originPlace = null;
+            let destinationPlace = null;
 
-        //         const originInput = document.getElementById("origin-input");
-        //         const destinationInput = document.getElementById("destination-input");
-        //         const modeSelector = document.getElementById("mode-selector");
-        //         // Specify just the place data fields that you need.
-        //         const originAutocomplete = new google.maps.places.Autocomplete(
-        //             originInput, {
-        //                 fields: ["place_id"]
-        //             },
-        //         );
-        //         // Specify just the place data fields that you need.
-        //         const destinationAutocomplete = new google.maps.places.Autocomplete(
-        //             destinationInput, {
-        //                 fields: ["place_id"]
-        //             },
-        //         );
+            function initMap() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 13,
+                    center: {
+                        lat: 13.7563,
+                        lng: 100.5018
+                    }
+                });
 
-        //         this.setupClickListener(
-        //             "changemode-walking",
-        //             google.maps.TravelMode.WALKING,
-        //         );
-        //         this.setupClickListener(
-        //             "changemode-transit",
-        //             google.maps.TravelMode.TRANSIT,
-        //         );
-        //         this.setupClickListener(
-        //             "changemode-driving",
-        //             google.maps.TravelMode.DRIVING,
-        //         );
-        //         this.setupPlaceChangedListener(originAutocomplete, "ORIG");
-        //         this.setupPlaceChangedListener(destinationAutocomplete, "DEST");
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        //             destinationInput,
-        //         );
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(modeSelector);
-        //     }
-        //     // Sets a listener on a radio button to change the filter type on Places
-        //     // Autocomplete.
-        //     setupClickListener(id, mode) {
-        //         const radioButton = document.getElementById(id);
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map
+                });
 
-        //         radioButton.addEventListener("click", () => {
-        //             this.travelMode = mode;
-        //             this.route();
-        //         });
-        //     }
-        //     setupPlaceChangedListener(autocomplete, mode) {
-        //         autocomplete.bindTo("bounds", this.map);
-        //         autocomplete.addListener("place_changed", () => {
-        //             const place = autocomplete.getPlace();
+                const originInput = document.getElementById("origin");
+                const destinationInput = document.getElementById("destination");
 
-        //             if (!place.place_id) {
-        //                 window.alert("Please select an option from the dropdown list.");
-        //                 return;
-        //             }
+                autocompleteOrigin = new google.maps.places.Autocomplete(originInput);
+                autocompleteDestination = new google.maps.places.Autocomplete(destinationInput);
 
-        //             if (mode === "ORIG") {
-        //                 this.originPlaceId = place.place_id;
-        //             } else {
-        //                 this.destinationPlaceId = place.place_id;
-        //             }
+                autocompleteOrigin.setComponentRestrictions({
+                    country: ["th"]
+                });
+                autocompleteDestination.setComponentRestrictions({
+                    country: ["th"]
+                });
 
-        //             this.route();
-        //         });
-        //     }
-        //     route() {
-        //         if (!this.originPlaceId || !this.destinationPlaceId) {
-        //             return;
-        //         }
+                // ✅ เก็บชื่อสถานที่ (name) ลง input
+                autocompleteOrigin.addListener('place_changed', () => {
+                    originPlace = autocompleteOrigin.getPlace();
+                    document.getElementById("map_a_name").value = originPlace.name || originPlace.formatted_address;
+                });
 
-        //         const me = this;
+                autocompleteDestination.addListener('place_changed', () => {
+                    destinationPlace = autocompleteDestination.getPlace();
+                    document.getElementById("map_b_name").value = destinationPlace.name || destinationPlace
+                        .formatted_address;
+                });
+            }
+            window.initMap = initMap;
 
-        //         this.directionsService.route({
-        //                 origin: {
-        //                     placeId: this.originPlaceId
-        //                 },
-        //                 destination: {
-        //                     placeId: this.destinationPlaceId
-        //                 },
-        //                 travelMode: this.travelMode,
-        //             },
-        //             (response, status) => {
-        //                 if (status === "OK") {
-        //                     me.directionsRenderer.setDirections(response);
-        //                 } else {
-        //                     window.alert("Directions request failed due to " + status);
-        //                 }
-        //             },
-        //         );
-        //     }
-        // }
 
-        // window.initMap = initMap;
-    </script>
+            function calculateDistance() {
+                const originInput = document.querySelector('#origin input');
+                const destinationInput = document.querySelector('#destination input');
+
+                const originAddress = originPlace?.formatted_address || originInput?.value;
+                const destinationAddress = destinationPlace?.formatted_address || destinationInput?.value;
+
+                if (!originAddress || !destinationAddress) {
+                    alert("กรุณากรอกที่ตั้งต้นทางและปลายทางให้ครบ");
+                    return;
+                }
+
+
+                // document.getElementById("map_a_name").value = originAddress;
+                // document.getElementById("map_b_name").value = destinationAddress;
+
+
+                if (originPlace?.geometry?.location) {
+                    document.getElementById("latitude").value = originPlace.geometry.location.lat();
+                    document.getElementById("longitude").value = originPlace.geometry.location.lng();
+                }
+
+                if (destinationPlace?.geometry?.location) {
+                    document.getElementById("latitude_b").value = destinationPlace.geometry.location.lat();
+                    document.getElementById("longitude_b").value = destinationPlace.geometry.location.lng();
+                }
+
+                directionsService.route({
+                    origin: originAddress,
+                    destination: destinationAddress,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                }, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+
+                        const distanceValue = result.routes[0].legs[0].distance.value;
+                        const distanceText = result.routes[0].legs[0].distance.text;
+
+                        document.getElementById("distance").innerText = distanceText;
+                        const km = ((distanceValue / 1000) * 2).toFixed(2);
+                        document.getElementById("totaldistance_text").value = km;
+                        document.getElementById("totaldistance").value = km;
+                    } else {
+                        alert("ไม่สามารถคำนวณเส้นทางได้ กรุณาตรวจสอบชื่อสถานที่ให้ชัดเจน");
+                    }
+                });
+            }
+        </script>
+
+        <!-- โหลด Google Maps API -->
+        <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly&language=th">
+        </script>
+
+        {{-- <script>
+            let map, directionsService, directionsRenderer;
+            let originAutocomplete, destinationAutocomplete;
+
+            function initMap() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 13,
+                    center: {
+                        lat: 13.7563,
+                        lng: 100.5018
+                    }
+                });
+
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map
+                });
+
+                originAutocomplete = new google.maps.places.Autocomplete(document.getElementById("origin"));
+                destinationAutocomplete = new google.maps.places.Autocomplete(document.getElementById("destination"));
+
+                originAutocomplete.setComponentRestrictions({
+                    country: ["th"]
+                });
+                destinationAutocomplete.setComponentRestrictions({
+                    country: ["th"]
+                });
+            }
+
+            window.initMap = initMap;
+
+            function calculateDistance() {
+                const origin = document.getElementById("origin").value;
+                const destination = document.getElementById("destination").value;
+
+                if (!origin || !destination) {
+                    alert("กรุณากรอกที่ตั้งต้นทางและปลายทางให้ครบ");
+                    return;
+                }
+
+                document.getElementById("origin_value").value = origin;
+                document.getElementById("destination_value").value = destination;
+
+                directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+
+                        const distanceValue = result.routes[0].legs[0].distance.value;
+                        const distanceText = result.routes[0].legs[0].distance.text;
+
+                        document.getElementById("distance").innerText = distanceText;
+                        const km = ((distanceValue / 1000) * 2).toFixed(2);
+                        document.getElementById("totaldistance_text").value = km;
+                        document.getElementById("totaldistance").value = km;
+                    } else {
+                        alert("ไม่สามารถคำนวณเส้นทางได้");
+                    }
+                });
+            }
+        </script>
+
+        <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly">
+        </script> --}}
+    @endif
 @endsection
-
-

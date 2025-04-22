@@ -225,7 +225,7 @@ class HRController extends Controller
         $finalHNameNext = '';
         $finalIdNext = '';
 
-        $expense = Expense::with(['vbooking', 'user'])->findOrFail($id);
+        $expense = Expense::with(['vbooking', 'user','fuel','fuelprice'])->findOrFail($id);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             ->get();
