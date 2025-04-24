@@ -84,17 +84,17 @@
             </div>
         </div>
         {{-- Map --}}
-        @if ($booking->type_reserve == 4)
+        @if ($booking->type_reserve == 4 && $passengertype == 0)
             <!-- เฉพาะเมื่อ type_reserve == 4 -->
             <div class="container mt-3 mb-3">
                 <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
                 <div class="mb-3">
                     <label for="origin">ต้นทาง</label>
-                    <input id="origin" class="form-control" type="text" placeholder="เช่น สยามพารากอน">
+                    <input id="origin" class="form-control" type="text" placeholder="เช่น บางกอกกล๊าส">
                 </div>
                 <div class="mb-3">
                     <label for="destination">ปลายทาง</label>
-                    <input id="destination" class="form-control" type="text" placeholder="เช่น เซ็นทรัลเวิลด์">
+                    <input id="destination" class="form-control" type="text" placeholder="เช่น ฟิวเจอร์พาร์ค">
                 </div>
                 <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
 

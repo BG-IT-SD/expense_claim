@@ -201,6 +201,27 @@ class ApproveController extends Controller
             }
         }
 
+        if($approve->typeapprove == 5 && $approve->statusapprove === 1){
+            // อนุมัติขั้นตอนสุดท้ายเสร็จ
+            // $linksuccess = route('approve.magic.login', ['token' => $token]);
+
+            $data = [
+                'type' => 5,
+                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+                'name' => $empfullname,
+                'full_name' => $empfullname,
+                'departuredate' => $departuredate ?? '',
+            ];
+
+            MailHelper::sendExternalMail(
+                $empemail,
+                'อนุมัติการเบิกเบี้ยเลี้ยง',
+                'mails.success',
+                $data,
+                'Expense Claim System EX' . $approve->exid,
+            );
+        }
+
         return back()->with([
             'message' => 'บันทึกผลอนุมัติเรียบร้อย',
             'class' => 'success'

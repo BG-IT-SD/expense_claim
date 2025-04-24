@@ -87,7 +87,7 @@
             </div>
         </div>
         {{-- Map --}}
-        @if ($expense->vbooking->type_reserve == 4)
+        @if ($expense->vbooking->type_reserve == 4 && $passengertype == 0)
         <div class="col-sm-3">
             <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่ จาก google map</span>
         </div>

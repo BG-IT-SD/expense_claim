@@ -183,6 +183,7 @@ class HRController extends Controller
         $startDate = $Alldayfood->first();
         $endDate = $Alldayfood->last();
 
+
         return view('front.driver.show', compact(
             'expense',
             'driver_empid',
@@ -306,7 +307,15 @@ class HRController extends Controller
         // $finalHNameNext = 'เสาวภา เข็มเหลือง';
         // $finalIdNext = '63000455';
 
-        return view('back.hr.frmapprovegrp', compact(['expense', 'empid', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+        $passengertype = 0;
+        if($expense->vbooking->type_reserve == 4){
+            if($empid == $expense->vbooking->passenger_empid){
+                $passengertype = 1;
+            }
+        }
+
+
+        return view('back.hr.frmapprovegrp', compact(['expense', 'empid','passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
 
     /**
