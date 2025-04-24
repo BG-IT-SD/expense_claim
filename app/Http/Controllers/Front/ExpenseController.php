@@ -186,8 +186,13 @@ class ExpenseController extends Controller
         $rate_id = '';
         $bath_per_km = '';
         $oilid = '';
+        $passengertype = 0;
         if (($booking->type_reserve == 4)) {
 
+            // ตรวจสอบ ผู้ร่วมเดินทาง
+            if($empid == $booking->passenger_empid){
+                $passengertype = 1;
+            }
 
             $travelDate = Carbon::parse($booking->departure_date)->startOfDay();
 
@@ -241,9 +246,11 @@ class ExpenseController extends Controller
 
 
 
+
+
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels','travel_date','oilid','data_oil_price','price_used_date','rate_id','bath_per_km','data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid','passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels','travel_date','oilid','data_oil_price','price_used_date','rate_id','bath_per_km','data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
@@ -525,12 +532,18 @@ class ExpenseController extends Controller
                 $query->where('levelid', $level);
             })
             ->first();
+        $passengertype = 0;
+        if($expense->vbooking->type_reserve == 4){
+            if($empid == $expense->vbooking->passenger_empid){
+                $passengertype = 1;
+            }
+        }
 
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
         // ราคาน้ำมัน
         $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        return view('front.expenses.view', compact(['expense', 'empid', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
+        return view('front.expenses.view', compact(['expense', 'empid','passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
     }
 
     /**

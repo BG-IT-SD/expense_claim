@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-    @if ($booking->type_reserve == 4)
+    @if ($booking->type_reserve == 4 && $passengertype == 0)
         {{-- น้ำมัน --}}
         <div class="alert alert-dark mb-3 mt-3">
             <h6 class="mb-0">ส่วนที่ 3</h6>

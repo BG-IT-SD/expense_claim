@@ -63,7 +63,8 @@
                             {{-- hidden --}}
                             <input type="hidden" name="extype" value="{{ $typegroup }}">
                             <input type="hidden" name="bookid" value="{{ $booking->id }}">
-                            <input type="hidden" name="empid" value="{{ $empid }}">
+                            <input type="text" name="empid" value="{{ $empid }}">
+                            <input type="text" name="passengertype" value="{{ $passengertype }}">
                             <input type="hidden" name="locationbu" value="{{ $booking->locationbu }}">
                             <input type="hidden" name="locationid" value="{{ $booking->locationid }}">
                             <input type="hidden" name="checktypereserve" id="checktypereserve"
@@ -90,25 +91,7 @@
     @include('front.expenses.modal')
 @endsection
 @section('csscustom')
-    <style>
-        /* #map {
-                                            height: 400px;
-                                            width: 100%;
-                                            margin-top: 20px;
-                                        }
-
-                                        gmpx-place-autocomplete {
-                                            display: block;
-                                            margin: 10px 0;
-                                            width: 100%;
-                                            max-width: 600px;
-                                        }
-
-                                        #mode-selector {
-                                            margin: 10px 0;
-                                        } */
-
-        #map {
+    <style>s
             height: 500px;
         }
 
@@ -356,9 +339,9 @@
         </script>
 
         <!-- โหลด Google Maps API -->
-        <script async
+        {{-- <script async
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly&language=th">
-        </script>
+        </script> --}}
 
         {{-- <script>
             let map, directionsService, directionsRenderer;
