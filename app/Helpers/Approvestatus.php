@@ -141,7 +141,7 @@ if(!function_exists('Approvestep')){
                 $step = $nextstep;
             }elseif($bu == 'BGC'){
             // check BGC By BG Codeemp 011-010 | BGC
-                $group = 1;
+                $group = 2;
                 $step = $nextstep;
             }
         }elseif($type == 2){
