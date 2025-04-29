@@ -63,8 +63,8 @@
                             {{-- hidden --}}
                             <input type="hidden" name="extype" value="{{ $typegroup }}">
                             <input type="hidden" name="bookid" value="{{ $booking->id }}">
-                            <input type="text" name="empid" value="{{ $empid }}">
-                            <input type="text" name="passengertype" value="{{ $passengertype }}">
+                            <input type="hidden" name="empid" value="{{ $empid }}">
+                            <input type="hidden" name="passengertype" value="{{ $passengertype }}">
                             <input type="hidden" name="locationbu" value="{{ $booking->locationbu }}">
                             <input type="hidden" name="locationid" value="{{ $booking->locationid }}">
                             <input type="hidden" name="checktypereserve" id="checktypereserve"
@@ -91,10 +91,7 @@
     @include('front.expenses.modal')
 @endsection
 @section('csscustom')
-    <style>s
-            height: 500px;
-        }
-
+    <style>
 
         .controls {
             margin-top: 10px;
@@ -286,7 +283,7 @@
                         .formatted_address;
                 });
             }
-            window.initMap = initMap;
+            // window.initMap = initMap;
 
 
             function calculateDistance() {

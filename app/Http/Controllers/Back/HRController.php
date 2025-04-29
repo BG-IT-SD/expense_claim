@@ -174,10 +174,10 @@ class HRController extends Controller
         $nextStepApprove = Approvestep($bu, 1, 1);
 
         // $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
-        // $finalHNameNext = $nextStepApprove['fullname'] ?? 'กมลวรรณ บรรชา';
+        $finalHNameNext = $nextStepApprove['fullname'] ?? '';
         // $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
          $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
         $finalIdNext = '66000510';
 
         $startDate = $Alldayfood->first();
@@ -296,11 +296,11 @@ class HRController extends Controller
         $nextStepApprove = Approvestep($bu, 1, 1);
         // dd($nextStepApprove);
         // $finalHEmailNext = $nextStepApprove["email"];
-        // $finalHNameNext = $nextStepApprove["fullname"];
+        $finalHNameNext = $nextStepApprove["fullname"];
         // $finalIdNext = $nextStepApprove["empid"];
 
         $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
         $finalIdNext = '66000510';
 
         // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
