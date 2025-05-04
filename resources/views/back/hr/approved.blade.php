@@ -53,7 +53,7 @@
                                         <label class="col-sm-3 col-form-label text-sm-end"
                                             for="formtabs-phone">Status</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-phone" class="form-control phone-mask" >
+                                            <input type="text" id="formtabs-phone" class="form-control phone-mask">
                                         </div>
                                     </div>
                                 </div>
@@ -90,7 +90,8 @@
                                     <th>Expense ID</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
-                                    <th>ID | Name | BU</th>
+                                    <th>ID | Name </th>
+                                    <th>BU</th>
                                     <th>Location</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
@@ -101,7 +102,7 @@
                             <tbody class="table-border-bottom-0">
                                 @foreach ($expenses as $key => $expense)
                                     <tr>
-                                        <td>{{ $expense->prefix.$expense->id }}</td>
+                                        <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                 'd/m/Y H:i',
@@ -112,9 +113,16 @@
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
                                             @if ($expense->extype == 2 || $expense->extype == 3)
-                                                 {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
+                                                {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
                                             @else
-                                                {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . $expense->user->bu }}
+                                                {{ $expense->empid . ' | ' . $expense->user->fullname }}
+                                            @endif
+
+                                        </td>
+                                        <td class="text-wrap">
+                                            @if ($expense->extype == 2 || $expense->extype == 3)
+                                            @else
+                                                {{ $expense->user->bu }}
                                             @endif
 
                                         </td>
@@ -137,22 +145,27 @@
                                     </td> --}}
                                         <td class="text-nowrap">
                                             @if ($expense->latestApprove->statusapprove == 2)
-                                                {{-- <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button> --}}
-                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
-                                                {{-- <button class="btn btn-sm btn-danger"><span
-                                                        class="mdi mdi-trash-can-outline"></span></button> --}}
+                                                @if ($expense->extype == 2)
+                                                    <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
+                                                        target="_blank" class="btn btn-sm btn-info">
+                                                        <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                @endif
                                             @else
-                                                {{-- <button class="btn btn-sm btn-info" type="button" class="btn btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#largeModal"><span
-                                                        class="mdi mdi-plus-box-multiple-outline"></span></button> --}}
-                                                {{-- <button class="btn btn-sm btn-warning"
-                                                    onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
-                                                        class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button> --}}
-                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank" class="btn btn-sm btn-info"><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
-                                                {{-- <button class="btn btn-sm btn-danger"><span
-                                                        class="mdi mdi-trash-can-outline"></span></button> --}}
+                                                @if ($expense->extype == 2)
+                                                    <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
+                                                        target="_blank" class="btn btn-sm btn-info">
+                                                        <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                @endif
                                             @endif
 
                                         </td>

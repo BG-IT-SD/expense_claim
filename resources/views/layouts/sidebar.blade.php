@@ -191,23 +191,31 @@
                             {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
                         </a>
                     </li>
-                    <li class="menu-item @if (Route::is('HR.approved')) active @endif">
+                    {{-- <li class="menu-item @if (Route::is('HR.approved')) active @endif">
                         <a href="{{ route('HR.approved') }}" class="menu-link">
-                            <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
+                            <div data-i18n="รายการตรวจสอบแล้ว">รายการตรวจสอบแล้ว</div>
                         </a>
-                    </li>
-                    <li class="menu-header fw-medium mt-4">
+                    </li> --}}
+                    {{-- <li class="menu-header fw-medium mt-4">
                         <span class="menu-header-text" data-i18n="สำหรับ พขร.">สำหรับ พขร.</span>
-                    </li>
+                    </li> --}}
                     <li class="menu-item @if (Route::is('HR.hrdriver')) active @endif">
                         <a href="{{ route('HR.hrdriver') }}" class="menu-link">
                             <div data-i18n="รายการส่งเบิก พขร.">รายการส่งเบิก พขร.</div>
                             {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
                         </a>
                     </li>
-                    <li class="menu-item @if (Route::is('HR.driverapproved')) active @endif">
+                    {{-- <li class="menu-item @if (Route::is('HR.driverapproved')) active @endif">
                         <a href="{{ route('HR.driverapproved') }}" class="menu-link">
-                            <div data-i18n="รายการอนุมัติแล้ว พขร.">รายการอนุมัติแล้ว พขร.</div>
+                            <div data-i18n="รายการตรวจสอบแล้ว พขร.">รายการตรวจสอบแล้ว พขร.</div>
+                        </a>
+                    </li> --}}
+                    {{-- <li class="menu-header fw-medium mt-4">
+                        <span class="menu-header-text" data-i18n="ตรวจสอบข้อมูล">ตรวจสอบข้อมูล</span>
+                    </li> --}}
+                     <li class="menu-item @if (Route::is('HR.approved')) active @endif">
+                        <a href="{{ route('HR.approved') }}" class="menu-link">
+                            <div data-i18n="รายการตรวจสอบแล้ว">รายการตรวจสอบแล้ว</div>
                         </a>
                     </li>
                     <li class="menu-header fw-medium mt-4">

@@ -46,6 +46,7 @@ class Expense extends Model
         'modified_by',
         'status',
         'deleted',
+        'exgroup',
     ];
 
     public function latestApprove()

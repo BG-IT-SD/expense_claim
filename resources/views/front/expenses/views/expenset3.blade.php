@@ -329,7 +329,7 @@
         @if ($isView == 1)
             {{-- Apporve for Head --}}
             <div class="row g-4">
-                <div class="col-sm-6">
+                <div class="col-sm-12">
                     <div class="card shadow-none bg-transparent border border-primary mb-3">
                         <div class="card-body">
                             <h5 class="card-title "><span class="badge rounded-pill bg-primary">ผู้ตรวจสอบ</span>
@@ -359,7 +359,7 @@
                 </div>
                 {{-- Next Step --}}
 
-                <div class="col-sm-6">
+                {{-- <div class="col-sm-6">
                     <div class="card shadow-none bg-transparent border border-primary mb-3">
                         <div class="card-body">
                             <h5 class="card-title "><span
@@ -387,7 +387,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         @endif
         {{-- End Apporve for Head --}}
