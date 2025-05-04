@@ -90,7 +90,8 @@
                                     <th>Expense ID</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
-                                    <th>ID | Name | BU</th>
+                                    <th>ID | Name</th>
+                                    <th>BU</th>
                                     <th>Location</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
@@ -112,11 +113,17 @@
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">
                                             @if ($expense->extype == 2 || $expense->extype == 3)
-                                                 {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
+                                                {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
                                             @else
                                                 {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . $expense->user->bu }}
                                             @endif
 
+                                        </td>
+                                        <td>
+                                            @if ($expense->extype == 2 || $expense->extype == 3)
+                                            @else
+                                                {{ $expense->user->bu }}
+                                            @endif
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
@@ -141,8 +148,8 @@
                                                     class="btn btn-primary" data-bs-toggle="modal"
                                                     data-bs-target="#modalGroup" data-bookid="{{ $expense->bookid }}"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
-                                                <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank"
-                                                    class="btn btn-sm btn-info"><span
+                                                <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                    target="_blank" class="btn btn-sm btn-info"><span
                                                         class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
@@ -152,13 +159,13 @@
                                                     data-bs-target="#modalGroup" data-bookid="{{ $expense->bookid }}"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
                                                 @if ($expense->latestApprove->typeapprove == 1 && $expense->latestApprove->statusapprove == 0)
-                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}" target="_blank"
-                                                        class="btn btn-sm btn-info"><span
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
                                                             class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                                 @else
-                                                <a href="{{ route('HR.edit', $expense->id) }}" target="_blank"
-                                                    class="btn btn-sm btn-warning"><span
-                                                    class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</a>
+                                                    <a href="{{ route('HR.edit', $expense->id) }}" target="_blank"
+                                                        class="btn btn-sm btn-warning"><span
+                                                            class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</a>
                                                     {{-- <button class="btn btn-sm btn-warning"
                                                         onclick="window.location.href='{{ route('HR.edit', $expense->id) }}'"><span
                                                             class="mdi mdi-eye-circle-outline"></span> ตรวจสอบ</button> --}}

@@ -586,7 +586,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 7);
+            ->where('numlvl', '>=', 8);
 
         $total = $query->count();
 
@@ -615,7 +615,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 7)
+            ->where('numlvl', '>=', 8)
             ->first();
 
         // ถ้าไม่เจอข้อมูลเลย

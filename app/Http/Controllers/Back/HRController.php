@@ -31,43 +31,58 @@ class HRController extends Controller
      */
     public function index()
     {
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user','tech'])
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
             ->whereHas('latestApprove', function ($query) {
-                $query->whereIn('typeapprove', [1,3]);
-                // ->where('statusapprove', 1);
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1) // เอาทุก statusapprove
+                      ->orWhere(function ($sub) {
+                          $sub->where('typeapprove', 3)
+                              ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
+                      });
+                });
             })
-            ->whereIn('extype', [1,3])
+            ->whereIn('extype', [1, 3])
             ->get();
-
-        // dd($expenses);
 
         return view('back.hr.list', compact('expenses'));
     }
 
     public function history()
     {
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user','tech'])
-            ->whereHas('latestApprove', function ($query) {
-                $query->whereIn('typeapprove', [4, 5]);
-                // ->where('statusapprove', 1);
+        $usercheck = Auth::user()->empid;
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+            ->whereHas('latestApprove', function ($query) use ($usercheck) {
+                $query->where('typeapprove', 3)
+                      ->where('statusapprove', 1)
+                      ->where('empid', $usercheck); // แสดงเฉพาะข้อมูลผู้ตรวจสอบที่ login
             })
-            ->whereIn('extype', [1,3])
+            ->whereIn('extype', [1, 2, 3])
             ->get();
 
-        return view('back.hr.approved', compact('expenses'));
+        $page = 'HR.show';
+
+        return view('back.hr.approved', compact('expenses', 'page'));
     }
 
-    public function hrdriver(){
-        $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
-        ->whereHas('latestApprove', function ($query) {
-            $query->whereIn('typeapprove', [1,3]);
-            // ->where('statusapprove', 1);
-        })
-        ->whereIn('extype', [2])
-        ->get();
+    public function hrdriver()
+    {
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1) // เอาทุก statusapprove
+                      ->orWhere(function ($sub) {
+                          $sub->where('typeapprove', 3)
+                              ->where('statusapprove', 0); // เฉพาะ statusapprove = 0
+                      });
+                });
+            })
+            ->whereIn('extype', [2])
+            ->get();
+
         return view('back.hr.listdriver', compact('expenses'));
-    }
 
+    }
     public function driverhistory(){
         $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
         ->whereHas('latestApprove', function ($query) {
@@ -391,39 +406,39 @@ class HRController extends Controller
                 'token_expires_at' => now()->addDays(10),
             ]);
 
-            $approve_nextstep = Approve::create([
-                'exid' => $id,
-                'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
-                'empid' => $request->nexthead_id,
-                'email' => $request->nexthead_email ?? '',
-                'approvename' => $request->nexthead_name ?? '',
-                'emailstatus' => 1,
-                'statusapprove' => 0,
-                'login_token' => $token2,
-                'token_expires_at' => now()->addDays(10),
-            ]);
+            // $approve_nextstep = Approve::create([
+            //     'exid' => $id,
+            //     'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
+            //     'empid' => $request->nexthead_id,
+            //     'email' => $request->nexthead_email ?? '',
+            //     'approvename' => $request->nexthead_name ?? '',
+            //     'emailstatus' => 1,
+            //     'statusapprove' => 0,
+            //     'login_token' => $token2,
+            //     'token_expires_at' => now()->addDays(10),
+            // ]);
 
             // End บันทึก Approve
             DB::commit();
             // Sent Mail
-            $link = route('approve.magic.login', ['token' => $token2]);
-            $data = [
-                'type' => 1,
-                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
-                'name' => $request->nexthead_name,
-                'full_name' => $request->empfullname,
-                'check_hr' => $request->head_name,
-                'departuredate' => $request->departuredatemail ?? '',
-                'link' => $link,
-            ];
+            // $link = route('approve.magic.login', ['token' => $token2]);
+            // $data = [
+            //     'type' => 1,
+            //     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'name' => $request->nexthead_name,
+            //     'full_name' => $request->empfullname,
+            //     'check_hr' => $request->head_name,
+            //     'departuredate' => $request->departuredatemail ?? '',
+            //     'link' => $link,
+            // ];
 
-            MailHelper::sendExternalMail(
-                $request->nexthead_email,
-                'อนุมัติการเบิกเบี้ยเลี้ยง',
-                'mails.hrapprove', // ชื่อ blade view
-                $data,
-                'Expense Claim System EX' . $id,
-            );
+            // MailHelper::sendExternalMail(
+            //     $request->nexthead_email,
+            //     'อนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'mails.hrapprove', // ชื่อ blade view
+            //     $data,
+            //     'Expense Claim System EX' . $id,
+            // );
             //End Sent Mail
 
             return response()->json([
@@ -520,39 +535,39 @@ class HRController extends Controller
                 'token_expires_at' => now()->addDays(10),
             ]);
 
-            $approve_nextstep = Approve::create([
-                'exid' => $id,
-                'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
-                'empid' => $request->nexthead_id,
-                'email' => $request->nexthead_email ?? '',
-                'approvename' => $request->nexthead_name ?? '',
-                'emailstatus' => 1,
-                'statusapprove' => 0,
-                'login_token' => $token2,
-                'token_expires_at' => now()->addDays(10),
-            ]);
+            // $approve_nextstep = Approve::create([
+            //     'exid' => $id,
+            //     'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
+            //     'empid' => $request->nexthead_id,
+            //     'email' => $request->nexthead_email ?? '',
+            //     'approvename' => $request->nexthead_name ?? '',
+            //     'emailstatus' => 1,
+            //     'statusapprove' => 0,
+            //     'login_token' => $token2,
+            //     'token_expires_at' => now()->addDays(10),
+            // ]);
 
             // End บันทึก Approve
             DB::commit();
             // Sent Mail
-            $link = route('approve.magic.login', ['token' => $token2]);
-            $data = [
-                'type' => 1,
-                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
-                'name' => $request->nexthead_name,
-                'full_name' => $request->empfullname,
-                'check_hr' => $request->head_name,
-                'departuredate' => $request->departuredatemail ?? '',
-                'link' => $link,
-            ];
+            // $link = route('approve.magic.login', ['token' => $token2]);
+            // $data = [
+            //     'type' => 1,
+            //     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'name' => $request->nexthead_name,
+            //     'full_name' => $request->empfullname,
+            //     'check_hr' => $request->head_name,
+            //     'departuredate' => $request->departuredatemail ?? '',
+            //     'link' => $link,
+            // ];
 
-            MailHelper::sendExternalMail(
-                $request->nexthead_email,
-                'อนุมัติการเบิกเบี้ยเลี้ยง',
-                'mails.hrapprove', // ชื่อ blade view
-                $data,
-                'Expense Claim System EX' . $id,
-            );
+            // MailHelper::sendExternalMail(
+            //     $request->nexthead_email,
+            //     'อนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'mails.hrapprove', // ชื่อ blade view
+            //     $data,
+            //     'Expense Claim System EX' . $id,
+            // );
             //End Sent Mail
             return redirect()->route('HR.hrdriver')->with('success', 'ตรวจสอบการเบิกอาหารเรียบร้อย');
         } catch (\Exception $e) {

@@ -201,7 +201,8 @@ class ApproveController extends Controller
             }
         }
 
-        if($approve->typeapprove == 5 && $approve->statusapprove === 1){
+        // บัญชีอนุมัติเรียบร้อย
+        if($approve->typeapprove == 6 && $approve->statusapprove === 1){
             // อนุมัติขั้นตอนสุดท้ายเสร็จ
             // $linksuccess = route('approve.magic.login', ['token' => $token]);
 
@@ -221,6 +222,7 @@ class ApproveController extends Controller
                 'Expense Claim System EX' . $approve->exid,
             );
         }
+        // บัญชีอนุมัติเรียบร้อย
 
         return back()->with([
             'message' => 'บันทึกผลอนุมัติเรียบร้อย',

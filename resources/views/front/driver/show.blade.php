@@ -185,7 +185,7 @@
                                 <div class="card shadow-none bg-transparent border border-primary mb-3">
                                     <div class="card-body">
                                         <div class="row mt-3 mb-3 justify-content-center text-center ">
-                                            <div class="col-md-5">
+                                            <div class="col-md-10">
                                                 <label class="form-label fw-bold">ผู้ตรวจสอบ</label>
                                                 <select name="headapprove" id="headapprove" class="form-select text-center">
                                                     <option value="{{ $headempid }}">
@@ -193,14 +193,14 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-5">
+                                            {{-- <div class="col-md-5">
                                                 <label class="form-label fw-bold">ผู้อนุมัติขั้นถัดไป</label>
                                                 <select name="nextapprove" id="nextapprove" class="form-select text-center">
                                                     <option value="{{ $finalIdNext }}">
                                                         {{ $finalHNameNext . ' | ' . $finalHEmailNext }}
                                                     </option>
                                                 </select>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                 </div>
