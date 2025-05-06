@@ -170,6 +170,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
             Route::put('/claimdriver/update/{id}', [HRController::class, 'updateClaimDriver'])->name('claimdriverupdate');
             Route::get('driverapproved',[HRController::class,'driverhistory'])->name('driverapproved');
+            Route::post('hrnextapprove',[HRController::class,'hrNextApprove'])->name('hrnextapprove');
 
 
 

@@ -7,6 +7,7 @@ use App\Models\Valldataemp;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Carbon\Carbon;
 
 if (!function_exists('status_approve_badge')) {
     function status_approve_badge($status, $type = null)
@@ -100,7 +101,8 @@ if (!function_exists('hr_status_approve_badge')) {
 }
 
 if (!function_exists('LevelEmp')) {
-    function LevelEmp($empid){
+    function LevelEmp($empid)
+    {
         $vAllemp = Valldataemp::where('CODEMPID', "$empid")->where('STAEMP', '!=', '9')->first();
         $level = $vAllemp?->NUMLVL ?? "";
         return  $level;
@@ -108,7 +110,8 @@ if (!function_exists('LevelEmp')) {
 }
 
 if (!function_exists('BuEmp')) {
-    function BuEmp($empid){
+    function BuEmp($empid)
+    {
         // $user = User::where('empid', "$empid")->where('status', 1)->where('deleted', 0)->first();
         $user = Valldataemp::where('CODEMPID', $empid)
             ->where('STAEMP', '!=', '9')
@@ -118,9 +121,10 @@ if (!function_exists('BuEmp')) {
     }
 }
 
-if(!function_exists('Approvestep')){
+if (!function_exists('Approvestep')) {
 
-    function Approvestep($bu,$type,$nextstep,$groups = null){
+    function Approvestep($bu, $type, $nextstep, $groups = null)
+    {
         $step = "";
         $group = "";
         $email = "";
@@ -128,37 +132,37 @@ if(!function_exists('Approvestep')){
         $empid = "";
 
 
-        if($type == 1){
+        if ($type == 1) {
 
-            if($bu == 'BG' || $bu == 'BGE' || $bu == 'BGER' || $bu == 'BGA'){
+            if ($bu == 'BG' || $bu == 'BGE' || $bu == 'BGER' || $bu == 'BGA') {
                 $group = 1;
                 $step = $nextstep;
-            }elseif($bu == 'KBI' || $bu == 'BGCP'){
+            } elseif ($bu == 'KBI' || $bu == 'BGCP') {
                 $group = 2;
                 $step = $nextstep;
-            }elseif($bu == 'PTI'){
+            } elseif ($bu == 'PTI') {
                 $group = 3;
                 $step = $nextstep;
-            }elseif($bu == 'BGC'){
-            // check BGC By BG Codeemp 011-010 | BGC
+            } elseif ($bu == 'BGC') {
+                // check BGC By BG Codeemp 011-010 | BGC
                 $group = 2;
                 $step = $nextstep;
             }
-        }elseif($type == 2){
+        } elseif ($type == 2) {
             $group = $groups;
             $step = $nextstep;
-        }elseif($type ==3){
+        } elseif ($type == 3) {
             $group = $groups;
             $step = $nextstep;
         }
 
-        $nextApprove = ApproveStaff::where('extype',$type)
-        ->where("group",$group)
-        ->where("step",$step)
-        ->where("deleted",0)
-        ->where("status",1)
-        ->first();
-// dd($nextstep);
+        $nextApprove = ApproveStaff::where('extype', $type)
+            ->where("group", $group)
+            ->where("step", $step)
+            ->where("deleted", 0)
+            ->where("status", 1)
+            ->first();
+
         $email = $nextApprove->email;
         $fullname = $nextApprove->fullname;
         $empid = $nextApprove->empid;
@@ -169,7 +173,6 @@ if(!function_exists('Approvestep')){
             "fullname" => $fullname,
             "empid" => $empid,
         ];
-
     }
 }
 
@@ -190,3 +193,28 @@ if (!function_exists('logAction')) {
     }
 }
 
+if (!function_exists('Thaidatenow')) {
+    function Thaidatenow(Carbon $date)
+    {
+        $thaiMonths = [
+            '01' => 'มกราคม',
+            '02' => 'กุมภาพันธ์',
+            '03' => 'มีนาคม',
+            '04' => 'เมษายน',
+            '05' => 'พฤษภาคม',
+            '06' => 'มิถุนายน',
+            '07' => 'กรกฎาคม',
+            '08' => 'สิงหาคม',
+            '09' => 'กันยายน',
+            '10' => 'ตุลาคม',
+            '11' => 'พฤศจิกายน',
+            '12' => 'ธันวาคม',
+        ];
+
+        $day = $date->format('d');
+        $month = $thaiMonths[$date->format('m')];
+        $year = $date->year + 543;
+
+        return "{$day} {$month} {$year}";
+    }
+}

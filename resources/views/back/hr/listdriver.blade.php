@@ -98,11 +98,12 @@
                 <div class="card">
                     <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก พขร.</h5>
                     <div class="table-responsive text-nowrap2">
-                        <table class="table">
+                        <table class="table" id="expensedvhr">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Expense ID</th>
-                                    <th>ID | Name | BU</th>
+                                    <th>ID | Name</th>
+                                    <th>BU</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
                                     {{-- <th>Approve Name</th> --}}
@@ -115,7 +116,10 @@
                                         <td>{{ $expense->prefix . $expense->id }}</td>
 
                                         <td class="text-wrap">
-                                            {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' . BuEmp($expense->empid) }}
+                                            {{ $expense->empid . ' | ' . $expense->tech->fullname  }}
+                                        </td>
+                                        <td>
+                                            {{ BuEmp($expense->empid) }}
                                         </td>
                                         <td>
                                             @if (!is_null($expense->latestApprove->typeapprove))

@@ -4,7 +4,7 @@
         {{-- Search --}}
         <div class="row">
             <!-- Basic Layout -->
-            <div class="col-xxl">
+            {{-- <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h5 class="mb-0"><span class="mdi mdi-file-search-outline"></span> ค้นหาข้อมูล</h5>
@@ -76,17 +76,26 @@
 
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         {{-- End Search --}}
         <div class="row">
             <div class="col-12 mb-4">
-                <div class="card">
-                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิก</h5>
+                <div class="card p-3">
+                    <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิกที่ตรวจสอบแล้ว</h5>
+                    <div class="row">
+                        <div class="col-md-6 mt-3 mb-3"></div>
+                        <div class="col-md-6 mt-3 mb-3 text-end"> <button type="button" class="btn btn-primary"
+                                id="sendSelected">
+                                <i class="mdi mdi-content-save"></i> ยืนยันข้อมูลเพื่ออนุมัติ
+                            </button></div>
+                    </div>
+
                     <div class="table-responsive text-nowrap2">
-                        <table class="table">
+                        <table class="table" id="appex">
                             <thead class="table-dark">
                                 <tr>
+                                    <th><input type="checkbox" id="selectAll" /></th>
                                     <th>Expense ID</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
@@ -102,6 +111,10 @@
                             <tbody class="table-border-bottom-0">
                                 @foreach ($expenses as $key => $expense)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" name="expense_ids[]" class="expense-checkbox"
+                                                value="{{ $expense->id }}">
+                                        </td>
                                         <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
@@ -120,11 +133,7 @@
 
                                         </td>
                                         <td class="text-wrap">
-                                            @if ($expense->extype == 2 || $expense->extype == 3)
-                                            @else
-                                                {{ $expense->user->bu }}
-                                            @endif
-
+                                            {{ BuEmp($expense->empid) }}
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>
                                         <td>
@@ -171,25 +180,6 @@
                                         </td>
                                     </tr>
                                 @endforeach
-
-
-                                {{-- <tr>
-                                    <td>EX20241101</td>
-                                    <td>09/11/2024 10:30 น.</td>
-                                    <td>11080</td>
-                                    <td>BGCG</td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Completed</span></td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Approved</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><span
-                                                class="mdi mdi-plus-box-multiple-outline"></span> </button>
-                                        <button class="btn btn-sm btn-warning"><span
-                                                class="mdi mdi-eye-circle-outline"></span> Detail</button>
-                                        <button class="btn btn-sm btn-danger"><span
-                                                class="mdi mdi-trash-can-outline"></span></button>
-                                    </td>
-                                </tr> --}}
-
                             </tbody>
                         </table>
                     </div>
@@ -199,71 +189,79 @@
     </div>
 
     {{-- Modal --}}
-    <div class="modal fade" id="largeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel3">List Group Book ID : 11099</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {{-- body --}}
-                    <div class="card">
-                        {{-- <h5 class="card-header">Bordered Table</h5> --}}
-                        <div class="card-body">
-                            <div class="table-responsive text-nowrap">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Expense ID</th>
-                                            <th>Emp ID</th>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+@endsection
+@section('jscustom')
+    <script>
+        $('#appex').DataTable({
+            processing: true,
+            order: [
+                [2, 'desc']
+            ],
+            // lengthMenu: [5, 10, 25, 50, 75, 100],
+        });
+        const hrNextApproveUrl = "{{ route('HR.hrnextapprove') }}";
+        $(document).ready(function() {
+            // Click ปุ่มส่งข้อมูล
+            $('#sendSelected').on('click', function() {
+                const selected = $('.expense-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
 
-                                        <tr>
-                                            <td>
-                                                EX20241102
-                                            </td>
-                                            <td>66000510</td>
-                                            <td>กมลวรรณ บรรชา</td>
-                                            <td><span class="badge rounded-pill bg-label-success me-1">Completed</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary"
-                                                    onclick="window.location.href='{{ route('HR.edit', 1) }}'"><span
-                                                        class="mdi mdi-check-circle-outline"></span> Approve</button>
-                                            </td>
-                                        </tr>
+                if (selected.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ยังไม่ได้เลือกรายการ',
+                        text: 'กรุณาเลือกรายการอย่างน้อย 1 รายการ',
+                    });
+                    return;
+                }
 
-                                        <tr>
-                                            <td>
-                                                {{-- EX20241102 --}}
-                                            </td>
-                                            <td>63000455</td>
-                                            <td>เสาวภา เข็มเหลือง</td>
-                                            <td><span class="badge rounded-pill bg-label-warning me-1">Pending</span></td>
-                                            <td>
+                // แสดง SweetAlert เพื่อยืนยัน
+                Swal.fire({
+                    title: 'ยืนยันการส่งข้อมูล?',
+                    text: 'คุณต้องการส่งรายการที่เลือกไปยังหน้าถัดไปหรือไม่',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, ส่งเลย',
+                    cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // สร้างฟอร์มแล้ว submit
+                        let $form = $('<form>', {
+                            action: hrNextApproveUrl,
+                            method: 'POST'
+                        });
 
-                                            </td>
-                                        </tr>
+                        $form.append($('<input>', {
+                            type: 'hidden',
+                            name: '_token',
+                            value: '{{ csrf_token() }}'
+                        }));
 
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- body --}}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
+                        selected.forEach(function(id) {
+                            $form.append($('<input>', {
+                                type: 'hidden',
+                                name: 'expense_ids[]',
+                                value: id
+                            }));
+                        });
 
-                </div>
-            </div>
-        </div>
-    </div>
+                        $('body').append($form);
+                        $form.submit();
+                    }
+                });
+            });
+
+            // Check all
+            $('#selectAll').on('click', function() {
+                $('.expense-checkbox').prop('checked', this.checked);
+            });
+
+            // Auto-toggle selectAll
+            $('.expense-checkbox').on('change', function() {
+                $('#selectAll').prop('checked', $('.expense-checkbox:checked').length === $(
+                    '.expense-checkbox').length);
+            });
+        });
+    </script>
 @endsection
