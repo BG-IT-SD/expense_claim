@@ -7,6 +7,7 @@ use App\Imports\GroupSpecialImport;
 use App\Models\GroupSpecial;
 use App\Models\Typegroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 
@@ -32,7 +33,7 @@ class ImportlistController extends Controller
     }
 
     public function importexcel(Request $request)
-    { {
+    {
             $request->validate([
                 'file' => 'required|mimes:xlsx,csv|max:2048',
             ]);
@@ -52,6 +53,20 @@ class ImportlistController extends Controller
             }
 
             return back()->with('importResults', $import->importResults)->with('success','Import Success');
+
+    }
+
+    public function delimport($id){
+        $users = GroupSpecial::findOrFail($id);
+        $users->status = 0;
+        $users->deleted = 1;
+        $users->modified_by = Auth::id();
+        try {
+            $users->save();
+            return response()->json(['message' => 'ลบข้อมูลเรียบร้อย', 'class' => 'success'], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['message' => 'ลบข้อมูลไม่สำเร็จ', 'class' => 'error'], 200);
         }
     }
 }

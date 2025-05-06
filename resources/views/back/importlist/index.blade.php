@@ -33,7 +33,7 @@
                                     <button type="submit" id="btnSearch"
                                         class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                             class="mdi mdi-file-search-outline"></span></button>
-                                    <a href="{{ route('FuelPrice91.index') }}" id="btnReset"
+                                    <a href="{{ route('importlist.index') }}" id="btnReset"
                                         class="btn btn-outline-secondary waves-effect">Reset</a>
 
                                 </div>
@@ -86,10 +86,10 @@
                                                 : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
                                         </td>
                                         <td>
-                                            <button class="btn btn-warning btn-sm btnedit"
+                                            {{-- <button class="btn btn-warning btn-sm btnedit"
                                                 onclick=""><i
                                                     class="mdi mdi-pencil-circle-outline"></i>
-                                                edit</button>
+                                                edit</button> --}}
                                             <button type="button" class="btn btn-danger btn-sm deletegropspecial"
                                                 data-id="{{ $groupspecial->id }}"><i class="mdi mdi-trash-can"></i></button>
                                         </td>
@@ -102,8 +102,12 @@
             </div>
         </div>
     </div>
+    @include('back.importlist.modal')
 @endsection
 
 @section('jscustom')
+<script>
+     const ImportDelUrl = "{{ route('importlist.destroy', ':id') }}";
+</script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/importlist.js']) }}"></script>
 @endsection
