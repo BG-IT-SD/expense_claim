@@ -240,6 +240,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::get('/', [ImportlistController::class, 'index'])->name('index');
                 Route::get('import', [ImportlistController::class, 'importuser'])->name('import');
                 Route::post('Excel', [ImportlistController::class, 'importexcel'])->name('excel');
+                Route::delete('delete/{id}', [ImportlistController::class, 'delimport'])->name('destroy');
             });
         });
 
