@@ -12,8 +12,13 @@ class Exgroup extends Model
     protected $fillable = [
         'groupdate',
         'grouptime',
+        'typeapprove',
+        'statusapprove',
         'checkempid',
         'nextmpid',
+        'nextemail',
+        'finalempid',
+        'finalemail',
         'totalfood',
         'totalfuel',
         'totalother',
@@ -22,6 +27,9 @@ class Exgroup extends Model
         'modified_by',
         'status',
         'deleted',
+        'expresswaytoll',
+        'publictransportfare',
+        'otherexpenses',
     ];
 
     public function CreatedBy()

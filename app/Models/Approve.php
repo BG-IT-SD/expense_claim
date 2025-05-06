@@ -23,7 +23,8 @@ class Approve extends Model
         'deleted',
         'login_token',
         'token_expires_at',
-        'remark'
+        'remark',
+        'exgroup',
     ];
 
 

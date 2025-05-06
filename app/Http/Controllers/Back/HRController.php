@@ -694,4 +694,30 @@ class HRController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function hrNextApprove(Request $request){
+        $ids = $request->input('expense_ids', []);
+        $makeuserempid = Auth::user()->empid;
+        $makeusername = Auth::user()->fullname;
+
+        $nextstaffgroup = ApproveStaff::where('group', function ($query) use ($makeuserempid) {
+            $query->select('group')
+                ->from('approvestaff')
+                ->where('empid', $makeuserempid)
+                ->where('status', 1)
+                ->where('deleted', 0)
+                ->limit(1);
+        })
+        ->where('step', 1)
+        ->where('status', 1)
+        ->where('deleted', 0)
+        ->first();
+        // dd($nextstaffgroup);
+
+        $expenses = Expense::with(['vbooking', 'user', 'tech','userhr'])
+            ->whereIn('id', $ids)
+            ->get();
+
+        return view('back.hr.groupapprove', compact('expenses','makeuserempid','makeusername','nextstaffgroup'));
+    }
 }

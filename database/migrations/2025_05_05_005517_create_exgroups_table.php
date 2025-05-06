@@ -12,12 +12,20 @@ class CreateExgroupsTable extends Migration
             $table->id();
             $table->date('groupdate'); // วันที่บันทึกกลุ่ม
             $table->time('grouptime'); // เวลาบันทึกกลุ่ม
+            $table->tinyInteger('typeapprove');
+            $table->tinyInteger('statusapprove');
             $table->string('checkempid', 20); // ผู้ตรวจสอบ
-            $table->string('nextmpid', 20); // ผู้นำกลุ่ม
+            $table->string('nextmpid', 20);
+            $table->string('nextemail',255);
+            $table->string('finalempid', 20);
+            $table->string('finalemail',255);
 
             // ค่าใช้จ่าย
             $table->decimal('totalfood', 10, 2)->nullable(); // ราคาค่าอาหารรวมกลุ่ม
             $table->decimal('totalfuel', 10, 2)->nullable(); // ราคาน้ำมันรวมกลุ่ม
+            $table->decimal('publictransportfare', 10, 2)->nullable();
+            $table->decimal('expresswaytoll', 10, 2)->nullable();
+            $table->decimal('otherexpenses', 10, 2)->nullable();
             $table->decimal('totalother', 10, 2)->nullable(); // รายการอื่นรวมกลุ่ม
             $table->decimal('total', 10, 2)->nullable(); // รวมทั้งหมด
 

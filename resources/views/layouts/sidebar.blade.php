@@ -178,7 +178,7 @@
                 <span class="menu-header-text" data-i18n="HR">HR</span>
             </li>
             <!-- HR -->
-            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view') || Route::is('HR.hrdriver') || Route::is('HR.driverapproved')) active open @endif ">
+            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view') || Route::is('HR.hrdriver') || Route::is('HR.driverapproved') || Route::is('HR.hrnextapprove')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-check-outline"></i>
                     <div data-i18n="HR">HR</div>
@@ -213,19 +213,24 @@
                     {{-- <li class="menu-header fw-medium mt-4">
                         <span class="menu-header-text" data-i18n="ตรวจสอบข้อมูล">ตรวจสอบข้อมูล</span>
                     </li> --}}
-                     <li class="menu-item @if (Route::is('HR.approved')) active @endif">
+                     <li class="menu-item @if (Route::is('HR.approved') || Route::is('HR.hrnextapprove')) active @endif">
                         <a href="{{ route('HR.approved') }}" class="menu-link">
                             <div data-i18n="รายการตรวจสอบแล้ว">รายการตรวจสอบแล้ว</div>
                         </a>
                     </li>
-                    <li class="menu-header fw-medium mt-4">
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="รายการอนุมัติ">รายการอนุมัติ</div>
+                        </a>
+                    </li>
+                    {{-- <li class="menu-header fw-medium mt-4">
                         <span class="menu-header-text" data-i18n="รายงาน">รายงาน</span>
                     </li>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
-                            <div data-i18n="รายงาน">รายงาน</div>
+                            <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </li>
         @endif

@@ -82,6 +82,13 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class, 'empid', 'empid');
     }
+
+    public function userhr()
+    {
+        return $this->belongsTo(Valldataemp::class, 'empid', 'CODEMPID')
+                    ->where('STAEMP', '!=', 9);
+    }
+
     public function tech()
     {
         return $this->belongsTo(GroupSpecial::class, 'empid', 'empid');
