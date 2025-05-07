@@ -41,7 +41,8 @@ class PricepermealController extends Controller
             $query->where('deleted', '0');
         })
         ->get(); // Exclude records that exist in Pricepermeal
-        return view('back.pricepermeal.create', compact('plants', 'groupprices'));
+        $selectedPlants = "";
+        return view('back.pricepermeal.create', compact('plants', 'groupprices','selectedPlants'));
     }
 
     /**
@@ -49,7 +50,6 @@ class PricepermealController extends Controller
      */
     public function store(Request $request)
     {
-
         $levelID = $request->levelid;
 
         $request->validate([
@@ -134,18 +134,109 @@ class PricepermealController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Pricepermeal $pricepermeal)
+    public function edit($id)
     {
-        //
+        $pricepermeal = Pricepermeal::with(['plants'])->findOrFail($id);
+
+        $plants = Plant::where('deleted', 0)->get();
+
+        $groupprices = Groupprice::with('level')
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->where(function ($query) use ($pricepermeal) {
+                $query->whereDoesntHave('pricepermeal', function ($q) {
+                    $q->where('deleted', 0);
+                })->orWhere('id', $pricepermeal->groupid); // เปลี่ยนตรงนี้
+            })
+            ->get();
+
+        $selectedPlants = $pricepermeal->plants->pluck('id')->toArray();
+
+        return view('back.pricepermeal.create', compact(
+            'pricepermeal',
+            'plants',
+            'groupprices',
+            'selectedPlants'
+        ));
     }
+
+
+
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Pricepermeal $pricepermeal)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'groupprice' => 'required|exists:groupprices,id',
+            'meal1' => 'required|numeric|min:0',
+            'meal2' => 'required|numeric|min:0',
+            'meal3' => 'required|numeric|min:0',
+            'meal4' => 'required|numeric|min:0',
+            'plants' => 'required|array|min:1',
+            'plants.*' => 'exists:plants,id',
+            'status' => 'required|in:0,1',
+        ], [
+            'groupprice.required' => 'กรุณาเลือกกลุ่ม',
+            'plants.required' => 'กรุณาเลือก BU อย่างน้อย 1 รายการ',
+        ]);
+
+
+
+        try {
+            DB::beginTransaction();
+
+            // อัปเดตข้อมูลหลัก
+            $meal = Pricepermeal::findOrFail($id);
+            $meal->update([
+                'groupid' => $validated['groupprice'],
+                'meal1' => $validated['meal1'],
+                'meal2' => $validated['meal2'],
+                'meal3' => $validated['meal3'],
+                'meal4' => $validated['meal4'],
+                'status' => $validated['status'],
+                'modified_by' => Auth::id(),
+            ]);
+
+            // soft-delete ข้อมูลเก่าใน pivot
+            $existingPlantIds = $meal->plants()->pluck('plants.id')->toArray();
+            foreach ($existingPlantIds as $plantId) {
+                $meal->plants()->updateExistingPivot($plantId, [
+                    'deleted' => 1,
+                    'status' => 0,
+                    'modified_by' => Auth::id(),
+                ]);
+            }
+
+            // เตรียมข้อมูลใหม่เพื่อ sync
+            $syncData = [];
+            foreach ($validated['plants'] as $plantId) {
+                $syncData[$plantId] = [
+                    'status' => 1,
+                    'deleted' => 0,
+                    'created_by' => Auth::id(),
+                    'modified_by' => null,
+                    'updated_at' => now(),
+                ];
+            }
+
+            // sync ข้อมูลใหม่ (จะ insert หรือ update ใหม่)
+            $meal->plants()->syncWithoutDetaching($syncData);
+
+            DB::commit();
+
+            return redirect()->route('Pricepermeal.index')->with([
+                'message' => 'แก้ไขรายการสำเร็จ',
+                'class' => 'success',
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.

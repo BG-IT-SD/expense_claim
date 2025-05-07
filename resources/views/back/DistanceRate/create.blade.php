@@ -8,7 +8,7 @@
             <!-- Add Product -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
                 <div class="d-flex flex-column justify-content-center">
-                    <h4 class="mb-1 mt-3">เพิ่มข้อมูลระยะทางจาก Plant to Plant</h4>
+                    <h4 class="mb-1 mt-3"> {{ isset($DistanceRate) ? 'แก้ไข' : 'เพิ่ม' }}ข้อมูลระยะทางจาก Plant to Plant</h4>
                     {{-- <p></p> --}}
                 </div>
                 <div class="d-flex align-content-center flex-wrap gap-3">
@@ -45,7 +45,7 @@
                                                 data-style="btn-default">
                                                 <option value="">เลือก Plant</option>
                                                 @foreach ($plants as $plant)
-                                                    <option value="{{ $plant->id }}">
+                                                    <option value="{{ $plant->id }}"  {{ isset($DistanceRate) && $DistanceRate->startplant == $plant->id ? 'selected' : '' }}>
                                                         {{ $plant->plantname }}
                                                     </option>
                                                 @endforeach
@@ -63,7 +63,7 @@
                                                 data-style="btn-default">
                                                 <option value="">เลือก Plant</option>
                                                 @foreach ($plants as $plant)
-                                                    <option value="{{ $plant->id }}">
+                                                    <option value="{{ $plant->id }}" {{ isset($DistanceRate) && $DistanceRate->endplant == $plant->id ? 'selected' : '' }}>
                                                         {{ $plant->plantname }}
                                                     </option>
                                                 @endforeach
