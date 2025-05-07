@@ -22,6 +22,7 @@ class Groupprice extends Model
         return $this->hasOne(Pricepermeal::class, 'groupid', 'id');
     }
 
+
     public function CreatedBy(){
         return $this->belongsTo(User::class, 'created_by', 'id');
     }

@@ -92,6 +92,9 @@
             });
         </script>
     @endif
+    <script>
+         const RateDelUrl = "{{ route('DistanceRate.destroy', ':id') }}";
+    </script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/distancerate.js']) }}"></script>
 @endsection
 

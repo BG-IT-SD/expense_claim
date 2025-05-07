@@ -9,20 +9,32 @@ class Pricepermeal extends Model
 {
 
     use HasFactory;
-    protected $table ='pricepermeals';
+    protected $table = 'pricepermeals';
 
-    protected $fillable = ['groupid','meal1','meal2','meal3','meal4','status', 'deleted' , 'created_by', 'modified_by'];
+    protected $fillable = ['groupid', 'meal1', 'meal2', 'meal3', 'meal4', 'status', 'deleted', 'created_by', 'modified_by'];
 
     public function group()
     {
         return $this->belongsTo(Groupprice::class, 'groupid', 'id');
     }
 
-    public function CreatedBy(){
+
+
+    public function plants()
+    {
+        return $this->belongsToMany(Plant::class, 'groupplants', 'mealid', 'plantid')
+            ->withPivot(['status', 'deleted', 'created_by', 'modified_by'])
+            ->withTimestamps()
+            ->wherePivot('deleted', 0);
+    }
+
+    public function CreatedBy()
+    {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    public function ModifiedBy(){
-            return $this->belongsTo(User::class, 'modified_by', 'id');
+    public function ModifiedBy()
+    {
+        return $this->belongsTo(User::class, 'modified_by', 'id');
     }
 }

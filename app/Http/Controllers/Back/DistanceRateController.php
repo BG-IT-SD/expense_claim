@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DistanceRate;
 use App\Models\Plant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DistanceRateController extends Controller
 {
@@ -121,22 +122,69 @@ class DistanceRateController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+        $DistanceRate = DistanceRate::find($id);
+
+        return view('back.DistanceRate.create', compact('plants', 'DistanceRate'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'startplant' => 'required|integer|exists:plants,id',
+            'endplant'   => 'required|integer|exists:plants,id|different:startplant',
+            'kilometer'  => 'required|numeric|min:0.01',
+            'status'     => 'required|in:0,1',
+        ], [
+            'status.required' => 'กรุณาเลือกสถานะ',
+            'status.in' => 'สถานะไม่ถูกต้อง',
+        ]);
+
+        // ตรวจสอบว่าระยะทางซ้ำ (ยกเว้นตัวเอง)
+        $exists = DistanceRate::where('startplant', $validated['startplant'])
+            ->where('endplant', $validated['endplant'])
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['startplant' => 'มีระยะทางนี้ในระบบแล้ว']);
+        }
+
+        try {
+            $distance = DistanceRate::findOrFail($id);
+            $distance->update($validated); // ✅ รวม status ด้วย
+
+            return redirect()->route('DistanceRate.index')->with([
+                'message' => 'แก้ไขข้อมูลสำเร็จ',
+                'class' => 'success',
+            ]);
+        } catch (\Throwable $th) {
+            return redirect()->route('DistanceRate.index')->with([
+                'message' => 'แก้ไขข้อมูลไม่สำเร็จ',
+                'class' => 'error',
+            ]);
+        }
     }
+
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $users = DistanceRate::findOrFail($id);
+        $users->status = 0;
+        $users->deleted = 1;
+        try {
+            $users->save();
+            return response()->json(['message' => 'ลบข้อมูลเรียบร้อย', 'class' => 'success'], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['message' => 'ลบข้อมูลไม่สำเร็จ', 'class' => 'error'], 200);
+        }
     }
 }

@@ -15,8 +15,8 @@ class GrouppriceController extends Controller
      */
     public function index()
     {
-        $data =[];
-        $result=[];
+        $data = [];
+        $result = [];
 
         // $groupprices = Groupprice::where('groupprices.deleted', '0')
         // ->leftJoin('levels', 'groupprices.levelid', '=', 'levels.id')
@@ -25,12 +25,15 @@ class GrouppriceController extends Controller
 
         $groupprices = Groupprice::with('level')->where('deleted', '0')->get();  #Eloquent
         foreach ($groupprices as $groupprice) {
+            $editUrl = route('Pricepermeal.edit', $groupprice->id);
             $data = [
                 'id' => $groupprice->id,
                 'groupname' => $groupprice->groupname,
                 'levelname' => $groupprice->level->levelname,
                 'status' => $groupprice->status == 1 ? '<span class="badge rounded-pill bg-success">Active</span>' : '<span class="badge rounded-pill bg-danger">Inactive</span>',
-                'action' => '<button class="btn btn-warning btn-sm btngroupedit"  data-id="' . $groupprice->id . '"><i class="mdi mdi-pencil-circle-outline"></i> edit</button> <button type="button" class="btn btn-danger btn-sm deletegroup"  data-id="' . $groupprice->id . '"><i class="mdi mdi-trash-can"></i></button>',
+                'action' => '<a href="' . $editUrl . '" class="btn btn-warning btn-sm">
+        <i class="mdi mdi-pencil-circle-outline"></i> edit
+     </a> <button type="button" class="btn btn-danger btn-sm deletegroup"  data-id="' . $groupprice->id . '"><i class="mdi mdi-trash-can"></i></button>',
             ];
             $result[] = $data;
         }
