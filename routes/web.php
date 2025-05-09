@@ -171,6 +171,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::put('/claimdriver/update/{id}', [HRController::class, 'updateClaimDriver'])->name('claimdriverupdate');
             Route::get('driverapproved',[HRController::class,'driverhistory'])->name('driverapproved');
             Route::post('hrnextapprove',[HRController::class,'hrNextApprove'])->name('hrnextapprove');
+            Route::post('hrheadapprove',[HRController::class,'hrHextApprove'])->name('hrheadapprove');
 
 
 
@@ -256,6 +257,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
 
     Route::get('/approve/view/{id}', [ApproveController::class, 'show'])->name('approve.page');
+    Route::get('/approve/viewgroup/{id}', [ApproveController::class, 'showgroup'])->name('approve.page.group');
     Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
 
 

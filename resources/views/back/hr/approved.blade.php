@@ -191,77 +191,20 @@
     {{-- Modal --}}
 @endsection
 @section('jscustom')
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
     <script>
-        $('#appex').DataTable({
-            processing: true,
-            order: [
-                [2, 'desc']
-            ],
-            // lengthMenu: [5, 10, 25, 50, 75, 100],
-        });
         const hrNextApproveUrl = "{{ route('HR.hrnextapprove') }}";
-        $(document).ready(function() {
-            // Click ปุ่มส่งข้อมูล
-            $('#sendSelected').on('click', function() {
-                const selected = $('.expense-checkbox:checked').map(function() {
-                    return $(this).val();
-                }).get();
-
-                if (selected.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'ยังไม่ได้เลือกรายการ',
-                        text: 'กรุณาเลือกรายการอย่างน้อย 1 รายการ',
-                    });
-                    return;
-                }
-
-                // แสดง SweetAlert เพื่อยืนยัน
-                Swal.fire({
-                    title: 'ยืนยันการส่งข้อมูล?',
-                    text: 'คุณต้องการส่งรายการที่เลือกไปยังหน้าถัดไปหรือไม่',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'ใช่, ส่งเลย',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // สร้างฟอร์มแล้ว submit
-                        let $form = $('<form>', {
-                            action: hrNextApproveUrl,
-                            method: 'POST'
-                        });
-
-                        $form.append($('<input>', {
-                            type: 'hidden',
-                            name: '_token',
-                            value: '{{ csrf_token() }}'
-                        }));
-
-                        selected.forEach(function(id) {
-                            $form.append($('<input>', {
-                                type: 'hidden',
-                                name: 'expense_ids[]',
-                                value: id
-                            }));
-                        });
-
-                        $('body').append($form);
-                        $form.submit();
-                    }
-                });
-            });
-
-            // Check all
-            $('#selectAll').on('click', function() {
-                $('.expense-checkbox').prop('checked', this.checked);
-            });
-
-            // Auto-toggle selectAll
-            $('.expense-checkbox').on('change', function() {
-                $('#selectAll').prop('checked', $('.expense-checkbox:checked').length === $(
-                    '.expense-checkbox').length);
-            });
-        });
     </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/hr/approve.js']) }}"></script>
 @endsection

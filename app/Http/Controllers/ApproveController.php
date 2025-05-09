@@ -230,6 +230,10 @@ class ApproveController extends Controller
         ]);
     }
 
+    public function showgroup($id){
+        return view('approve.approve_group');
+    }
+
 
     // public function confirmNextStep(Request $request, $id)
     // {
