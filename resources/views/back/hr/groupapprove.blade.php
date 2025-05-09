@@ -59,8 +59,8 @@
                                             $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
                                             $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
                                             $publictransport = $expense->publictransportfare ?? 0; //ค่ารถสาธารณะ
-                                            $other =  $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
-                                            $total = $food + $gas + $express +  $publictransport + $other;
+                                            $other = $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
+                                            $total = $food + $gas + $express + $publictransport + $other;
 
                                             $sum_food += $food; //ค่าอาหาร
                                             $sum_gas += $gas; // ค่าน้ำมัน
@@ -70,7 +70,11 @@
                                             $sum_total += $total;
                                         @endphp
                                         <tr>
-                                            <td>{{ $i + 1 }}</td>
+                                            <td>
+                                                {{ $i + 1 }}
+                                                <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
+
+                                            </td>
                                             <td>{{ $expense->vbooking->locationbu }}</td>
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
@@ -95,21 +99,25 @@
                                     <tr class="table-warning fw-bold">
                                         <td colspan="11">รวม</td>
                                         <td>{{ number_format($sum_food, 2) }}
-                                            <input type="hidden" name="totalfood"  value="{{ $sum_food ?? 0 }}">
+                                            <input type="hidden" name="totalfood" value="{{ $sum_food ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_gas, 2) }}
-                                            <input type="hidden" name="totalfuel"  value="{{ $sum_gas ?? 0 }}">
+                                            <input type="hidden" name="totalfuel" value="{{ $sum_gas ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_express, 2) }}
-                                            <input type="hidden" name="expresswaytoll"  value="{{ $sum_express ?? 0 }}">
+                                            <input type="hidden" name="expresswaytoll" value="{{ $sum_express ?? 0 }}">
                                         </td>
-                                        <td>{{ number_format($sum_publictransport ,2) }}
-                                            <input type="hidden" name="publictransportfare"  value="{{ $sum_publictransport ?? 0 }}">
+                                        <td>{{ number_format($sum_publictransport, 2) }}
+                                            <input type="hidden" name="publictransportfare"
+                                                value="{{ $sum_publictransport ?? 0 }}">
                                         </td>
-                                        <td>{{ number_format($sum_other ,2) }}
-                                            <input type="hidden" name="otherexpenses"  value="{{ $sum_other ?? 0 }}">
+                                        <td>{{ number_format($sum_other, 2) }}
+                                            <input type="hidden" name="otherexpenses" value="{{ $sum_other ?? 0 }}">
                                         </td>
-                                        <td>{{ number_format($sum_total, 2) }}</td>
+                                        <td>
+                                            {{ number_format($sum_total, 2) }}
+                                            <input type="hidden" name="total" value="{{ $sum_total ?? 0 }}">
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -121,7 +129,7 @@
                                 <h5 class="card-header">ผู้จัดทำ</h5>
                                 <div class="card-body">
                                     <h5><span class="badge rounded-pill bg-primary">{{ $makeusername ?? '-' }}</span></h5>
-                                    <input type="hidden" name="created_by"  value="{{ $makeuserempid ?? '' }}">
+                                    <input type="hidden" name="created_by" value="{{ $makeuserempid ?? '' }}">
                                     <hr>
                                     HR
                                 </div>
@@ -133,6 +141,7 @@
                                 <div class="card-body">
                                     <h5><span class="badge rounded-pill bg-primary">{{ $makeusername ?? '-' }}</span></h5>
                                     <input type="hidden" name="checkempid" value="{{ $makeuserempid ?? '' }}">
+                                    <input type="hidden" name="checkname" value="{{ $makeusername ?? '' }}">
                                     <hr>
                                     HR
                                 </div>
@@ -143,9 +152,11 @@
                                 <h5 class="card-header">ผู้อนุมัติ</h5>
                                 <div class="card-body">
                                     <h5><span
-                                        class="badge rounded-pill bg-primary">{{ $nextstaffgroup->fullname ?? '-' }}</span></h5>
-                                        <input type="hidden" name="nextmpid" value="{{ $nextstaffgroup->empid ?? '' }}">
-                                        <input type="hidden" name="nextemail" value="{{ $nextstaffgroup->email ?? '' }}">
+                                            class="badge rounded-pill bg-primary">{{ $nextstaffgroup->fullname ?? '-' }}</span>
+                                    </h5>
+                                    <input type="hidden" name="nextmpid" value="{{ $nextstaffgroup->empid ?? '' }}">
+                                    <input type="hidden" name="nextemail" value="{{ $nextstaffgroup->email ?? '' }}">
+                                    <input type="hidden" name="approvename" value="{{ $nextstaffgroup->fullname ?? '' }}">
                                     <hr>
                                     HR
                                 </div>
@@ -153,7 +164,9 @@
                             </div>
                             <hr>
                             <div class="col-md-12">
-                                <button type="button" class="btn btn-primary"><span class="mdi mdi-content-save"></span> ยืนยันข้อมูลและส่งอนุมัติในขั้นตอนถัดไป</button>
+                                <button type="button" id="confrimapprove" class="btn btn-primary"><span
+                                        class="mdi mdi-content-save"></span>
+                                    ยืนยันข้อมูลและส่งอนุมัติในขั้นตอนถัดไป</button>
                             </div>
                         </div>
                         {{-- EndNextName --}}
@@ -164,4 +177,22 @@
             </div>
         </div>
     </div>
+@endsection
+@section('jscustom')
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+    <script>
+        const hrHeadApproveUrl = "{{ route('HR.hrheadapprove') }}";
+    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/hr/approve.js']) }}"></script>
 @endsection

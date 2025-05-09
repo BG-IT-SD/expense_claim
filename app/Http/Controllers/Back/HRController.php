@@ -14,6 +14,7 @@ use App\Mail\ApproveNotification;
 use App\Mail\TestMail;
 use App\Models\Approve;
 use App\Models\ApproveStaff;
+use App\Models\Exgroup;
 use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
 use App\Models\ExpenseLog;
@@ -35,10 +36,10 @@ class HRController extends Controller
             ->whereHas('latestApprove', function ($query) {
                 $query->where(function ($q) {
                     $q->where('typeapprove', 1) // เอาทุก statusapprove
-                      ->orWhere(function ($sub) {
-                          $sub->where('typeapprove', 3)
-                              ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
-                      });
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
+                        });
                 });
             })
             ->whereIn('extype', [1, 3])
@@ -54,8 +55,8 @@ class HRController extends Controller
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
             ->whereHas('latestApprove', function ($query) use ($usercheck) {
                 $query->where('typeapprove', 3)
-                      ->where('statusapprove', 1)
-                      ->where('empid', $usercheck); // แสดงเฉพาะข้อมูลผู้ตรวจสอบที่ login
+                    ->where('statusapprove', 1)
+                    ->where('empid', $usercheck); // แสดงเฉพาะข้อมูลผู้ตรวจสอบที่ login
             })
             ->whereIn('extype', [1, 2, 3])
             ->get();
@@ -71,28 +72,28 @@ class HRController extends Controller
             ->whereHas('latestApprove', function ($query) {
                 $query->where(function ($q) {
                     $q->where('typeapprove', 1) // เอาทุก statusapprove
-                      ->orWhere(function ($sub) {
-                          $sub->where('typeapprove', 3)
-                              ->where('statusapprove', 0); // เฉพาะ statusapprove = 0
-                      });
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0); // เฉพาะ statusapprove = 0
+                        });
                 });
             })
             ->whereIn('extype', [2])
             ->get();
 
         return view('back.hr.listdriver', compact('expenses'));
-
     }
-    public function driverhistory(){
-        $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
-        ->whereHas('latestApprove', function ($query) {
-            $query->whereIn('typeapprove', [1,3,4,5]);
-            // ->where('statusapprove', 1);
-        })
-        ->whereIn('extype', [2])
-        ->get();
+    public function driverhistory()
+    {
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->whereIn('typeapprove', [1, 3, 4, 5]);
+                // ->where('statusapprove', 1);
+            })
+            ->whereIn('extype', [2])
+            ->get();
         $page = 'HR.show';
-        return view('back.hr.historydv', compact('expenses','page'));
+        return view('back.hr.historydv', compact('expenses', 'page'));
     }
 
 
@@ -174,7 +175,7 @@ class HRController extends Controller
             ->orderBy('id')
             ->get();
 
-            // dd($details);
+        // dd($details);
 
         // ราคาต่อมื้อ
         $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
@@ -191,7 +192,7 @@ class HRController extends Controller
         // $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
         $finalHNameNext = $nextStepApprove['fullname'] ?? '';
         // $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
-         $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
         // $finalHNameNext = 'กมลวรรณ บรรชา';
         $finalIdNext = '66000510';
 
@@ -241,7 +242,7 @@ class HRController extends Controller
         $finalHNameNext = '';
         $finalIdNext = '';
 
-        $expense = Expense::with(['vbooking', 'user','fuel','fuelprice'])->findOrFail($id);
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             ->get();
@@ -323,14 +324,14 @@ class HRController extends Controller
         // $finalIdNext = '63000455';
 
         $passengertype = 0;
-        if($expense->vbooking->type_reserve == 4){
-            if($empid == $expense->vbooking->passenger_empid){
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
                 $passengertype = 1;
             }
         }
 
 
-        return view('back.hr.frmapprovegrp', compact(['expense', 'empid','passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+        return view('back.hr.frmapprovegrp', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
 
     /**
@@ -684,7 +685,6 @@ class HRController extends Controller
                         $p->expense->lastapprove = $lastApprove;
                     }
                 }
-
             }
 
 
@@ -695,7 +695,8 @@ class HRController extends Controller
         }
     }
 
-    public function hrNextApprove(Request $request){
+    public function hrNextApprove(Request $request)
+    {
         $ids = $request->input('expense_ids', []);
         $makeuserempid = Auth::user()->empid;
         $makeusername = Auth::user()->fullname;
@@ -707,17 +708,109 @@ class HRController extends Controller
                 ->where('status', 1)
                 ->where('deleted', 0)
                 ->limit(1);
-        })
-        ->where('step', 1)
-        ->where('status', 1)
-        ->where('deleted', 0)
-        ->first();
+            })
+            ->where('step', 1)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->first();
         // dd($nextstaffgroup);
 
-        $expenses = Expense::with(['vbooking', 'user', 'tech','userhr'])
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
             ->whereIn('id', $ids)
             ->get();
 
-        return view('back.hr.groupapprove', compact('expenses','makeuserempid','makeusername','nextstaffgroup'));
+        return view('back.hr.groupapprove', compact('expenses', 'makeuserempid', 'makeusername', 'nextstaffgroup'));
+    }
+
+    public function hrHextApprove(Request $request)
+    {
+        // dd($request);
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Insert into exgroups
+            $exgroup = Exgroup::create([
+                'groupdate' => now()->toDateString(),
+                'grouptime' => now()->toTimeString(),
+                'typeapprove' => 4,
+                'statusapprove' => 0,
+                'checkempid' => $request->checkempid,
+                'nextmpid' => $request->nextmpid,
+                'nextemail' => $request->nextemail,
+                'totalfood' => $request->totalfood,
+                'totalfuel' => $request->totalfuel,
+                'totalother' => $request->otherexpenses,
+                'total' => $request->total,
+            ]);
+
+            $exgroupId = $exgroup->id;
+            // 2. Update expenses.exgroup
+            foreach ($request->expense_id as $exid) {
+                Expense::where('id', $exid)->update([
+                    'exgroup' => $exgroupId
+                ]);
+            }
+            // $nextmail = $request->nextemail;
+            $nextmail = 'Kamolwan.b@bgiglass.com';
+            // 3. Insert approve (typeapprove = 4)
+            $token = Str::random(64);
+            foreach ($request->expense_id as $exid) {
+
+                Approve::create([
+                    'exid' => $exid,
+                    'typeapprove' => 4,
+                    'empid' => $request->nextmpid,
+                    'email' => $nextmail,
+                    'approvename' => $request->approvename,
+                    'emailstatus' => 1,
+                    'exgroup' => $exgroupId,
+                    'statusapprove' => 0,
+                    'login_token' => $token,
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+            }
+
+            // 4. Update approve (typeapprove != 4) เพิ่ม exgroup
+            Approve::whereIn('exid', $request->expense_id)
+                ->where('typeapprove', '!=', 4)
+                ->update([
+                    'exgroup' => $exgroupId
+                ]);
+
+            DB::commit();
+
+            //ส่งเมลหลังจาก Commit
+            $nowDate = Carbon::now();
+
+            $link = route('approve.magic.login', ['token' => $token]);
+
+            MailHelper::sendExternalMail(
+                $nextmail,
+                'แจ้งเตือนอนุมัติกลุ่มรายการเบิกเบี้ยเลี้ยงวันที่ ' . $nowDate,
+                'mails.groupapprove',
+                [
+                    'name' => $request->approvename,
+                    'groupid' => $exgroup->id,
+                    'count' => count($request->expense_id),
+                    'groupdate' => $nowDate,
+                    'checkname' => $request->checkname,
+                    'link' => $link
+                ],
+                'รายการขออนุมัติกลุ่ม EXGROUP-' . $exgroup->id . 'วันที่ ' . $nowDate
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'บันทึกสำเร็จ',
+                'redirect' => route('HR.approved')
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

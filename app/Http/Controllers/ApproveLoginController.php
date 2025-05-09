@@ -20,6 +20,11 @@ class ApproveLoginController extends Controller
             ->where('token_expires_at', '>=', now())
             ->first();
 
+        $checkgroup = Approve::where('login_token', $token)
+            ->where('token_expires_at', '>=', now())
+            ->whereNotNull('exgroup')
+            ->count();
+
         if (!$approve) {
             return view('approve.approve_expired');
         }
@@ -32,7 +37,7 @@ class ApproveLoginController extends Controller
         $user = User::where('empid', $approve->empid)->first();
 
         if (!$user) {
-            // ✅ สร้าง user ใหม่อัตโนมัติ
+            //สร้าง user ใหม่อัตโนมัติ
             $DetailEmp = Valldataemp::where('CODEMPID', $approve->empid)
                 ->where('STAEMP', '!=', '9')
                 ->first();
@@ -59,6 +64,11 @@ class ApproveLoginController extends Controller
         Auth::login($user);
         session()->regenerate();
 
-        return redirect()->route('approve.page', ['id' => $approve->id]);
+        if($checkgroup > 0){
+            return redirect()->route('approve.page.group', ['id' => $approve->exgroup]);
+        }else{
+            return redirect()->route('approve.page', ['id' => $approve->id]);
+        }
+
     }
 }

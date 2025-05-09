@@ -177,7 +177,7 @@ if (!function_exists('Approvestep')) {
 }
 
 if (!function_exists('logAction')) {
-    function logAction($action, $model = null, $description = null)
+    function logAction($action, $model = null, $description = null, $json = null)
     {
         $user = Auth::user();
 
@@ -185,6 +185,7 @@ if (!function_exists('logAction')) {
             'action'      => $action,
             'model'       => $model,
             'description' => $description,
+            'json'        => $json,
             'user_id'     => $user?->empid ?? 'guest',
             'user_name'   => $user?->fullname ?? 'guest',
             'ip_address'  => Request::ip(),
