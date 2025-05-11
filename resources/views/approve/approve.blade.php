@@ -7,13 +7,13 @@
             <div class="row">
                 <!-- Basic Layout -->
                 <div class="col-xxl-12">
-                    @if(session('message'))
-                    {{-- alert --}}
-                    <div class="alert alert-{{ session('class') }} alert-dismissible h4" role="alert">
-                        <span class="mdi mdi-bell"></span> {{ session('message') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {{--  alert --}}
+                    @if (session('message'))
+                        {{-- alert --}}
+                        <div class="alert alert-{{ session('class') }} alert-dismissible h4" role="alert">
+                            <span class="mdi mdi-bell"></span> {{ session('message') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {{--  alert --}}
                     @endif
                     <div class="card mb-4">
                         <div class="card-header d-flex align-items-center justify-content-between">
@@ -22,22 +22,21 @@
                         </div>
                         <div class="card-body row">
                             @if ($expense->extype == 2)
-
                             @else
-                            <div class="col-sm-6 mb-3">
-                                <div class="form-floating form-floating-outline">
-                                    <input type="text" id="expense_t1" class="form-control"
-                                        value="{{ $booking->location_name }}" disabled>
-                                    <label for="expense_t1">สถานที่ปฏิบัติงาน</label>
+                                <div class="col-sm-6 mb-3">
+                                    <div class="form-floating form-floating-outline">
+                                        <input type="text" id="expense_t1" class="form-control"
+                                            value="{{ $booking->location_name }}" disabled>
+                                        <label for="expense_t1">สถานที่ปฏิบัติงาน</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <div class="form-floating form-floating-outline">
-                                    <input type="text" id="expense_t2" class="form-control"
-                                        value="{{ $departure_date . ' - ' . $return_date }}" disabled>
-                                    <label for="expense_t2">วันเวลาที่ออกปฎิบัติงาน</label>
+                                <div class="col-sm-6 mb-3">
+                                    <div class="form-floating form-floating-outline">
+                                        <input type="text" id="expense_t2" class="form-control"
+                                            value="{{ $departure_date . ' - ' . $return_date }}" disabled>
+                                        <label for="expense_t2">วันเวลาที่ออกปฎิบัติงาน</label>
+                                    </div>
                                 </div>
-                            </div>
                             @endif
 
                             {{-- <div class="col-sm-6 mb-3">
@@ -117,14 +116,14 @@
 
                             </div>
                             <div class="col-sm-6 mb-3">
-                                <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid.' | '.$approve->approvename }}</h4>
+                                <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid . ' | ' . $approve->approvename }}</h4>
 
                             </div>
                             @if ($approve->typeapprove == 4 || $approve->typeapprove == 2)
-                            <div class="col-sm-6 mb-3">
-                                <h4><strong>ผู้อนุมัติขั้นถัดไป:</strong> {{ $nextempid.' | '.$nextfullname }}</h4>
+                                <div class="col-sm-6 mb-3">
+                                    <h4><strong>ผู้อนุมัติขั้นถัดไป:</strong> {{ $nextempid . ' | ' . $nextfullname }}</h4>
 
-                            </div>
+                                </div>
                             @endif
                             @if ($approve->statusapprove == 0)
                                 <hr>
@@ -140,16 +139,24 @@
                                             <textarea name="reason" id="reason" class="form-control" rows="3"></textarea>
 
                                         </div>
-                                        <input type="hidden" id="typeapprove" name="typeapprove" value="{{ $approve->typeapprove }}">
-                                        <input type="hidden" name="expenseempid" id="expenseempid" value="{{ $expense->empid }}">
+                                        <input type="hidden" id="typeapprove" name="typeapprove"
+                                            value="{{ $approve->typeapprove }}">
+                                        <input type="hidden" name="expenseempid" id="expenseempid"
+                                            value="{{ $expense->empid }}">
                                         <input type="hidden" name="nextempid" id="nextempid" value="{{ $nextempid }}">
-                                        <input type="hidden" name="nextfullname" id="nextfullname" value="{{ $nextfullname }}">
+                                        <input type="hidden" name="nextfullname" id="nextfullname"
+                                            value="{{ $nextfullname }}">
                                         <input type="hidden" name="nextemail" id="nextemail" value="{{ $nextemail }}">
-                                        <input type="hidden" name="departuredate" id="departuredate" value="{{ $departure_date . ' - ' . $return_date }}">
-                                        <input type="hidden" name="approvename" id="approvename" value="{{ $approve->approvename }}">
-                                        <input type="hidden" name="expenseid" id="expenseid" value="{{ $expense->prefix . $expense->id }}">
-                                        <input type="hidden" name="empemail" id="empemail" value="{{ $expense->user->email ?? $exMail }}">
-                                        <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname ?? $exName  }}">
+                                        <input type="hidden" name="departuredate" id="departuredate"
+                                            value="{{ $departure_date . ' - ' . $return_date }}">
+                                        <input type="hidden" name="approvename" id="approvename"
+                                            value="{{ $approve->approvename }}">
+                                        <input type="hidden" name="expenseid" id="expenseid"
+                                            value="{{ $expense->prefix . $expense->id }}">
+                                        <input type="hidden" name="empemail" id="empemail"
+                                            value="{{ $expense->user->email ?? $exMail }}">
+                                        <input type="hidden" name="empfullname" id="empfullname"
+                                            value="{{ $expense->user->fullname ?? $exName }}">
 
                                         <button type="button" name="action" value="approve" class="btn btn-success"
                                             id="btnApprove">
@@ -179,10 +186,14 @@
 @section('jscustom')
     <script>
         $(document).ready(function() {
-            // ✅ เมื่อกดปุ่ม "อนุมัติ"
+            let isSubmitting = false;
+
+            // เมื่อกดปุ่ม "อนุมัติ"
             $('#btnApprove').click(function(e) {
+                if (isSubmitting) return; //ป้องกันกดรัว
+
                 Swal.fire({
-                    icon: 'success',
+                    icon: 'question',
                     title: 'ยืนยันการอนุมัติ',
                     text: 'คุณต้องการอนุมัติรายการนี้ใช่หรือไม่?',
                     showCancelButton: true,
@@ -190,18 +201,21 @@
                     cancelButtonText: 'ยกเลิก',
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        isSubmitting = true;
+
                         $('#actionInput').val('approve');
+                        $('#btnApprove, #btnReject').prop('disabled', true); // ปิดทั้ง 2 ปุ่ม
                         $('#approveForm').submit();
                     }
                 });
             });
 
-            // ❌ ปุ่ม "ไม่อนุมัติ"
+            // เมื่อกดปุ่ม "ไม่อนุมัติ"
             $('#btnReject').click(function(e) {
-                const reasonBox = $('#reject-reason-box');
-                const reason = $('#reason').val().trim();
+                if (isSubmitting) return; // ✅ ป้องกันกดรัว
 
-                reasonBox.show();
+                const reason = $('#reason').val().trim();
+                $('#reject-reason-box').show();
 
                 if (reason === '') {
                     e.preventDefault();
@@ -215,7 +229,11 @@
 
                     $('#reason').focus();
                 } else {
+                    isSubmitting = true;
+
                     $('#actionInput').val('reject');
+                    $('#btnApprove, #btnReject').prop('disabled', true);
+                    $('#approveForm').submit();
                 }
             });
         });

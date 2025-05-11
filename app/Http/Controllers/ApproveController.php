@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MailHelper;
 use App\Models\Approve;
+use App\Models\ApproveStaff;
+use App\Models\Exgroup;
+use App\Models\Expense;
 use App\Models\GroupSpecial;
 use App\Models\User;
 use App\Models\Valldataemp;
@@ -12,6 +15,7 @@ use App\Models\Vbookingall;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ApproveController extends Controller
@@ -42,32 +46,30 @@ class ApproveController extends Controller
         $bu = BuEmp($expense->empid);
         // เช็คกลุ่ม
 
-        $groupapprove = GroupSpecial::where('empid',$expense->empid)->where('deleted',0)->first();
+        $groupapprove = GroupSpecial::where('empid', $expense->empid)->where('deleted', 0)->first();
         $groupData = $groupapprove->groupapprove ?? 1;
         $extype = $expense->extype ?? 1;
 
-        if($extype == 3){
+        if ($extype == 3) {
             if ($approve->typeapprove == 2) {
 
-                $nextStepApprove = Approvestep($bu, $extype , 2,$groupData);
+                $nextStepApprove = Approvestep($bu, $extype, 2, $groupData);
                 $nextempid = $nextStepApprove['empid'];
                 $nextemail = $nextStepApprove['email'];
                 $nextfullname = $nextStepApprove['fullname'];
-
             }
-        }else{
+        } else {
             // dd($extype);
             if ($approve->typeapprove == 4) {
-                if($extype == 2){
-                    $nextStepApprove = Approvestep($bu, 1 , 2);
-                }else{
-                    $nextStepApprove = Approvestep($bu, $extype , 2);
+                if ($extype == 2) {
+                    $nextStepApprove = Approvestep($bu, 1, 2);
+                } else {
+                    $nextStepApprove = Approvestep($bu, $extype, 2);
                 }
 
                 $nextempid = $nextStepApprove['empid'];
                 $nextemail = $nextStepApprove['email'];
                 $nextfullname = $nextStepApprove['fullname'];
-
             }
         }
 
@@ -75,14 +77,14 @@ class ApproveController extends Controller
 
         $exMail = '';
         $exName = '';
-        if($extype == 2 || $extype == 3){
+        if ($extype == 2 || $extype == 3) {
             $vAllemp = Valldataemp::where('CODEMPID', $expense->empid)->where('STAEMP', '!=', '9')->first();
             $exMail = $vAllemp->EMAIL;
             $exName = $vAllemp->NAMFIRSTT . ' ' . $vAllemp->NAMLASTT;
         }
 
 
-        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date', 'nextempid', 'nextemail', 'nextfullname','exName','exMail'));
+        return view('approve.approve', compact('approve', 'expense', 'user', 'booking', 'departure_date', 'return_date', 'nextempid', 'nextemail', 'nextfullname', 'exName', 'exMail'));
     }
 
 
@@ -158,9 +160,9 @@ class ApproveController extends Controller
                 $nextemail = 'kamolwan.b@bgiglass.com';
                 $nextfullname = 'กมลวรรณ บรรชา';
                 // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (HR ผุู้จัดการฝ่าย)
-                if($approve->typeapprove == 2){
+                if ($approve->typeapprove == 2) {
                     $nextType = 1;
-                }else{
+                } else {
                     $nextType = $approve->typeapprove + 1;
                 }
 
@@ -202,7 +204,7 @@ class ApproveController extends Controller
         }
 
         // บัญชีอนุมัติเรียบร้อย
-        if($approve->typeapprove == 6 && $approve->statusapprove === 1){
+        if ($approve->typeapprove == 6 && $approve->statusapprove === 1) {
             // อนุมัติขั้นตอนสุดท้ายเสร็จ
             // $linksuccess = route('approve.magic.login', ['token' => $token]);
 
@@ -230,69 +232,163 @@ class ApproveController extends Controller
         ]);
     }
 
-    public function showgroup($id){
-        return view('approve.approve_group');
+    public function showgroup($id,$type)
+    {
+        //ดึงรายการ approve ทั้งหมดในกลุ่ม
+        $approve = Approve::where('exgroup', $id)
+        ->where('typeapprove',$type)
+        ->orderBy('typeapprove', 'desc')
+        ->first();
+
+        //ดึงรายการเบิกทั้งหมดในกลุ่ม พร้อม relations
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+            ->where('exgroup', $id)
+            ->get();
+        $makeuserempid = $approve->empid;
+        //ดึงข้อมูลกลุ่ม
+        $exgroup = Exgroup::findOrFail($id);
+
+        $nextstaffgroup = ApproveStaff::where('group', function ($query) use ($makeuserempid) {
+            $query->select('group')
+                ->from('approvestaff')
+                ->where('empid', $makeuserempid)
+                ->where('status', 1)
+                ->where('deleted', 0)
+                ->limit(1);
+        })
+            ->where('step', 2)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->first();
+        // dd($nextstaffgroup);
+        if($type == 5){
+            $nextempid = '99999999';
+            $nextfullname = 'หน่วยงานบัญชี';
+            $nextemail = 'account_auto@bgiglass.com';
+        }else{
+            $nextempid = $nextstaffgroup->empid ?? '';
+            $nextfullname = $nextstaffgroup->fullname ?? '';
+            // $nextemail = $nextstaffgroup->email ?? '';
+            $nextemail = 'Kamolwan.b@bgiglass.com';
+        }
+
+        return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail'));
     }
 
+    public function confirmgroup(Request $request, $id)
+    {
 
-    // public function confirmNextStep(Request $request, $id)
-    // {
-    //     $approve = Approve::findOrFail($id);
+        $approve = Exgroup::findOrFail($id);
+        $approveex = Approve::where('exgroup', $id)->first();
 
-    //     if ($approve->statusapprove !== 0) {
-    //         return back()->with('error', 'คุณได้ดำเนินการไปแล้ว');
-    //     }
+        $action = $request->input('action');
+        $reason = $request->input('reason');
+        $typeapprove = $request->input('typeapprove');
+        $approvename = $request->input('approvename');
+        $nextempid = $request->input('nextempid');
+        $nextfullname = $request->input('nextfullname');
+        $nextemail = $request->input('nextemail');
+        $expenseidgroup = $request->input('expenseidgroup');
+        $groupdate = $request->filled('groupdate')
+            ? Carbon::parse($request->input('groupdate'))->format('d/m/Y')
+            : null;
+        $expensegroupdata = Approve::where('exgroup', $id)
+        ->where('deleted',0)
+        ->where('status',1)
+        ->where('typeapprove',$typeapprove)
+        ->get();
 
-    //     if (now()->greaterThan($approve->token_expires_at)) {
-    //         return back()->with('error', 'ลิงก์หมดอายุแล้ว');
-    //     }
 
-    //     $approve->statusapprove = $request->action === 'approve' ? 1 : 2;
-    //     $approve->save();
 
-    //     // ✅ หากอนุมัติสำเร็จ → สร้าง approve ถัดไป
-    //     if ($approve->statusapprove === 1) {
-    //         // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (บัญชี)
-    //         $nextType = $approve->typeapprove + 1;
+        if ($approve->statusapprove !== 0) {
+            return back()->with([
+                'message' => 'คุณได้ดำเนินการไปแล้ว',
+                'class' => 'error'
+            ]);
+        }
 
-    //         $nextEmpId = '66000111';
-    //         $nextEmail = 'accounting@company.com';
-    //         $nextName = 'บัญชีตรวจสอบ';
 
-    //         $token = Str::random(64);
-    //         $nextApprove = Approve::create([
-    //             'exid' => $approve->exid,
-    //             'typeapprove' => $nextType,
-    //             'empid' => $nextEmpId,
-    //             'email' => $nextEmail,
-    //             'approvename' => $nextName,
-    //             'emailstatus' => 1,
-    //             'statusapprove' => 0,
-    //             'login_token' => $token,
-    //             'token_expires_at' => now()->addDays(10),
-    //         ]);
+        if (now()->greaterThan($approveex->token_expires_at)) {
+            return back()->with([
+                'message' => 'ลิงก์หมดอายุแล้ว',
+                'class' => 'error'
+            ]);
+        }
 
-    //         // ✅ ส่งอีเมลลิงก์อนุมัติรอบถัดไป
-    //         $link = route('approve.magic.login', ['token' => $token]);
+        if ($action === 'reject' && empty($reason)) {
+            return back()->with([
+                'message' => 'กรุณากรอกเหตุผลที่ไม่อนุมัติ',
+                'class' => 'error'
+            ]);
+        }
 
-    //         $data = [
-    //             'type' => $nextType,
-    //             'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
-    //             'name' => $nextName,
-    //             'full_name' => $approve->approvename,
-    //             'departuredate' => $approve->expense?->departuredate ?? '',
-    //             'link' => $link,
-    //         ];
+        try {
+            DB::beginTransaction();
 
-    //         MailHelper::sendExternalMail(
-    //             $nextEmail,
-    //             'อนุมัติการเบิกเบี้ยเลี้ยง (ขั้นตอนถัดไป)',
-    //             'mails.exapprove',
-    //             $data,
-    //             'Expense Claim System'
-    //         );
-    //     }
+            // 2. อัปเดต Approve ทั้งหมดในกลุ่มนี้
+            Approve::where('exgroup', $id)->where('typeapprove', $typeapprove)->update([
+                'statusapprove' => ($action === 'approve') ? 1 : 2,
+                'remark' => $reason ?? null,
+            ]);
+            $nexttypeapprove = $typeapprove+1;
+            // 3. ถ้า approve สร้าง approve ใหม่ (ขั้นถัดไป)
+            $token = Str::random(64);
+            if ($action === 'approve') {
+                foreach ($expensegroupdata as $exid) {
+                    Approve::create([
+                        'exid' => $exid->exid,
+                        'typeapprove' => $nexttypeapprove,
+                        'empid' => $nextempid,
+                        'email' => $nextemail,
+                        'approvename' => $nextfullname,
+                        'emailstatus' => 1,
+                        'statusapprove' => 0,
+                        'login_token' => $token,
+                        'token_expires_at' => now()->addDays(10),
+                        'exgroup' => $id,
+                    ]);
+                }
 
-    //     return back()->with('success', 'บันทึกผลอนุมัติเรียบร้อย');
-    // }
+                    //อัปเดต exgroup
+                    $approve->typeapprove = $nexttypeapprove;
+                    $approve->statusapprove = 0;
+                    if($typeapprove == 4){
+                    $approve->finalempid = $nextempid;
+                    $approve->finalemail = $nextemail;
+                    }
+                    $approve->save();
+
+            }
+
+
+
+            DB::commit();
+
+            if($typeapprove == 4 || $typeapprove == 5){
+                $link = route('approve.magic.login', ['token' => $token]);
+                // ส่งเมลแจ้งขั้นถัดไปหลัง commit
+                MailHelper::sendExternalMail(
+                    $nextemail,
+                    'แจ้งเตือนการอนุมัติรายการกลุ่ม',
+                    'mails.groupapprove',
+                    [
+                        'name' => $nextfullname,
+                        'groupid' => $id,
+                        'count' => $expensegroupdata->count(),
+                        'groupdate' => $groupdate,
+                        'checkname' => $approvename,
+                        'link' => $link
+                    ],
+                    'รายการขออนุมัติกลุ่ม EXGROUP-' . $id . 'วันที่ ' . $groupdate
+                );
+            }
+
+
+            return redirect()->route('approve.page.group', ['id' => $id,'type'=>$typeapprove])
+                ->with(['message' => 'บันทึกผลอนุมัติแล้ว', 'class' => 'success']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+        }
+    }
 }

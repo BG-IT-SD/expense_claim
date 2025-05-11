@@ -65,7 +65,7 @@ class ApproveLoginController extends Controller
         session()->regenerate();
 
         if($checkgroup > 0){
-            return redirect()->route('approve.page.group', ['id' => $approve->exgroup]);
+            return redirect()->route('approve.page.group', ['id' => $approve->exgroup,'type'=>$approve->typeapprove]);
         }else{
             return redirect()->route('approve.page', ['id' => $approve->id]);
         }

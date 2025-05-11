@@ -44,6 +44,7 @@ if (!function_exists('type_approve_text')) {
             3 => '<span class="badge rounded-pill bg-label-info"><span class="mdi mdi-account-check"></span>HRตรวจสอบข้อมูล</span>',
             4 => '<span class="badge rounded-pill bg-label-primary"><span class="mdi mdi-account-check"></span>อนุมัติจากผู้จัดการส่วนHR</span>',
             5 => '<span class="badge rounded-pill bg-label-success"><span class="mdi mdi-account-check"></span>อนุมัติจากผู้จัดการฝ่ายHR</span>',
+            6 => '<span class="badge rounded-pill bg-label-success"><span class="mdi mdi-account-check"></span>อนุมัติจากบัญชี</span>',
             default => '<span class="badge bg-warning text-dark">ประเภทไม่ระบุ</span>',
         };
     }
@@ -66,6 +67,7 @@ if (!function_exists('hr_type_approve_text')) {
             3 => '<span class="badge rounded-pill bg-label-info"><span class="mdi mdi-account-check"></span>HRตรวจสอบข้อมูล</span>',
             4 => '<span class="badge rounded-pill bg-label-primary"><span class="mdi mdi-account-check"></span>อนุมัติจากผู้จัดการส่วนHR</span>',
             5 => '<span class="badge rounded-pill bg-label-success"><span class="mdi mdi-account-check"></span>อนุมัติจากผู้จัดการฝ่ายHR</span>',
+            6 => '<span class="badge rounded-pill bg-label-success"><span class="mdi mdi-account-check"></span>อนุมัติจากบัญชี</span>',
             default => '<span class="badge bg-secondary">ประเภทไม่ระบุ</span>',
         };
     }

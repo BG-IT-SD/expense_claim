@@ -30,7 +30,14 @@ class Exgroup extends Model
         'expresswaytoll',
         'publictransportfare',
         'otherexpenses',
+        'accountempid',
+        'accountemail'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'checkempid', 'empid');
+    }
 
     public function CreatedBy()
     {
