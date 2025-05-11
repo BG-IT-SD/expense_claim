@@ -19,6 +19,8 @@ class CreateExgroupsTable extends Migration
             $table->string('nextemail',255);
             $table->string('finalempid', 20);
             $table->string('finalemail',255);
+            $table->string('accountempid', 20);
+            $table->string('accountemail',255);
 
             // ค่าใช้จ่าย
             $table->decimal('totalfood', 10, 2)->nullable(); // ราคาค่าอาหารรวมกลุ่ม

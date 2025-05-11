@@ -15,6 +15,7 @@
                                 <thead class="table-secondary">
                                     <tr>
                                         <th>ลำดับ</th>
+                                        <th>EXID</th>
                                         <th>สถานที่ไปปฏิบัติงาน</th>
                                         <th>บริษัท</th>
                                         <th>รหัสพนักงาน</th>
@@ -68,6 +69,7 @@
                                             $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
                                             $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
                                             $sum_total += $total;
+                                            $sumtotalother = ($sum_express + $sum_publictransport) + $sum_other;
                                         @endphp
                                         <tr>
                                             <td>
@@ -75,6 +77,7 @@
                                                 <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
 
                                             </td>
+                                            <td> {{ 'EX'.$expense->id }}</td>
                                             <td>{{ $expense->vbooking->locationbu }}</td>
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
@@ -97,7 +100,7 @@
                                     @endforeach
 
                                     <tr class="table-warning fw-bold">
-                                        <td colspan="11">รวม</td>
+                                        <td colspan="12">รวม</td>
                                         <td>{{ number_format($sum_food, 2) }}
                                             <input type="hidden" name="totalfood" value="{{ $sum_food ?? 0 }}">
                                         </td>
@@ -117,6 +120,51 @@
                                         <td>
                                             {{ number_format($sum_total, 2) }}
                                             <input type="hidden" name="total" value="{{ $sum_total ?? 0 }}">
+                                            <input type="hidden" name="totalother" value="{{ $sumtotalother ?? 0 }}">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-sm-12 mt-3 mb-3">
+                            <table class="table table-bordered text-center">
+                                <thead>
+                                    <tr class="table-info">
+                                        <th>
+                                            <h6>รายละเอียด</h6>
+                                        </th>
+                                        <th>
+                                            <h6>จำนวนเงินขอเบิก / บาท</h6>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>ค่าอาหาร</td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-primary waves-effect waves-light"> {{ number_format($sum_food, 2) }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ค่าเดินทาง และ อื่นๆ</td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ number_format($sumtotalother, 2) }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ค่าน้ำมัน</td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ number_format($sum_gas, 2) }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>รวม</td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ number_format($sum_total, 2) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>

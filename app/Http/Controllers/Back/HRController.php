@@ -740,7 +740,10 @@ class HRController extends Controller
                 'nextemail' => $request->nextemail,
                 'totalfood' => $request->totalfood,
                 'totalfuel' => $request->totalfuel,
-                'totalother' => $request->otherexpenses,
+                'expresswaytoll' =>  $request->expresswaytoll,
+                'publictransportfare' =>  $request->publictransportfare,
+                'otherexpenses' =>  $request->otherexpenses,
+                'totalother' => $request->totalother,
                 'total' => $request->total,
             ]);
 
@@ -772,16 +775,16 @@ class HRController extends Controller
             }
 
             // 4. Update approve (typeapprove != 4) เพิ่ม exgroup
-            Approve::whereIn('exid', $request->expense_id)
-                ->where('typeapprove', '!=', 4)
-                ->update([
-                    'exgroup' => $exgroupId
-                ]);
+            // Approve::whereIn('exid', $request->expense_id)
+            //     ->where('typeapprove', '!=', 4)
+            //     ->update([
+            //         'exgroup' => $exgroupId
+            //     ]);
 
             DB::commit();
 
             //ส่งเมลหลังจาก Commit
-            $nowDate = Carbon::now();
+            $nowDate = Carbon::now()->format('d/m/Y');
 
             $link = route('approve.magic.login', ['token' => $token]);
 
