@@ -133,10 +133,15 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('HR.export.group.pdf', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
-                                                <i class="mdi mdi-file-pdf"></i> PDF
+                                                <span class="mdi mdi-file-pdf-box"></span>
+                                                 {{-- PDF --}}
                                             </a>
                                             <a href="{{ route('HR.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success">
-                                                <i class="mdi mdi-file-excel"></i> Excel
+                                                <span class="mdi mdi-file-excel"></span>
+                                                {{-- Excel --}}
+                                            </a>
+                                            <a href="{{ route('HR.groupdetail', $exgroup->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                <span class="mdi mdi-list-box"></span>
                                             </a>
                                         </td>
 

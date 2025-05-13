@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Termwind\Components\Hr;
 use Whoops\Run;
 
 // Auth
@@ -177,6 +178,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
+            Route::get('groupdetail/{id}',[HRController::class,'groupDetail'])->name('groupdetail');
 
 
         });

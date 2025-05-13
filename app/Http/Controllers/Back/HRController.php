@@ -820,4 +820,16 @@ class HRController extends Controller
             ], 500);
         }
     }
+
+    public function groupDetail($id){
+
+        //ดึงรายการเบิกทั้งหมดในกลุ่ม
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+            ->where('exgroup', $id)
+            ->get();
+        //ดึงข้อมูลกลุ่ม
+        $exgroup = Exgroup::findOrFail($id);
+
+        return view('back.hr.groupdetail',compact('expenses','exgroup'));
+    }
 }
