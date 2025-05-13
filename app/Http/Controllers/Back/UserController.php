@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Back;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\Role;
+use App\Models\Sigfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -52,7 +54,8 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $users = User::find($id);
+        $users = User::with('sigfile')->findOrFail($id);
+        // dd($users);
         return view('back.user.edit', compact('users'));
     }
 
@@ -121,4 +124,29 @@ class UserController extends Controller
             return response()->json(['message' => 'แก้ไขข้อมูลไม่สำเร็จ', 'class' => 'error'], 200);
         }
     }
+
+    public function uploadSignature(Request $request)
+    {
+        $request->validate([
+            'empid' => 'required',
+            'sigfile' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        $file = $request->file('sigfile');
+        $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('images/signatures', $filename, 'public');
+
+        Sigfile::updateOrCreate(
+            ['empid' => $request->empid], // ค้นหา record นี้
+            [
+                'path' => $path,
+                'etc' => $file->getClientOriginalName(),
+            ]
+        );
+
+        return response()->json(['message' => 'อัปโหลดลายเซ็นเรียบร้อย']);
+    }
+
+
+
 }

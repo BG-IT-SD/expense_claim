@@ -232,13 +232,13 @@ class ApproveController extends Controller
         ]);
     }
 
-    public function showgroup($id,$type)
+    public function showgroup($id, $type)
     {
         //ดึงรายการ approve ทั้งหมดในกลุ่ม
         $approve = Approve::where('exgroup', $id)
-        ->where('typeapprove',$type)
-        ->orderBy('typeapprove', 'desc')
-        ->first();
+            ->where('typeapprove', $type)
+            ->orderBy('typeapprove', 'desc')
+            ->first();
 
         //ดึงรายการเบิกทั้งหมดในกลุ่ม พร้อม relations
         $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
@@ -261,11 +261,11 @@ class ApproveController extends Controller
             ->where('deleted', 0)
             ->first();
         // dd($nextstaffgroup);
-        if($type == 5){
+        if ($type == 5) {
             $nextempid = '99999999';
             $nextfullname = 'หน่วยงานบัญชี';
             $nextemail = 'account_auto@bgiglass.com';
-        }else{
+        } else {
             $nextempid = $nextstaffgroup->empid ?? '';
             $nextfullname = $nextstaffgroup->fullname ?? '';
             // $nextemail = $nextstaffgroup->email ?? '';
@@ -293,10 +293,10 @@ class ApproveController extends Controller
             ? Carbon::parse($request->input('groupdate'))->format('d/m/Y')
             : null;
         $expensegroupdata = Approve::where('exgroup', $id)
-        ->where('deleted',0)
-        ->where('status',1)
-        ->where('typeapprove',$typeapprove)
-        ->get();
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->where('typeapprove', $typeapprove)
+            ->get();
 
 
 
@@ -330,7 +330,7 @@ class ApproveController extends Controller
                 'statusapprove' => ($action === 'approve') ? 1 : 2,
                 'remark' => $reason ?? null,
             ]);
-            $nexttypeapprove = $typeapprove+1;
+            $nexttypeapprove = $typeapprove + 1;
             // 3. ถ้า approve สร้าง approve ใหม่ (ขั้นถัดไป)
             $token = Str::random(64);
             if ($action === 'approve') {
@@ -349,24 +349,26 @@ class ApproveController extends Controller
                     ]);
                 }
 
-                    //อัปเดต exgroup
-                    $approve->typeapprove = $nexttypeapprove;
-                    $approve->statusapprove = 0;
-                    if($typeapprove == 4){
+                //อัปเดต exgroup
+                $approve->typeapprove = $nexttypeapprove;
+                $approve->statusapprove = 0;
+                if ($typeapprove == 4) {
                     $approve->finalempid = $nextempid;
                     $approve->finalemail = $nextemail;
-                    }
-                    $approve->save();
-
+                }
+                $approve->save();
+            } else {
+                // ถ้าไม่อนุมัติ อัปเดต exgroup
+                $approve->statusapprove = 2;
+                $approve->save();
             }
 
 
 
             DB::commit();
 
-            if($typeapprove == 4 || $typeapprove == 5){
+            if (in_array($typeapprove, [4, 5])) {
                 $link = route('approve.magic.login', ['token' => $token]);
-                // ส่งเมลแจ้งขั้นถัดไปหลัง commit
                 MailHelper::sendExternalMail(
                     $nextemail,
                     'แจ้งเตือนการอนุมัติรายการกลุ่ม',
@@ -379,12 +381,12 @@ class ApproveController extends Controller
                         'checkname' => $approvename,
                         'link' => $link
                     ],
-                    'รายการขออนุมัติกลุ่ม EXGROUP-' . $id . 'วันที่ ' . $groupdate
+                    'รายการขออนุมัติกลุ่ม EXGROUP-' . $id . ' วันที่ ' . $groupdate
                 );
             }
 
 
-            return redirect()->route('approve.page.group', ['id' => $id,'type'=>$typeapprove])
+            return redirect()->route('approve.page.group', ['id' => $id, 'type' => $typeapprove])
                 ->with(['message' => 'บันทึกผลอนุมัติแล้ว', 'class' => 'success']);
         } catch (\Throwable $e) {
             DB::rollBack();

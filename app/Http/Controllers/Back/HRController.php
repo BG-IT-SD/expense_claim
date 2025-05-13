@@ -66,6 +66,11 @@ class HRController extends Controller
         return view('back.hr.approved', compact('expenses', 'page'));
     }
 
+    public function groupList(){
+        $exgroups = Exgroup::where('deleted', 0)->orderByDesc('id')->get();
+        return view('back.hr.grouplist',compact('exgroups'));
+    }
+
     public function hrdriver()
     {
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
@@ -579,7 +584,7 @@ class HRController extends Controller
 
 
     public function reject(Request $request)
-    { {
+    {
             $request->validate([
                 'rejectremark' => 'required',
                 'rejectidexpense' => 'required'
@@ -640,7 +645,6 @@ class HRController extends Controller
                     'class' => 'warning'
                 ], 400);
             }
-        }
     }
     /**
      * Remove the specified resource from storage.

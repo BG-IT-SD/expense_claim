@@ -4,6 +4,7 @@ use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Back\DistanceRateController;
+use App\Http\Controllers\Back\ExportController;
 use App\Http\Controllers\Back\FuelPrice91Controller;
 use App\Http\Controllers\Back\FuelPriceController;
 use App\Http\Controllers\Back\GrouppriceController;
@@ -159,6 +160,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
             Route::get('view/{id}/{type}', [HRController::class, 'edit'])->name('view');
             Route::get('approved',[HRController::class,'history'])->name('approved');
+            Route::get('grouplist',[HRController::class,'groupList'])->name('grouplist');
             // เพิ่มเติม: หากมี create, store, update, destroy
             // Route::get('create', [HRController::class, 'create'])->name('create');
             // Route::post('/', [HRController::class, 'store'])->name('store');
@@ -173,7 +175,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('hrnextapprove',[HRController::class,'hrNextApprove'])->name('hrnextapprove');
             Route::post('hrheadapprove',[HRController::class,'hrHextApprove'])->name('hrheadapprove');
 
-
+            Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
+            Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
 
 
         });
@@ -185,6 +188,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::prefix('User')->name('User.')->group(function () {
                 Route::get('/', [UserController::class, 'index'])->name('index');
                 Route::put('{id}/reset', [UserController::class, 'ResetPassword'])->name('reset');
+                Route::post('upload-signature', [UserController::class, 'uploadSignature'])->name('uploadSignature');
 
                 Route::resource('/', UserController::class)
                     ->parameters(['' => 'user'])

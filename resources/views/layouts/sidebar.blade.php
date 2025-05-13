@@ -21,7 +21,7 @@
             <span class="menu-header-text" data-i18n="Normal">Normal</span>
         </li>
         <!-- Normal -->
-        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create')  || Route::is('Expense.history')) active open @endif ">
+        <li class="menu-item @if (Route::is('Expense.index') || Route::is('Expense.create') || Route::is('Expense.history')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
                 <div data-i18n="เบิกค่าใช้จ่าย">เบิกค่าใช้จ่าย</div>
@@ -60,7 +60,7 @@
         </li> --}}
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['Driver']) &&
-                collect($userModuleRoles['Driver'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                    collect($userModuleRoles['Driver'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="Other Driver">Other Driver</span>
             </li>
@@ -77,7 +77,7 @@
                         <div data-i18n="ฟอร์มการเบิก">ฟอร์มการเบิก</div>
                     </a>
                 </li> --}}
-                    <li class="menu-item @if (Route::is('DriverClaim.index')  || Route::is('DriverClaim.create')) active @endif">
+                    <li class="menu-item @if (Route::is('DriverClaim.index') || Route::is('DriverClaim.create')) active @endif">
                         <a href="{{ route('DriverClaim.index') }}" class="menu-link">
                             <div data-i18n="รายการเบิก">รายการเบิก</div>
                             {{-- <div class="badge bg-danger rounded-pill ms-auto">2</div> --}}
@@ -110,7 +110,7 @@
 
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['Tech']) &&
-                collect($userModuleRoles['Tech'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                    collect($userModuleRoles['Tech'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="Other Tech">Other Tech</span>
             </li>
@@ -173,12 +173,19 @@
 
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['HR']) &&
-                collect($userModuleRoles['HR'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                    collect($userModuleRoles['HR'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="HR">HR</span>
             </li>
             <!-- HR -->
-            <li class="menu-item @if (Route::is('HR.index') || Route::is('HR.edit') || Route::is('HR.approved') || Route::is('HR.view') || Route::is('HR.hrdriver') || Route::is('HR.driverapproved') || Route::is('HR.hrnextapprove')) active open @endif ">
+            <li class="menu-item @if (Route::is('HR.index') ||
+                    Route::is('HR.edit') ||
+                    Route::is('HR.approved') ||
+                    Route::is('HR.view') ||
+                    Route::is('HR.hrdriver') ||
+                    Route::is('HR.driverapproved') ||
+                    Route::is('HR.hrnextapprove') ||
+                    Route::is('HR.grouplist')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-check-outline"></i>
                     <div data-i18n="HR">HR</div>
@@ -213,13 +220,13 @@
                     {{-- <li class="menu-header fw-medium mt-4">
                         <span class="menu-header-text" data-i18n="ตรวจสอบข้อมูล">ตรวจสอบข้อมูล</span>
                     </li> --}}
-                     <li class="menu-item @if (Route::is('HR.approved') || Route::is('HR.hrnextapprove')) active @endif">
+                    <li class="menu-item @if (Route::is('HR.approved') || Route::is('HR.hrnextapprove')) active @endif">
                         <a href="{{ route('HR.approved') }}" class="menu-link">
                             <div data-i18n="รายการตรวจสอบแล้ว">รายการตรวจสอบแล้ว</div>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item @if (Route::is('HR.grouplist')) active @endif">
+                        <a href="{{ route('HR.grouplist') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติ">รายการอนุมัติ</div>
                         </a>
                     </li>
@@ -235,6 +242,30 @@
             </li>
         @endif
 
+        @if (isset($userModuleRoles['AllSystems']) ||
+                (isset($userModuleRoles['HR']) &&
+                    collect($userModuleRoles['HR'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+            <li class="menu-header fw-medium mt-4">
+                <span class="menu-header-text" data-i18n="บัญชี">บัญชี</span>
+            </li>
+            <!-- Account -->
+            <li class="menu-item ">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons mdi mdi-currency-usd"></i>
+                    <div data-i18n="บัญชี">บัญชี</div>
+
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item active">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="รายการกลุ่มอนุมัติ">รายการกลุ่มอนุมัติ</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @endif
+
+
         @if (isset($userModuleRoles['AllSystems']) || isset($userModuleRoles['Setting']) || isset($userModuleRoles['User']))
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="Admin">Admin</span>
@@ -242,7 +273,7 @@
         @endif
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['User']) &&
-                collect($userModuleRoles['User'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                    collect($userModuleRoles['User'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             {{-- User --}}
             <li class="menu-item  @if (Route::is('User.index') || Route::is('Role.index') || Route::is('Role.create') || Route::is('User.create')) active open @endif ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -272,7 +303,7 @@
         {{-- Setting --}}
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['Setting']) &&
-                collect($userModuleRoles['Setting'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                    collect($userModuleRoles['Setting'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             <li class="menu-item  @if (Route::is('FuelPrice91.index') ||
                     Route::is('Pricepermeal.index') ||
                     Route::is('Pricepermeal.create') ||

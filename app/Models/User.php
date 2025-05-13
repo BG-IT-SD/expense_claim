@@ -31,6 +31,11 @@ class User extends Authenticatable
         'modified_by',
     ];
 
+    public function sigfile()
+    {
+        return $this->hasOne(Sigfile::class, 'empid', 'empid');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
