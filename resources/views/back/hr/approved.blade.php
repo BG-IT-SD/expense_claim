@@ -102,6 +102,7 @@
                                     <th>ID | Name </th>
                                     <th>BU</th>
                                     <th>Location</th>
+                                    <th>รวมเบิก</th>
                                     <th>Type Approve</th>
                                     <th>Approve</th>
                                     {{-- <th>Approve Name</th> --}}
@@ -135,7 +136,8 @@
                                         <td class="text-wrap">
                                             {{ BuEmp($expense->empid) }}
                                         </td>
-                                        <td>{{ $expense->vbooking->location_name }}</td>
+                                        <td>{{ $expense->vbooking->locationbu }}</td>
+                                        <td>{{ $expense->totalprice ?? 0 }}</td>
                                         <td>
                                             @if (!is_null($expense->latestApprove->typeapprove))
                                                 {!! type_approve_text($expense->latestApprove->typeapprove, $expense->latestApprove->typeapprove) !!}

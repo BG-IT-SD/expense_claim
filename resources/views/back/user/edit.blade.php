@@ -28,7 +28,8 @@
                             {{-- <h5 class="card-tile mb-0">From New Data</h5> --}}
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('User.update', $users->id) }}" method="POST">
+                            <form action="{{ route('User.update', $users->id) }}" method="POST"
+                                enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
 
@@ -63,9 +64,38 @@
                                             </li>
                                             <li class="d-flex align-items-center mb-1">
                                                 <i class="mdi mdi-lock-reset mdi-24px"></i>
-                                                <button type="button" id="resetpassword" class="btn btn-sm btn-danger">Reset Password</button>
+                                                <button type="button" id="resetpassword"
+                                                    class="btn btn-sm btn-danger">Reset Password</button>
                                             </li>
+                                            {{-- <li class="d-flex align-items-center mb-1">
+                                                <i class="mdi mdi-draw mdi-24px"></i>
+                                                <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#signatureModal">
+                                                    อัปโหลดลายเซ็น
+                                                </button>
+                                            </li> --}}
                                         </ul>
+                                    </div>
+                                    <div class="col-md-12 mb-3 mt-3">
+                                        <h6>ลายเซ็น</h6>
+                                        @if ($users->sigfile && $users->sigfile->path)
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="card border shadow-sm p-3">
+                                                        {{-- <h6 class="text-muted">ลายเซ็นเดิม</h6> --}}
+                                                        <img src="{{ asset('storage/' . $users->sigfile->path) }}"
+                                                            class="img-thumbnail" style="max-height:150px;">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6"></div>
+                                            </div>
+                                        @else
+                                            <p class="text-danger">ยังไม่มีลายเซ็น</p>
+                                        @endif
+
+                                        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
+                                            data-bs-target="#signatureModal">
+                                            อัปโหลดลายเซ็น
+                                        </button>
                                     </div>
 
                                     <div class="col-md-12 mb-3">
@@ -80,8 +110,10 @@
                                                     Inactive</option>
                                             </select>
                                             <label for="status">status</label>
-                                            <input type="hidden" name="userid" id="userid" value="{{ $users->id }}">
-                                            <input type="hidden" name="empid" id="empid" value="{{ $users->empid }}">
+                                            <input type="hidden" name="userid" id="userid"
+                                                value="{{ $users->id }}">
+                                            <input type="hidden" name="empid" id="empid"
+                                                value="{{ $users->empid }}">
                                         </div>
                                         @error('status')
                                             <div class="text-danger small">{{ $message }}</div>
@@ -104,10 +136,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="signatureForm" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="empid" value="{{ $users->empid }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="signatureModalLabel">อัปโหลดลายเซ็น</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="sigfile" class="form-label">เลือกลายเซ็น</label>
+                            <input type="file" class="form-control" name="sigfile" id="sigfile"
+                                accept="image/*,application/pdf" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 @section('jscustom')
-<script>
-    const UserResetUrl = "{{ route('User.reset', ':id') }}";
-</script>
-<script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/usercreate.js']) }}"></script>
+    <script>
+        const UserResetUrl = "{{ route('User.reset', ':id') }}";
+        const UserSigUrl = "{{ route('User.uploadSignature') }}";
+    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/usercreate.js']) }}"></script>
 @endsection
