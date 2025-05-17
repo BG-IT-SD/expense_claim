@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Http\Controllers\Back;
+
+use App\Helpers\MailHelper;
+use App\Http\Controllers\Controller;
+use App\Models\Approve;
+use App\Models\Exgroup;
+use App\Models\Expense;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class AccountController extends Controller
+{
+    public function index()
+    {
+        $exgroups = Exgroup::where('deleted', 0)
+            ->where('typeapprove', 6)
+            ->orderByDesc('id')
+            ->get();
+        return view('back.account.index', compact('exgroups'));
+    }
+
+    public function manage($id)
+    {
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+            ->where('exgroup', $id)
+            ->get();
+        $exgroup = Exgroup::findOrFail($id);
+        $approvename = Auth::user()->fullname;
+        $approveempid = Auth::user()->empid;
+        $approveemail= Auth::user()->email;
+
+        return view('back.account.manage', compact('expenses', 'exgroup','approvename','approveempid','approveemail'));
+    }
+
+
+
+    public function saveExgroupApproval(Request $request)
+    {
+
+        $request->validate([
+            'expense_id' => 'required|array',
+            'statsapprove' => 'required|array',
+            'txtreason' => 'nullable|array',
+            'nettotalfood' => 'required',
+            'nettotalfuel' => 'required',
+            'netexpresswaytoll' => 'required',
+            'netpublictransportfare' => 'required',
+            'netotherexpenses' => 'required',
+            'nettotalother' => 'required',
+            'nettotal' => 'required',
+        ]);
+
+        $exgroupId = intval($request->input('exgroup_id'));
+
+        $exgroup = Exgroup::where('id', $exgroupId)
+            ->where('statusapprove', '!=', 1)
+            ->first();
+        // dd($exgroup);
+        if (!$exgroup) {
+            return redirect()->route('Account.index')->with([
+                'message' => 'รายการนี้ถูกอนุมัติแล้ว',
+                'class' => 'warning'
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            // loop อัปเดต statusapprove และ reason
+            $expenseIds = $request->input('expense_id', []);
+            $statuses = $request->input('statsapprove', []);
+            $reasons = $request->input('txtreason', []);
+            $fullnames = $request->input('fullname', []);
+            $accountempid = $request->input('accountempid');
+            $accountemail = $request->input('accountemail');
+            $paymentdate = $request->input('paymentdate');
+
+            foreach ($expenseIds as $index => $exid) {
+                $status = $statuses[$index];
+                $reason = $reasons[$index] ?? null;
+                $fullname = $fullnames[$index] ?? '';
+
+                $approve = Approve::where('exid', $exid)->where('typeapprove',6)->first();
+                if ($approve) {
+                    $expense_data = $approve->expense;
+                    $totalprice =  $approve->expense->totalprice;
+                    $exdate =  $expense_data->vbooking->departure_date;
+                    $pricedate = $exgroup->groupdate;
+                    $Tomail = EmailEmp($approve->expense->empid) ?? '';
+                    $approve->statusapprove = $status;
+                    $approve->remark = $reason;
+                    $approve->save();
+                    if ($Tomail != '') {
+                        if ($status == 1) {
+                            // ส่ง mail ว่า success
+                            $data = [
+                                'name' => $fullname, // user
+                                'price' => $totalprice,
+                                'pricedate' => $paymentdate,
+                                'expenseid' => $approve->exid, //exid
+                            ];
+
+                            MailHelper::sendExternalMail(
+                                $Tomail, // ผู้รับ
+                                'แจ้งยอดการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่',
+                                'mails.accountapporve', // ชื่อ blade view mail
+                                $data,
+                                'Expense Claim System EX' . $exid,
+                            );
+                        } elseif ($status == 2 || $status == 9) {
+                            $textreject = $status == 2 ? 'ไม่ผ่านการอนุมัติ' : 'ติดสถานะHold';
+                            // ส่ง mail ว่า reject หรือ Hold
+                            $data = [
+                                'name' => $fullname, // user
+                                'text' => $textreject,
+                                'expenseid' => $approve->exid, //exid
+                                'exdate' => $exdate,
+                                'remark' => $reason,
+                            ];
+                            // $Tomail
+                            MailHelper::sendExternalMail(
+                                'Kamolwan.b@bgiglass.com', // ผู้รับ
+                                'แจ้งผลการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่จากบัญชี',
+                                'mails.accounthold', // ชื่อ blade view mail
+                                $data,
+                                'Expense Claim System EX' . $exid,
+                            );
+                        }
+                    }
+                }
+            }
+            // อัปเดตยอดสุทธิใน exgroup
+            $exgroup->nettotalfood = $this->cleanNumber($request->input('nettotalfood'));
+            $exgroup->nettotalfuel = $this->cleanNumber($request->input('nettotalfuel'));
+            $exgroup->netexpresswaytoll = $this->cleanNumber($request->input('netexpresswaytoll'));
+            $exgroup->netpublictransportfare = $this->cleanNumber($request->input('netpublictransportfare'));
+            $exgroup->netotherexpenses = $this->cleanNumber($request->input('netotherexpenses'));
+            $exgroup->nettotalother = $this->cleanNumber($request->input('nettotalother'));
+            $exgroup->nettotal = $this->cleanNumber($request->input('nettotal'));
+            $exgroup->accountempid = $accountempid; // บัญชีคนอนุมัติ
+            $exgroup->accountemail = $accountemail; // emailบัญชีคนอนุมัติ
+            $exgroup->statusapprove = 1; // set เป็นอนุมัติ
+            $exgroup->paymentdate = $paymentdate; //วันที่จ่าย
+            $exgroup->save();
+
+            DB::commit();
+
+            return redirect()->route('Account.index')->with(['message' => 'บันทึกผลอนุมัติเรียบร้อย', 'class' => 'success']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('Account.index')->with(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage(), 'class' => 'danger']);
+        }
+    }
+
+    private function cleanNumber($value)
+    {
+        return floatval(str_replace(',', '', $value));
+    }
+}

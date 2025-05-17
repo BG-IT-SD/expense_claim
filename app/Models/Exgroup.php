@@ -23,6 +23,7 @@ class Exgroup extends Model
         'totalfuel',
         'totalother',
         'total',
+        'nettotal',
         'created_by',
         'modified_by',
         'status',
@@ -31,8 +32,27 @@ class Exgroup extends Model
         'publictransportfare',
         'otherexpenses',
         'accountempid',
-        'accountemail'
+        'accountemail',
+        // new
+        'netexpresswaytoll',
+        'netpublictransportfare',
+        'netotherexpenses',
+        'nettotalfood',
+        'nettotalother',
+        'nettotalfuel',
+        'paymentdate',
+
     ];
+
+    public function nextuser()
+    {
+        return $this->belongsTo(User::class, 'nextmpid', 'empid');
+    }
+
+    public function finaluser()
+    {
+        return $this->belongsTo(User::class, 'finalempid', 'empid');
+    }
 
     public function user()
     {

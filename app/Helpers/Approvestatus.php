@@ -221,3 +221,14 @@ if (!function_exists('Thaidatenow')) {
         return "{$day} {$month} {$year}";
     }
 }
+
+if (!function_exists('EmailEmp')) {
+    function EmailEmp($empid)
+    {
+        $user = Valldataemp::where('CODEMPID', $empid)
+            ->where('STAEMP', '!=', '9')
+            ->first();
+        $email = $user?->EMAIL ?? "";
+        return  $email;
+    }
+}
