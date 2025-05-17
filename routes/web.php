@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Back\AccountController;
 use App\Http\Controllers\Back\DistanceRateController;
 use App\Http\Controllers\Back\ExportController;
 use App\Http\Controllers\Back\FuelPrice91Controller;
@@ -180,6 +181,18 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
             Route::get('groupdetail/{id}',[HRController::class,'groupDetail'])->name('groupdetail');
 
+
+        });
+
+        // Account
+        Route::prefix('Account')
+        ->name('Account.')
+        ->middleware('check.module.access:Account,Staff|Admin|SuperAdmin')
+        ->group(function () {
+
+            Route::get('/', [AccountController::class, 'index'])->name('index');
+            Route::get('manage/{id}', [AccountController::class, 'manage'])->name('manage');
+            Route::post('approve', [AccountController::class, 'saveExgroupApproval'])->name('exgroup.approve');
 
         });
 

@@ -829,7 +829,11 @@ class HRController extends Controller
             ->get();
         //ดึงข้อมูลกลุ่ม
         $exgroup = Exgroup::findOrFail($id);
+        $create_by = $exgroup->CreatedBy->fullname ?? "";
+        $checked_by = $exgroup->user->fullname ?? "";
+        $nextuser = $exgroup->nextuser->fullname ?? "";
+        $finaluser = $exgroup->finaluser->fullname ?? "";
 
-        return view('back.hr.groupdetail',compact('expenses','exgroup'));
+        return view('back.hr.groupdetail',compact('expenses','exgroup','create_by','checked_by','nextuser','finaluser'));
     }
 }

@@ -12,6 +12,7 @@ class CreateExgroupsTable extends Migration
             $table->id();
             $table->date('groupdate'); // วันที่บันทึกกลุ่ม
             $table->time('grouptime'); // เวลาบันทึกกลุ่ม
+            $table->date('paymentdate');
             $table->tinyInteger('typeapprove');
             $table->tinyInteger('statusapprove');
             $table->string('checkempid', 20); // ผู้ตรวจสอบ
@@ -30,6 +31,12 @@ class CreateExgroupsTable extends Migration
             $table->decimal('otherexpenses', 10, 2)->nullable();
             $table->decimal('totalother', 10, 2)->nullable(); // รายการอื่นรวมกลุ่ม
             $table->decimal('total', 10, 2)->nullable(); // รวมทั้งหมด
+            $table->decimal('netexpresswaytoll', 10, 2)->nullable(); // รวมทั้งหมดหลังบัญชีอนุมัติ
+            $table->decimal('netpublictransportfare', 10, 2)->nullable();
+            $table->decimal('netotherexpenses', 10, 2)->nullable();
+            $table->decimal('nettotalfood', 10, 2)->nullable();
+            $table->decimal('nettotalother', 10, 2)->nullable();
+            $table->decimal('nettotal', 10, 2)->nullable();
 
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('deleted')->default(0);

@@ -243,21 +243,21 @@
         @endif
 
         @if (isset($userModuleRoles['AllSystems']) ||
-                (isset($userModuleRoles['HR']) &&
-                    collect($userModuleRoles['HR'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
+                (isset($userModuleRoles['Account']) &&
+                    collect($userModuleRoles['Account'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
             <li class="menu-header fw-medium mt-4">
                 <span class="menu-header-text" data-i18n="บัญชี">บัญชี</span>
             </li>
             <!-- Account -->
-            <li class="menu-item ">
+            <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage')) open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-currency-usd"></i>
                     <div data-i18n="บัญชี">บัญชี</div>
 
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item active">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage')) active @endif">
+                        <a href="{{ route('Account.index') }}" class="menu-link">
                             <div data-i18n="รายการกลุ่มอนุมัติ">รายการกลุ่มอนุมัติ</div>
                         </a>
                     </li>
