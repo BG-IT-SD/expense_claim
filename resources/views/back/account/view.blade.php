@@ -35,7 +35,7 @@
                                     <a href="#" class="btn btn-sm btn-danger" target="_blank">
                                         <span class="mdi mdi-file-pdf-box"></span>
                                     </a>
-                                    <a href="#" class="btn btn-sm btn-success">
+                                    <a href="{{ route('Account.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success"  target="_blank">
                                         <span class="mdi mdi-file-excel"></span>
                                     </a>
                                 </div>

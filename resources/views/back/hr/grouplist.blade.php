@@ -136,7 +136,7 @@
                                                 <span class="mdi mdi-file-pdf-box"></span>
                                                  {{-- PDF --}}
                                             </a>
-                                            <a href="{{ route('HR.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success">
+                                            <a href="{{ route('HR.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success" target="_blank">
                                                 <span class="mdi mdi-file-excel"></span>
                                                 {{-- Excel --}}
                                             </a>

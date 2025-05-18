@@ -19,12 +19,17 @@ class ExportController extends Controller
             ->where('exgroup', $id)
             ->get();
 
-        $pdf = Pdf::loadView('exports.group_pdf', compact('exgroup', 'expenses'))->setPaper('a4', 'landscape');
+            $pdf = Pdf::loadView('exports.group_pdf', compact('exgroup', 'expenses'))
+            ->setPaper('a4', 'landscape')
+            ->setOption('defaultFont', 'THSarabunNew');
         return $pdf->download("EXGROUP_{$id}.pdf");
     }
 
+
+
     public function exportGroupExcel($id)
     {
-        return Excel::download(new GroupExport($id), "EXGROUP_{$id}.xlsx");
+        $year = date('Y');
+        return Excel::download(new GroupExport($id), "EXGROUP_{$id}_{$year}.xlsx");
     }
 }
