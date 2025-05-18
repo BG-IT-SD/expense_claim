@@ -134,19 +134,16 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{-- <a href="{{ route('HR.export.group.pdf', $exgroup->id) }}"
-                                                class="btn btn-sm btn-danger" target="_blank">
-                                                <span class="mdi mdi-file-pdf-box"></span>
-                                            </a>
-                                            <a href="{{ route('HR.export.group.excel', $exgroup->id) }}"
-                                                class="btn btn-sm btn-success">
-                                                <span class="mdi mdi-file-excel"></span>
-                                            </a> --}}
                                             @if($exgroup->statusapprove == 0)
                                                 <a href="{{ route('Account.manage', $exgroup->id) }}" target="_blank"
                                                     class="btn btn-sm btn-primary">
                                                     <span class="mdi mdi-file-document-edit"></span> จัดการข้อมูล
                                                 </a>
+                                            @else
+                                            <a href="{{ route('Account.view', $exgroup->id) }}" target="_blank"
+                                                class="btn btn-sm btn-info">
+                                                <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                                            </a>
                                             @endif
 
                                         </td>

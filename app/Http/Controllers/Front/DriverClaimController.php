@@ -31,7 +31,7 @@ class DriverClaimController extends Controller
     public function history(){
         $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
         ->whereHas('latestApprove', function ($query) {
-            $query->whereIn('typeapprove', [1,3,4,5]);
+            $query->whereIn('typeapprove', [1,3,4,5,6]);
             // ->where('statusapprove', 1);
         })
         ->whereIn('extype', [2])

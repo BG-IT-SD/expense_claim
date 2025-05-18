@@ -35,6 +35,15 @@ class AccountController extends Controller
         return view('back.account.manage', compact('expenses', 'exgroup','approvename','approveempid','approveemail'));
     }
 
+    public function view($id){
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+            ->where('exgroup', $id)
+            ->get();
+        $exgroup = Exgroup::findOrFail($id);
+
+        return view('back.account.view', compact('expenses', 'exgroup'));
+    }
+
 
 
     public function saveExgroupApproval(Request $request)

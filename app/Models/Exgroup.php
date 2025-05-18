@@ -44,6 +44,11 @@ class Exgroup extends Model
 
     ];
 
+    public function accountuser()
+    {
+        return $this->belongsTo(User::class, 'accountempid', 'empid');
+    }
+
     public function nextuser()
     {
         return $this->belongsTo(User::class, 'nextmpid', 'empid');

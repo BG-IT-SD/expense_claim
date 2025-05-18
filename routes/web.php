@@ -193,6 +193,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('/', [AccountController::class, 'index'])->name('index');
             Route::get('manage/{id}', [AccountController::class, 'manage'])->name('manage');
             Route::post('approve', [AccountController::class, 'saveExgroupApproval'])->name('exgroup.approve');
+            Route::get('view/{id}', [AccountController::class, 'view'])->name('view');
 
         });
 
