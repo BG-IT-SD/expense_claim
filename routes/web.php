@@ -194,6 +194,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('manage/{id}', [AccountController::class, 'manage'])->name('manage');
             Route::post('approve', [AccountController::class, 'saveExgroupApproval'])->name('exgroup.approve');
             Route::get('view/{id}', [AccountController::class, 'view'])->name('view');
+            Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
+            Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
 
         });
 
