@@ -67,7 +67,7 @@ class ExpenseController extends Controller
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
             ->where('empid', $currentEmpid)
             ->whereHas('latestApprove', function ($query) {
-                $query->whereIn('typeapprove', [1, 2, 3, 4, 5]);
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5,6]);
             })
             ->get();
 
