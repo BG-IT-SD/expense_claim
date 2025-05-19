@@ -70,7 +70,12 @@
                             {{-- <input type="hidden" name="locationbu" value="{{ $booking->locationbu }}">
                             <input type="hidden" name="locationid" value="{{ $booking->locationid }}"> --}}
                             <input type="hidden" id="expense_id" name="expense_id" value="{{ $expense->id }}">
+                            @if ($expense->extype == 3 || $expense->extype == 2)
+                            <input type="hidden" id="empfullname" name="empfullname" value="{{ $expense->tech->fullname }}">
+                            @else
                             <input type="hidden" id="empfullname" name="empfullname" value="{{ $expense->user->fullname }}">
+                            @endif
+
                             {{-- hidden --}}
                             <!-- Tab1 Details -->
                             @include('front.expenses.views.expenset1')

@@ -433,10 +433,19 @@
                                 class="form-control form-control-input">
                                 <input type="hidden" name="departuredaterj" id="departuredaterj" value="{{ $departure_date.' - '. $return_date}}"
                                 class="form-control form-control-input">
-                                <input type="hidden" name="empemailrj" id="empemailrj" value="{{ $expense->user->email }}"
-                                class="form-control form-control-input">
-                                <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname }}"
-                                class="form-control form-control-input">
+
+                                @if ($expense->extype == 3 || $expense->extype == 2)
+                                    <input type="hidden" name="empemailrj" id="empemailrj" value="{{ EmailEmp($expense->empid) }}"
+                                    class="form-control form-control-input">
+                                    <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->tech->fullname }}"
+                                    class="form-control form-control-input">
+                                @else
+                                    <input type="hidden" name="empemailrj" id="empemailrj" value="{{ $expense->user->email }}"
+                                    class="form-control form-control-input">
+                                    <input type="hidden" name="empfullname" id="empfullname" value="{{ $expense->user->fullname }}"
+                                    class="form-control form-control-input">
+                                @endif
+
 
                         </div>
                         <hr>

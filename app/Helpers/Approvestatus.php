@@ -236,3 +236,12 @@ if (!function_exists('EmailEmp')) {
         return  $email;
     }
 }
+
+if (!function_exists('isApprover')) {
+    function isApprover(): bool
+    {
+        return Approve::whereIn('typeapprove', [1, 2])
+            ->where('empid', Auth::user()->empid)
+            ->exists();
+    }
+}
