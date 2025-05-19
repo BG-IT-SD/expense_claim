@@ -43,6 +43,7 @@ class HRController extends Controller
                 });
             })
             ->whereIn('extype', [1, 3])
+            ->where('deleted', 0)
             ->get();
 
         return view('back.hr.list', compact('expenses'));

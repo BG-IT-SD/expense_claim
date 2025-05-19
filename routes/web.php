@@ -117,6 +117,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // HeadApprove
     Route::get('HeadApprove', [HeadApprovedController::class, 'index'])
         ->name('HeadApprove.index');
+    Route::get('HeadApprove/drivershow/{id}/{type}', [HeadApprovedController::class, 'show'])->name('HeadApprove.show');
+    Route::post('/headapprove/confirm', [HeadApprovedController::class, 'confirm'])->name('HeadApprove.confirm');
 
     // DriverClaim
     Route::prefix('DriverClaim')

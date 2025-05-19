@@ -121,6 +121,7 @@
                                         </td>
                                         <td>
                                             @if ($expense->extype == 2 || $expense->extype == 3)
+                                                {{ BuEmp($expense->empid) }}
                                             @else
                                                 {{ $expense->user->bu }}
                                             @endif
@@ -177,25 +178,6 @@
                                         </td>
                                     </tr>
                                 @endforeach
-
-
-                                {{-- <tr>
-                                    <td>EX20241101</td>
-                                    <td>09/11/2024 10:30 น.</td>
-                                    <td>11080</td>
-                                    <td>BGCG</td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Completed</span></td>
-                                    <td><span class="badge rounded-pill bg-label-success me-1">Approved</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><span
-                                                class="mdi mdi-plus-box-multiple-outline"></span> </button>
-                                        <button class="btn btn-sm btn-warning"><span
-                                                class="mdi mdi-eye-circle-outline"></span> Detail</button>
-                                        <button class="btn btn-sm btn-danger"><span
-                                                class="mdi mdi-trash-can-outline"></span></button>
-                                    </td>
-                                </tr> --}}
-
                             </tbody>
                         </table>
                     </div>

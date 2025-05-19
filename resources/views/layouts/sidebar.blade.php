@@ -43,7 +43,8 @@
         </li>
 
         {{-- Normal Approve --}}
-        {{-- <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
+        @if (isApprover())
+        <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-file-check"></i>
                 <div data-i18n="การอนุมัติ">การอนุมัติ</div>
@@ -53,11 +54,12 @@
                 <li class="menu-item @if (Route::is('HeadApprove.index')) active @endif">
                     <a href="{{ route('HeadApprove.index') }}" class="menu-link">
                         <div data-i18n="รายการขออนุมัติ">รายการขออนุมัติ</div>
-                        <div class="badge bg-danger rounded-pill ms-auto">5</div>
+                        {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
                     </a>
                 </li>
             </ul>
-        </li> --}}
+        </li>
+        @endif
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['Driver']) &&
                     collect($userModuleRoles['Driver'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))
