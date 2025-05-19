@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GroupExport;
 use App\Models\Exgroup;
 use App\Models\Expense;
+use App\Models\Sigfile;
 
 class ExportController extends Controller
 {
@@ -19,10 +20,20 @@ class ExportController extends Controller
             ->where('exgroup', $id)
             ->get();
 
-            $pdf = Pdf::loadView('exports.group_pdf', compact('exgroup', 'expenses'))
+               // หาลายเซ็นจาก empid
+            $signatures = [
+                'created' => Sigfile::where('empid', $exgroup->CreatedBy->empid)->value('path'),
+                'checked' => Sigfile::where('empid', $exgroup->checkempid)->value('path'),
+                'approved' => Sigfile::where('empid', $exgroup->finalempid)->value('path'),
+            ];
+
+            $exdate = $exgroup->groupdate;
+
+            $pdf = Pdf::loadView('exports.group_pdf', compact('exgroup', 'expenses','signatures'))
             ->setPaper('a4', 'landscape')
+            ->setOption('margin-top', 0)
             ->setOption('defaultFont', 'THSarabunNew');
-        return $pdf->download("EXGROUP_{$id}.pdf");
+        return $pdf->download("EXGROUP_{$id}_{$exdate}.pdf");
     }
 
 
