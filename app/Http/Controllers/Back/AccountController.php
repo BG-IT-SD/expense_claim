@@ -30,12 +30,13 @@ class AccountController extends Controller
         $exgroup = Exgroup::findOrFail($id);
         $approvename = Auth::user()->fullname;
         $approveempid = Auth::user()->empid;
-        $approveemail= Auth::user()->email;
+        $approveemail = Auth::user()->email;
 
-        return view('back.account.manage', compact('expenses', 'exgroup','approvename','approveempid','approveemail'));
+        return view('back.account.manage', compact('expenses', 'exgroup', 'approvename', 'approveempid', 'approveemail'));
     }
 
-    public function view($id){
+    public function view($id)
+    {
         $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
             ->where('exgroup', $id)
             ->get();
@@ -91,7 +92,7 @@ class AccountController extends Controller
                 $reason = $reasons[$index] ?? null;
                 $fullname = $fullnames[$index] ?? '';
 
-                $approve = Approve::where('exid', $exid)->where('typeapprove',6)->first();
+                $approve = Approve::where('exid', $exid)->where('typeapprove', 6)->first();
                 if ($approve) {
                     $expense_data = $approve->expense;
                     $totalprice =  $approve->expense->totalprice;
@@ -166,5 +167,85 @@ class AccountController extends Controller
     private function cleanNumber($value)
     {
         return floatval(str_replace(',', '', $value));
+    }
+
+
+    public function ListHold()
+    {
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->where('typeapprove', 6)
+                    ->where('statusapprove', 9);
+            })
+            ->whereIn('extype', [1, 2, 3])
+            ->get();
+
+        $page = 'HeadApprove.show';
+
+        return view('back.account.listhold', compact('expenses', 'page'));
+    }
+
+    public function confirmHold(Request $request)
+    {
+        $request->validate([
+            'expense_ids' => 'required|array',
+            'costoffood' => 'required|array',
+            'gasolinecost' => 'required|array',
+            'expresswaytoll' => 'required|array',
+            'publictransportfare' => 'required|array',
+            'otherexpenses' => 'required|array',
+            'totalprice' => 'required|array',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $paymentdate = $request->paymentdate;
+            foreach ($request->expense_ids as $index => $expenseId) {
+                $expense = Expense::find($expenseId);
+                if (!$expense || $expense->latestApprove->statusapprove != 9) continue; // 9 = Hold
+
+                //อัปเดตสถานะ approve
+                $expense->latestApprove->statusapprove = 1; // approved
+                $expense->latestApprove->save();
+
+                //เพิ่มยอด Net เข้า exgroups
+                $exgroup = Exgroup::find($expense->exgroup);
+                if ($exgroup) {
+                    $exgroup->nettotalfood += $request->costoffood[$index];
+                    $exgroup->nettotalfuel += $request->gasolinecost[$index];
+                    $exgroup->netexpresswaytoll += $request->expresswaytoll[$index];
+                    $exgroup->netpublictransportfare += $request->publictransportfare[$index];
+                    $exgroup->netotherexpenses += $request->otherexpenses[$index];
+                    $exgroup->nettotal += $request->totalprice[$index];
+                    $exgroup->save();
+                }
+                $email = $request->empemail[$index] ?? "";
+                if ($email != "") {
+                    // ส่ง mail ว่า success
+                    $data = [
+                        'name' => $request->fullname[$index] ?? "", // user
+                        'price' => $request->totalprice[$index],
+                        'pricedate' => $paymentdate,
+                        'expenseid' => $expenseId, //exid
+                    ];
+
+                    MailHelper::sendExternalMail(
+                        $email, // ผู้รับ
+                        'แจ้งยอดการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่',
+                        'mails.accountapporve', // ชื่อ blade view mail
+                        $data,
+                        'Expense Claim System EX' . $expenseId,
+                    );
+                }
+            }
+
+            DB::commit();
+            return back()->with(['message' => 'อนุมัติรายการที่ Hold สำเร็จแล้ว', 'class' => 'success']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage(), 'class' => 'danger']);
+        }
     }
 }

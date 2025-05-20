@@ -105,12 +105,11 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             ->name('store');
 
         // ประวัติการเบิก
-        Route::get('/ExpensHistory',[ExpenseController::class,'history'])
+        Route::get('/ExpensHistory', [ExpenseController::class, 'history'])
             ->name('history');
 
         //ดูข้อมูลหลังบันทึก
         Route::get('/view/{id}', [ExpenseController::class, 'show'])->name('show');
-
     });
     // Expense
 
@@ -133,7 +132,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             // ถ้ามี route เพิ่มเติมในอนาคต เช่น:
             // Route::get('create', [DriverClaimController::class, 'create'])->name('create');
             Route::post('/', [DriverClaimController::class, 'store'])->name('store');
-            Route::get('history',[DriverClaimController::class,'history'])->name('history');
+            Route::get('history', [DriverClaimController::class, 'history'])->name('history');
             Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
         });
 
@@ -163,31 +162,29 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('/', [HRController::class, 'index'])->name('index');
             Route::get('edit/{id}', [HRController::class, 'edit'])->name('edit');
             Route::get('view/{id}/{type}', [HRController::class, 'edit'])->name('view');
-            Route::get('approved',[HRController::class,'history'])->name('approved');
-            Route::get('grouplist',[HRController::class,'groupList'])->name('grouplist');
+            Route::get('approved', [HRController::class, 'history'])->name('approved');
+            Route::get('grouplist', [HRController::class, 'groupList'])->name('grouplist');
             // เพิ่มเติม: หากมี create, store, update, destroy
             // Route::get('create', [HRController::class, 'create'])->name('create');
             // Route::post('/', [HRController::class, 'store'])->name('store');
-             Route::put('{id}', [HRController::class, 'update'])->name('update');
-             Route::post('reject', [HRController::class, 'reject'])->name('reject');
+            Route::put('{id}', [HRController::class, 'update'])->name('update');
+            Route::post('reject', [HRController::class, 'reject'])->name('reject');
             // Route::delete('{id}', [HRController::class, 'destroy'])->name('destroy');
             Route::get('passenger-list/{bookid}', [HRController::class, 'showPassengerList']);
-            Route::get('hrdriver',[HRController::class,'hrdriver'])->name('hrdriver');
+            Route::get('hrdriver', [HRController::class, 'hrdriver'])->name('hrdriver');
             Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
             Route::put('/claimdriver/update/{id}', [HRController::class, 'updateClaimDriver'])->name('claimdriverupdate');
-            Route::get('driverapproved',[HRController::class,'driverhistory'])->name('driverapproved');
-            Route::post('hrnextapprove',[HRController::class,'hrNextApprove'])->name('hrnextapprove');
-            Route::post('hrheadapprove',[HRController::class,'hrHextApprove'])->name('hrheadapprove');
+            Route::get('driverapproved', [HRController::class, 'driverhistory'])->name('driverapproved');
+            Route::post('hrnextapprove', [HRController::class, 'hrNextApprove'])->name('hrnextapprove');
+            Route::post('hrheadapprove', [HRController::class, 'hrHextApprove'])->name('hrheadapprove');
 
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
-            Route::get('groupdetail/{id}',[HRController::class,'groupDetail'])->name('groupdetail');
-
-
+            Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
         });
 
-        // Account
-        Route::prefix('Account')
+    // Account
+    Route::prefix('Account')
         ->name('Account.')
         ->middleware('check.module.access:Account,Staff|Admin|SuperAdmin')
         ->group(function () {
@@ -198,7 +195,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('view/{id}', [AccountController::class, 'view'])->name('view');
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
-
+            Route::get('listhold', [AccountController::class, 'ListHold'])->name('listhold');
+            Route::post('HoldApprove/confirm', [AccountController::class, 'confirmHold'])->name('HoldApprove.confirm');
         });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')
@@ -284,15 +282,12 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::get('/approve/viewgroup/{id}/{type}', [ApproveController::class, 'showgroup'])->name('approve.page.group');
     Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
     Route::post('/approve/confirmgrp/{id}', [ApproveController::class, 'confirmgroup'])->name('approve.confirmgroup');
-
-
-
 });
 
-    // อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)
-    Route::middleware('web')->group(function () {
-        Route::get('/approve/login', [ApproveLoginController::class, 'loginWithToken'])->name('approve.magic.login');
-    });
+// อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)
+Route::middleware('web')->group(function () {
+    Route::get('/approve/login', [ApproveLoginController::class, 'loginWithToken'])->name('approve.magic.login');
+});
 
 
 
@@ -301,5 +296,5 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
 
 // Update API น้ำมัน
-Route::get('Updatefuel/index',[UpdatefuelController::class,'index'])->name('updatefuel.index');
+Route::get('Updatefuel/index', [UpdatefuelController::class, 'index'])->name('updatefuel.index');
 // Update API น้ำมัน
