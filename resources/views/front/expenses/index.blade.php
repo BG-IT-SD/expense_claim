@@ -228,17 +228,6 @@
 
     @if ($booking->type_reserve == 4)
         <script>
-            // let map, directionsService, directionsRenderer;
-
-            // function initMap() {
-            //     map = new google.maps.Map(document.getElementById("map"), {
-            //         zoom: 13,
-            //         center: { lat: 13.7563, lng: 100.5018 }, // Bangkok
-            //     });
-            //     directionsService = new google.maps.DirectionsService();
-            //     directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
-            // }
-
             let map, directionsService, directionsRenderer;
             let autocompleteOrigin, autocompleteDestination;
             let originPlace = null;
@@ -336,77 +325,8 @@
         </script>
 
         <!-- โหลด Google Maps API -->
-        {{-- <script async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly&language=th">
-        </script> --}}
-
-        {{-- <script>
-            let map, directionsService, directionsRenderer;
-            let originAutocomplete, destinationAutocomplete;
-
-            function initMap() {
-                map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 13,
-                    center: {
-                        lat: 13.7563,
-                        lng: 100.5018
-                    }
-                });
-
-                directionsService = new google.maps.DirectionsService();
-                directionsRenderer = new google.maps.DirectionsRenderer({
-                    map: map
-                });
-
-                originAutocomplete = new google.maps.places.Autocomplete(document.getElementById("origin"));
-                destinationAutocomplete = new google.maps.places.Autocomplete(document.getElementById("destination"));
-
-                originAutocomplete.setComponentRestrictions({
-                    country: ["th"]
-                });
-                destinationAutocomplete.setComponentRestrictions({
-                    country: ["th"]
-                });
-            }
-
-            window.initMap = initMap;
-
-            function calculateDistance() {
-                const origin = document.getElementById("origin").value;
-                const destination = document.getElementById("destination").value;
-
-                if (!origin || !destination) {
-                    alert("กรุณากรอกที่ตั้งต้นทางและปลายทางให้ครบ");
-                    return;
-                }
-
-                document.getElementById("origin_value").value = origin;
-                document.getElementById("destination_value").value = destination;
-
-                directionsService.route({
-                    origin: origin,
-                    destination: destination,
-                    travelMode: google.maps.TravelMode.DRIVING
-                }, (result, status) => {
-                    if (status === "OK") {
-                        directionsRenderer.setDirections(result);
-
-                        const distanceValue = result.routes[0].legs[0].distance.value;
-                        const distanceText = result.routes[0].legs[0].distance.text;
-
-                        document.getElementById("distance").innerText = distanceText;
-                        const km = ((distanceValue / 1000) * 2).toFixed(2);
-                        document.getElementById("totaldistance_text").value = km;
-                        document.getElementById("totaldistance").value = km;
-                    } else {
-                        alert("ไม่สามารถคำนวณเส้นทางได้");
-                    }
-                });
-            }
-        </script>
-
         <script async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly">
-        </script> --}}
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly&language=th">
+        </script>
     @endif
 @endsection

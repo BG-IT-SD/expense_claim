@@ -825,7 +825,7 @@ class HRController extends Controller
     public function groupDetail($id){
 
         //ดึงรายการเบิกทั้งหมดในกลุ่ม
-        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','latestApprove'])
             ->where('exgroup', $id)
             ->get();
         //ดึงข้อมูลกลุ่ม
