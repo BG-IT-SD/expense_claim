@@ -1,57 +1,4 @@
 <div id="social-links" class="content active dstepper-block" step="3">
-    {{-- <div class="alert alert-dark mb-3 mt-3">
-        <h6 class="mb-0">ส่วนที่ 3</h6>
-        <small>รายชื่อพนักงาน</small>
-    </div> --}}
-    {{-- <div class="row g-4">
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>ชื่อ - นามสกุล</th>
-                                <th>รหัสพนักงาน</th>
-                                <th>Status</th>
-                                <th>Expense ID</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            <tr>
-                                <td>
-                                    <i
-                                        class="mdi mdi-account mdi-20px text-danger me-3"></i><span
-                                        class="fw-medium">กมลวรรณ บรรชา</span>
-                                </td>
-                                <td>66000510</td>
-
-                                <td><span
-                                        class="badge rounded-pill bg-label-primary me-1">Active</span>
-                                </td>
-                                <td>-</td>
-
-                            </tr>
-                            <tr>
-                                <td>
-                                    <i class="mdi mdi-account mdi-20px text-info me-3"></i><span
-                                        class="fw-medium">เสาวภา เข็มเหลือง</span>
-                                </td>
-                                <td>63000455</td>
-
-                                <td><span
-                                        class="badge rounded-pill bg-label-success me-1">Completed</span>
-                                </td>
-                                <td><span
-                                        class="badge rounded-pill bg-label-dark me-1">EX20241102</span>
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div> --}}
     <div class="alert alert-dark mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 3</h6>
         <small>ค่าใช้จ่ายอื่นๆเกี่ยวกับการเดินทาง</small>
@@ -150,7 +97,7 @@
                             </h5>
                             <h5><span class="badge rounded-pill bg-label-primary me-1">ราคาน้ำมัน ณ วันนั้น :
                                     {{ $data_oil_price }}</span>
-                                    <input type="hidden" name="fuel91id" value="{{ $oilid }}">
+                                <input type="hidden" name="fuel91id" value="{{ $oilid }}">
                             </h5>
                         </div>
                     </div>
@@ -208,16 +155,46 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td> <h5><span class="badge rounded-pill bg-danger lastkm"> </span></h5></td>
+                            <td>
+                                <h5><span class="badge rounded-pill bg-danger lastkm"> </span></h5>
+                                <span id="max-distance-label" style="display:none; color:red;">
+                                    *ใช้ระยะทางสูงสุดที่อนุญาต
+                                </span>
+                                <span id="base-distance-distance-label" style="display:none; color:red;">
+                                </span>
+                                <input type="hidden" id="afdistance" name="afdistance" value="0"/>
+                                <input type="hidden" id="base_distance" name="basedistance" value="0">
+                            </td>
                             <td>
                                 <h5><span class="badge rounded-pill bg-danger">{{ $bath_per_km }} บาท</span></h5>
-                                <input type="hidden" id="bath_per_km" name="bath_per_km" value="{{ $bath_per_km }}">
+                                <input type="hidden" id="bath_per_km" name="bath_per_km"
+                                    value="{{ $bath_per_km }}">
                                 <input type="hidden" id="fuelpricesid" name="fuelpricesid"
-                                    value="{{ $rate_id }}"></td>
-                            <td><h5><span class="badge rounded-pill bg-success pricesuccess"> </span></h5></td>
+                                    value="{{ $rate_id }}">
+                            </td>
+                            <td>
+                                <h5><span class="badge rounded-pill bg-success pricesuccess"> </span></h5>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating form-floating-outline">
+                            <input type="number" id="distancemore" name="distancemore" min="0"
+                                class="form-control" value="0">
+                            <label for="expresswaytoll">ระยะทางเพิ่มเติม / กิโลเมตร</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8 mb-3"></div>
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating form-floating-outline mb-4">
+                            <textarea class="form-control h-px-100" id="distancenote" name="distancenote" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง"></textarea>
+                            <label for="distancenote">ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง</label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         {{-- น้ำมัน --}}
@@ -269,24 +246,6 @@
             </table>
         </div>
         {{-- Apporve for Head --}}
-        {{--
-
-        เงื่อนไขที่ 1 อนุมัติตัวเองกรณี level >= 10 และอยู่ในกลุ่มเลขา
-        if($oHeadEmp['head_emp_id'] == "41000014" || $LEVEL >= 10 || $approve_g > 0){
-        }else{
-            เงื่อนไขที่ 2 level < 10
-            if($oHeadEmp['head_emp_id'] == ""){
-            เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7
-            }else{
-             เงื่อนไขที่ 4 มีหัวหน้า
-                if($head_Level > 10){
-                เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7
-                }else{
-                เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp
-                }
-            }
-        }
-        --}}
         <div class="row g-4">
             <div class="col-sm-12">
                 <div class="card shadow-none bg-transparent border border-primary mb-3">

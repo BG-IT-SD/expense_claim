@@ -115,7 +115,7 @@
                                                     <select class="status-dropdown action-select" name="statsapprove[]"
                                                         data-id = "{{ $expense->id }}" style="width: 110px;">
                                                         <option value="1" data-color="bg-success">Approve</option>
-                                                        <option value="9" data-color="bg-warning">Hold</option>
+                                                        {{-- <option value="9" data-color="bg-warning">Hold</option> --}}
                                                         <option value="2" data-color="bg-danger">Reject</option>
                                                     </select>
                                                     <div class="reasonarea" data-id="{{ $expense->id }}"

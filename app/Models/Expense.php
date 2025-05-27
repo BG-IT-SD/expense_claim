@@ -47,6 +47,10 @@ class Expense extends Model
         'status',
         'deleted',
         'exgroup',
+        'distancemore',
+        'distancenote',
+        'afdistance',
+        'basedistance'
     ];
 
     public function latestApprove()

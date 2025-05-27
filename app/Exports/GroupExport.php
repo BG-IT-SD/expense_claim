@@ -25,7 +25,11 @@ class GroupExport implements FromView, WithStyles,WithDrawings
     {
         $exgroup = Exgroup::findOrFail($this->id);
 
-        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','latestApprove'])
+        ->whereHas('latestApprove', function ($query) {
+            $query->where('typeapprove', 6)
+                ->where('statusapprove', 1);
+        })
             ->where('exgroup', $this->id)
             ->get();
 
@@ -39,7 +43,13 @@ class GroupExport implements FromView, WithStyles,WithDrawings
     {
         $exgroup = Exgroup::find($this->id); // ดึงโดยตรงจาก id
 
-        $expenses = Expense::where('exgroup', $this->id)->get();
+        $expenses = Expense::with(['latestApprove'])
+        ->whereHas('latestApprove', function ($query) {
+            $query->where('typeapprove', 6)
+                ->where('statusapprove', 1);
+        })
+            ->where('exgroup', $this->id)
+            ->get();
         $baseRow = $expenses->count() + 13;
 
         $drawings = [];

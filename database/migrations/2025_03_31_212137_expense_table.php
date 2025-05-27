@@ -34,7 +34,14 @@ return new class extends Migration
                  ->onDelete('cascade');
             $table->string('returnfromtext',255)->nullable();
             $table->time('returntime');
+
+            $table->decimal('afdistance', 10, 2);
             $table->decimal('totaldistance', 10, 2);
+            $table->decimal('distancemore', 10, 2)->nullable();
+            $table->decimal('basedistance', 10, 2);
+
+            $table->text('distancenote')->nullable();
+
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 10, 8)->nullable();
             $table->tinyInteger('checktoil')->nullable();

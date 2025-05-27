@@ -113,14 +113,14 @@
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
-                                @foreach($exgroups as $exgroup)
+                                @foreach ($exgroups as $exgroup)
                                     <tr>
                                         <td>{{ $exgroup->id }}</td>
                                         <td>{{ \Carbon\Carbon::parse($exgroup->groupdate)->format('d/m/Y') }}</td>
-                                        <td>{{ number_format($exgroup->total, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalfood, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalfuel, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalother, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfood, 2) : number_format($exgroup->totalfood, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfuel, 2) : number_format($exgroup->totalfuel, 2)}}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalother, 2) : number_format($exgroup->totalother, 2) }}</td>
                                         <td>
                                             @if (!is_null($exgroup->typeapprove))
                                                 {!! type_approve_text($exgroup->typeapprove, $exgroup->typeapprove) !!}
@@ -132,15 +132,21 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <a href="{{ route('HR.export.group.pdf', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
-                                                <span class="mdi mdi-file-pdf-box"></span>
-                                                 {{-- PDF --}}
-                                            </a>
-                                            <a href="{{ route('HR.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success" target="_blank">
-                                                <span class="mdi mdi-file-excel"></span>
-                                                {{-- Excel --}}
-                                            </a>
-                                            <a href="{{ route('HR.groupdetail', $exgroup->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                            @if ($exgroup->typeapprove == 6 && $exgroup->statusapprove == 1)
+                                                <a href="{{ route('HR.export.group.pdf', $exgroup->id) }}"
+                                                    class="btn btn-sm btn-danger" target="_blank">
+                                                    <span class="mdi mdi-file-pdf-box"></span>
+                                                    {{-- PDF --}}
+                                                </a>
+                                                <a href="{{ route('HR.export.group.excel', $exgroup->id) }}"
+                                                    class="btn btn-sm btn-success" target="_blank">
+                                                    <span class="mdi mdi-file-excel"></span>
+                                                    {{-- Excel --}}
+                                                </a>
+                                            @endif
+
+                                            <a href="{{ route('HR.groupdetail', $exgroup->id) }}" target="_blank"
+                                                class="btn btn-sm btn-primary">
                                                 <span class="mdi mdi-list-box"></span>
                                             </a>
                                         </td>
@@ -156,6 +162,5 @@
     </div>
 @endsection
 @section('jscustom')
-<script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/hr/groupapprove.js']) }}"></script>
-
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/hr/groupapprove.js']) }}"></script>
 @endsection

@@ -328,6 +328,13 @@ class ExpenseController extends Controller
                 'returnfromtext' => $request->returnfromtext ?? null,
                 'returntime' => $request->returntime,
                 'totaldistance' => $request->totaldistance,
+                // new 28/05
+
+                'basedistance' => $request->basedistance  ?? 0,
+                'afdistance' => $request->afdistance  ?? 0,
+                'distancemore' => $request->distancemore  ?? 0,
+                'distancenote' =>  $request->distancenote ?? null,
+                // new 28/05
                 'latitude' =>  $request->latitude,
                 'longitude' =>  $request->longitude,
                 'latitude_b' =>  $request->latitude_b,
@@ -588,7 +595,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 8);
+            ->where('numlvl', '>=', 7);
 
         $total = $query->count();
 
@@ -617,7 +624,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 8)
+            ->where('numlvl', '>=', 7)
             ->first();
 
         // ถ้าไม่เจอข้อมูลเลย

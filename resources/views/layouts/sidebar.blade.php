@@ -263,11 +263,11 @@
                             <div data-i18n="รายการกลุ่มอนุมัติ">รายการกลุ่มอนุมัติ</div>
                         </a>
                     </li>
-                    <li class="menu-item @if (Route::is('Account.listhold')) active @endif">
+                    {{-- <li class="menu-item @if (Route::is('Account.listhold')) active @endif">
                         <a href="{{ route('Account.listhold') }}" class="menu-link">
                             <div data-i18n="รายการ Hold">รายการ Hold</div>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </li>
         @endif

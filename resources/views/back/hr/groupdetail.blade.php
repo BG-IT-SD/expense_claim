@@ -24,6 +24,7 @@
                             <table class="table table-bordered text-center">
                                 <thead class="table-secondary">
                                     <tr>
+                                        <th>Approve</th>
                                         <th>ลำดับ</th>
                                         <th>EXID</th>
                                         <th>สถานที่ไปปฏิบัติงาน</th>
@@ -83,6 +84,11 @@
                                         @endphp
                                         <tr>
                                             <td>
+                                                @if (!is_null($expense->latestApprove->statusapprove))
+                                                    {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
+                                                @endif
+                                            </td>
+                                            <td>
                                                 {{ $i + 1 }}
                                                 <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
 
@@ -110,7 +116,7 @@
                                     @endforeach
 
                                     <tr class="table-warning fw-bold">
-                                        <td colspan="12">รวม</td>
+                                        <td colspan="13">รวม</td>
                                         <td>{{ number_format($sum_food, 2) }}
                                         </td>
                                         <td>{{ number_format($sum_gas, 2) }}
@@ -138,6 +144,9 @@
                                         <th>
                                             <h6>จำนวนเงินขอเบิก / บาท</h6>
                                         </th>
+                                        <th>
+                                            <h6>จำนวนเงินเบิกได้ / บาท</h6>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -147,12 +156,27 @@
                                             <span class="btn rounded-pill btn-primary waves-effect waves-light">
                                                 {{ number_format($exgroup->totalfood, 2) }}</span>
                                         </td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-info waves-effect waves-light sum-mealnet">
+                                                {{ number_format($exgroup->nettotalfood, 2) }}</span>
+                                            <input type="hidden" name="nettotalfood" class="row-foodnet"
+                                                data-id="{{ $expense->id }}"
+                                                value="{{ number_format($exgroup->nettotalfood, 2) }}">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>ค่าเดินทาง และ อื่นๆ</td>
                                         <td>
                                             <span
                                                 class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ number_format($exgroup->totalother, 2) }}</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-info waves-effect waves-light totaltravelnet">{{ number_format($exgroup->nettotalother, 2) }}</span>
+                                            <input type="hidden" name="nettotalother" class="row-othernet"
+                                                data-id="{{ $expense->id }}"
+                                                value="{{ number_format($exgroup->nettotalother, 2) }}">
                                         </td>
                                     </tr>
                                     <tr>
@@ -161,6 +185,13 @@
                                             <span
                                                 class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ number_format($exgroup->totalfuel, 2) }}</span>
                                         </td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-info waves-effect waves-light gasolinecostnet">{{ number_format($exgroup->nettotalfuel, 2) }}</span>
+                                            <input type="hidden" name="nettotalfuel" class="row-gasnet"
+                                                data-id="{{ $expense->id }}"
+                                                value="{{ number_format($exgroup->nettotalfuel, 2) }}">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>รวม</td>
@@ -168,6 +199,14 @@
                                             <span
                                                 class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
                                                 {{ number_format($exgroup->total, 2) }}</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpenseNet">
+                                                {{ number_format($exgroup->nettotal, 2) }}</span>
+                                            <input type="hidden" name="nettotal" class="row-totalexNet"
+                                                data-id="{{ $expense->id }}"
+                                                value="{{ number_format($exgroup->nettotal, 2) }}">
                                         </td>
                                     </tr>
 

@@ -177,7 +177,7 @@
                                 </tr>
 
                                 <tr class="table-info sumallday">
-                                    <td><i class="mdi mdi-currency-usd mdi-20px text-info me-3"></i>รวม หห</td>
+                                    <td><i class="mdi mdi-currency-usd mdi-20px text-info me-3"></i>รวม</td>
                                     <td>{{ $food->meal1 ?? 0 }}</td>
                                     <td>{{ $food->meal2 ?? 0 }}</td>
                                     <td>{{ $food->meal3 ?? 0 }}</td>

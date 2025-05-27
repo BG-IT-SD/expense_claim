@@ -118,10 +118,10 @@
                                     <tr>
                                         <td>{{ $exgroup->id }}</td>
                                         <td>{{ \Carbon\Carbon::parse($exgroup->groupdate)->format('d/m/Y') }}</td>
-                                        <td>{{ number_format($exgroup->total, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalfood, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalfuel, 2) }}</td>
-                                        <td>{{ number_format($exgroup->totalother, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfood, 2) : number_format($exgroup->totalfood, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfuel, 2) : number_format($exgroup->totalfuel, 2)}}</td>
+                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalother, 2) : number_format($exgroup->totalother, 2) }}</td>
                                         <td>{{ $exgroup->finaluser->fullname }}</td>
                                         <td>
                                             @if (!is_null($exgroup->typeapprove))
