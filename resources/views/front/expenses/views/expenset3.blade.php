@@ -222,7 +222,15 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td> <h5><span class="badge rounded-pill bg-danger lastkm"> {{ $expense->totaldistance }}</span></h5></td>
+                            <td> <h5><span class="badge rounded-pill bg-danger lastkm"> {{ $expense->afdistance }}</span></h5>
+                            @if ($expense->distancemore > 0)
+                                <span id="base-distance-distance-label" style="display:none; color:red;">
+
+                                </span>
+                                <input type="hidden" id="afdistance" name="afdistance" value="0"/>
+                                <input type="hidden" id="base_distance" name="basedistance" value="0">
+                            @endif
+                            </td>
                             <td>
                                 <h5><span class="badge rounded-pill bg-danger">{{ $expense->fuelprice->bathperkm ?? "" }} บาท</span></h5>
                                 <input type="hidden" id="bath_per_km" name="bath_per_km" value="{{ $expense->fuelprice->bathperkm ?? "" }}">
@@ -232,6 +240,23 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-floating form-floating-outline">
+                        <input type="number" id="distancemore" name="distancemore" min="0"   @if ($isView == 1) onclick="return false;" @endif
+                            class="form-control" value="{{ $expense->distancemore }}">
+                        <label for="distancemore">ระยะทางเพิ่มเติม / กิโลเมตร</label>
+                    </div>
+                </div>
+                <div class="col-md-8 mb-3"></div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-floating form-floating-outline mb-4">
+                        <textarea class="form-control h-px-100" id="distancenote" name="distancenote" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง">{{ $expense->distancenote }}</textarea>
+                        <label for="distancenote">ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง</label>
+                    </div>
+                </div>
             </div>
         </div>
         {{-- น้ำมัน --}}

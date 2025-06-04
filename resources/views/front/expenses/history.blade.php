@@ -6,6 +6,11 @@
             <!-- Basic Layout -->
             <div class="col-xxl">
                 <div class="card mb-4">
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h5 class="mb-0"><span class="mdi mdi-file-search-outline"></span> ค้นหาข้อมูล</h5>
                     </div>
@@ -102,7 +107,7 @@
                             <tbody class="table-border-bottom-0">
                                 @foreach ($expenses as $key => $expense)
                                     <tr>
-                                        <td>{{ $expense->prefix.$expense->id }}</td>
+                                        <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                 'd/m/Y H:i',
@@ -130,7 +135,30 @@
                                             {!! $expense->latestApprove?->approvename ?? '-' !!}
                                         </td>
                                         <td class="text-nowrap">
-                                            <a href="{{ route('Expense.show', $expense->id) }}" class="btn btn-sm btn-info" ><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                            <a href="{{ route('Expense.show', $expense->id) }}"
+                                                class="btn btn-sm btn-info"><span
+                                                    class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                            @php
+                                                $latestApprove = $expense->latestApprove;
+                                                $empid = $expense->empid;
+
+                                                // ตรวจสอบว่ามีการเบิกซ้ำหรือยัง (bookid + empid + id > เดิม)
+                                                $hasReclaimed = \App\Models\Expense::where('bookid', $expense->bookid)
+                                                    ->where('empid', $empid)
+                                                    ->where('id', '>', $expense->id)
+                                                    ->exists();
+                                            @endphp
+
+                                            @if (
+                                                $latestApprove &&
+                                                    $latestApprove->statusapprove == 2 &&
+                                                    \Carbon\Carbon::parse($latestApprove->updated_at)->diffInDays(now()) <= 30 &&
+                                                    !$hasReclaimed)
+                                                <button class="btn btn-sm btn-primary"
+                                                    onclick="window.location.href='{{ route('Expense.create', $expense->id) }}'">
+                                                    <span class="mdi mdi-pencil-circle-outline"></span> เบิกอีกครั้ง
+                                                </button>
+                                            @endif
 
                                         </td>
                                     </tr>
@@ -145,5 +173,5 @@
     </div>
 @endsection
 @section('jscustom')
-<script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script>
 @endsection
