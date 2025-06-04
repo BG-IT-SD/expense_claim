@@ -25,6 +25,7 @@ use App\Models\ExpenseFile;
 use App\Models\ExpenseFood;
 use App\Models\Fuelprice;
 use App\Models\FuelPrice91;
+use App\Models\Vbookingall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -67,7 +68,7 @@ class ExpenseController extends Controller
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
             ->where('empid', $currentEmpid)
             ->whereHas('latestApprove', function ($query) {
-                $query->whereIn('typeapprove', [1, 2, 3, 4, 5,6]);
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
             })
             ->get();
 
@@ -81,7 +82,32 @@ class ExpenseController extends Controller
     {
         // $vhead = $this->getHeadEmp(66000510);
         // dd($vhead) ;
-        $booking = Vbooking::find($id);
+        // $booking = Vbooking::find($id);
+        // พยายามดึงจาก expense ก่อน
+        $expense = Expense::find($id);
+        // dd($expense);
+
+        if ($expense) {
+            // ดึง approve ล่าสุดของ exid นี้
+            $lastApprove = Approve::where('exid', $expense->id)->orderByDesc('id')->first();
+
+            // หากถูก reject ให้ใช้ Vbookingall
+            if ($lastApprove && $lastApprove->statusapprove == 2) {
+                $booking = Vbookingall::find($expense->bookid);
+            } else {
+                return redirect()->back()->with('error', 'สามารถเบิกอีกครั้งได้เฉพาะรายการที่ถูกปฏิเสธเท่านั้น');
+            }
+
+            $bookid = $expense->bookid;
+        } else {
+            // ยังไม่เคยเบิก → ใช้ Vbooking ปกติ
+            $bookid = $id;
+            $booking = Vbooking::find($bookid);
+        }
+
+        if (!$booking) {
+            return redirect()->back()->with('error', 'ไม่พบข้อมูลการจอง');
+        }
         $empid = Auth::user()->empid;
         $empemail = Auth::user()->email;
         $empfullname = Auth::user()->fullname;
@@ -190,7 +216,7 @@ class ExpenseController extends Controller
         if (($booking->type_reserve == 4)) {
 
             // ตรวจสอบ ผู้ร่วมเดินทาง
-            if($empid == $booking->passenger_empid){
+            if ($empid == $booking->passenger_empid) {
                 $passengertype = 1;
             }
 
@@ -231,17 +257,16 @@ class ExpenseController extends Controller
 
             if (!$rate) {
 
-                    $data_oil_price = $oilPrice;
-                    $data_message = 'ไม่พบช่วงราคาครอบคลุม';
-
+                $data_oil_price = $oilPrice;
+                $data_message = 'ไม่พบช่วงราคาครอบคลุม';
             }
 
-                $travel_date = $travelDate->format('d/m/Y');
-                $data_oil_price = $oilPrice;
-                $price_used_date = Carbon::parse($fuelBefore->dateprice)->format('d/m/Y');
-                $rate_id = $rate->id;
-                $bath_per_km = $rate->bathperkm;
-                $oilid = $oilPriceID;
+            $travel_date = $travelDate->format('d/m/Y');
+            $data_oil_price = $oilPrice;
+            $price_used_date = Carbon::parse($fuelBefore->dateprice)->format('d/m/Y');
+            $rate_id = $rate->id;
+            $bath_per_km = $rate->bathperkm;
+            $oilid = $oilPriceID;
         }
 
 
@@ -250,7 +275,7 @@ class ExpenseController extends Controller
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid','passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels','travel_date','oilid','data_oil_price','price_used_date','rate_id','bath_per_km','data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
@@ -487,7 +512,7 @@ class ExpenseController extends Controller
     {
         // ส่งตัวแปรบอกว่าเป็นหน้า view
         $isView = 0;
-        $expense = Expense::with(['vbooking', 'user','fuel','fuelprice'])->findOrFail($id);
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             ->get();
@@ -542,8 +567,8 @@ class ExpenseController extends Controller
             })
             ->first();
         $passengertype = 0;
-        if($expense->vbooking->type_reserve == 4){
-            if($empid == $expense->vbooking->passenger_empid){
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
                 $passengertype = 1;
             }
         }
@@ -552,7 +577,7 @@ class ExpenseController extends Controller
         // ราคาน้ำมัน
         $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        return view('front.expenses.view', compact(['expense', 'empid','passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
+        return view('front.expenses.view', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
     }
 
     /**

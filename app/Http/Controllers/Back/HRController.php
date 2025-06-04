@@ -369,6 +369,12 @@ class HRController extends Controller
                     'travelexpenses' => $request->travelexpenses,
                     'gasolinecost' => $request->gasolinecost,
                     'totalprice' => $request->totalExpense,
+                    // New
+                    'afdistance' => $request->afdistance ?? 0,
+                    'basedistance' => $request->basedistance ?? 0,
+                    'distancemore' => $request->distancemore ?? 0,
+                    'distancenote' => $request->distancenote ?? '',
+                    // New
                 ]);
             }
 
