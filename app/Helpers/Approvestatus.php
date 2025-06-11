@@ -5,6 +5,7 @@ use App\Models\ApproveStaff;
 use App\Models\User;
 use App\Models\Valldataemp;
 use App\Models\ActivityLog;
+use App\Models\Expense;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
@@ -242,6 +243,17 @@ if (!function_exists('isApprover')) {
     {
         return Approve::whereIn('typeapprove', [1, 2])
             ->where('empid', Auth::user()->empid)
+            ->exists();
+    }
+}
+
+
+if (!function_exists('hasReclaimedExpense')) {
+    function hasReclaimedExpense($bookid, $empid, $currentExpenseId)
+    {
+        return Expense::where('bookid', $bookid)
+            ->where('empid', $empid)
+            ->where('id', '>', $currentExpenseId)
             ->exists();
     }
 }
