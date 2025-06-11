@@ -141,19 +141,12 @@
                                             @php
                                                 $latestApprove = $expense->latestApprove;
                                                 $empid = $expense->empid;
-
-                                                // ตรวจสอบว่ามีการเบิกซ้ำหรือยัง (bookid + empid + id > เดิม)
-                                                $hasReclaimed = \App\Models\Expense::where('bookid', $expense->bookid)
-                                                    ->where('empid', $empid)
-                                                    ->where('id', '>', $expense->id)
-                                                    ->exists();
                                             @endphp
-
                                             @if (
                                                 $latestApprove &&
                                                     $latestApprove->statusapprove == 2 &&
                                                     \Carbon\Carbon::parse($latestApprove->updated_at)->diffInDays(now()) <= 30 &&
-                                                    !$hasReclaimed)
+                                                    !hasReclaimedExpense($expense->bookid, $expense->empid, $expense->id))
                                                 <button class="btn btn-sm btn-primary"
                                                     onclick="window.location.href='{{ route('Expense.create', $expense->id) }}'">
                                                     <span class="mdi mdi-pencil-circle-outline"></span> เบิกอีกครั้ง

@@ -36,7 +36,7 @@
             <th style="width: 120px;">3.ค่าทางด่วน</th>
             <th style="width: 150px;">4.ค่ารถโดยสารสาธารณะ</th>
             <th style="width: 120px;">5.ค่าใช้จ่ายอื่นๆ</th>
-            <th style="width: 120px;">Total (1+2+3)</th>
+            <th style="width: 120px;">Total</th>
         </tr>
     </thead>
     <tbody>
