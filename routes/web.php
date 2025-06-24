@@ -110,6 +110,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
         //ดูข้อมูลหลังบันทึก
         Route::get('/view/{id}', [ExpenseController::class, 'show'])->name('show');
+
+        Route::delete('/{id}', [ExpenseController::class, 'destroy'])->name('destroy');
     });
     // Expense
 

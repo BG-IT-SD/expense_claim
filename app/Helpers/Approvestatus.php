@@ -23,6 +23,7 @@ if (!function_exists('status_approve_badge')) {
                 1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>ตรวจสอบแล้ว</span>',
                 2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ผ่านการตรวจสอบ</span>',
                 9 => '<span class="badge bg-warning"><span class="mdi mdi-close-circle"></span>Hold</span>',
+                99 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ยกเลิกโดยผู้ใช้</span>',
                 default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
             };
         }
@@ -33,6 +34,7 @@ if (!function_exists('status_approve_badge')) {
             1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>อนุมัติแล้ว</span>',
             2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่อนุมัติ</span>',
             9 => '<span class="badge bg-warning"><span class="mdi mdi-close-circle"></span>Hold</span>',
+            99 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ยกเลิกโดยผู้ใช้</span>',
             default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
         };
     }
@@ -89,6 +91,7 @@ if (!function_exists('hr_status_approve_badge')) {
                 1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>ตรวจสอบแล้ว</span>',
                 2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่ผ่านการตรวจสอบ</span>',
                 9 => '<span class="badge bg-warning"><span class="mdi mdi-close-circle"></span>Hold</span>',
+                99 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ยกเลิกโดยผู้ใช้</span>',
                 default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
             };
         }
@@ -102,6 +105,7 @@ if (!function_exists('hr_status_approve_badge')) {
             1 => '<span class="badge bg-success"><span class="mdi mdi-check-circle"></span>อนุมัติแล้ว</span>',
             2 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ไม่อนุมัติ</span>',
             9 => '<span class="badge bg-warning"><span class="mdi mdi-close-circle"></span>Hold</span>',
+            99 => '<span class="badge bg-danger"><span class="mdi mdi-close-circle"></span>ยกเลิกโดยผู้ใช้</span>',
             default => '<span class="badge bg-secondary">สถานะไม่ทราบ</span>',
         };
     }

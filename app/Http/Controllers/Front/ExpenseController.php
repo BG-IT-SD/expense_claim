@@ -48,7 +48,9 @@ class ExpenseController extends Controller
         $booking = Vbooking::with([
             'expense' => function ($q) use ($empid) {
                 $q->where('empid', $empid)
-                    ->with('latestApprove'); // ✅ include latest approve
+                ->where('status', 1)
+                ->where('deleted', 0)
+                    ->with('latestApprove'); // include latest approve
             }
         ])
             ->where(function ($q) use ($empid) {
@@ -67,6 +69,8 @@ class ExpenseController extends Controller
         $currentEmpid = Auth::user()->empid;
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
             ->where('empid', $currentEmpid)
+            ->where('status', 1)
+            ->where('deleted', 0)
             ->whereHas('latestApprove', function ($query) {
                 $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
             })
@@ -632,8 +636,40 @@ class ExpenseController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $expense = Expense::findOrFail($id);
+
+        $approve = Approve::where('exid', $expense->id)
+            ->where('typeapprove', 1)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($approve && $approve->statusapprove == 0) {
+            // ยกเลิก Expense
+            $expense->update([
+                'deleted' => 1,
+                'status' => 0,
+            ]);
+
+            // ยกเลิก Approve ทุก exid เดียวกัน
+            Approve::where('exid', $expense->id)->update([
+                'statusapprove' => 99,
+                'remark' => 'รายการถูกยกเลิกโดยผู้ใช้',
+                'status' => 0,
+                'deleted' => 1,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ยกเลิกรายการเรียบร้อยแล้ว'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'ไม่สามารถยกเลิกได้ เพราะมีการอนุมัติแล้ว'
+        ]);
     }
+
 
     public function Heademp(Request $request)
     {
