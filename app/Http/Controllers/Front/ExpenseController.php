@@ -185,19 +185,50 @@ class ExpenseController extends Controller
 
         // // หัวหน้างานอนุมัติ
         // ดึง JSON จากลิงก์ API
+        // $response = $this->getHeadEmp($empid);
+
+        // if (!is_array($response) || ($response['code'] ?? null) !== 200) {
+        //     $headempid = "";
+        //     $headlevel = "";
+        //     $heademail = "";
+        //     $headname = "";
+        // } else {
+        //     $headempid = $response['head_emp_id'] ?? "";
+        //     $headlevel = LevelEmp($headempid);
+        //     $heademail = $response['head_email'] ?? "";
+        //     $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        // }
+
+        // New Head
         $response = $this->getHeadEmp($empid);
 
-        if (!is_array($response) || ($response['code'] ?? null) !== 200) {
-            $headempid = "";
-            $headlevel = "";
-            $heademail = "";
-            $headname = "";
-        } else {
-            $headempid = $response['head_emp_id'] ?? "";
-            $headlevel = LevelEmp($headempid);
-            $heademail = $response['head_email'] ?? "";
-            $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        $headempid = "";
+        $headlevel = "";
+        $heademail = "";
+        $headname = "";
+
+        $loopCount = 0;
+        $maxLoop = 5;
+
+        while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
+            $currentEmpId = $response['head_emp_id'] ?? "";
+            $currentLevel = LevelEmp($currentEmpId);
+
+            if ($currentLevel >= 10) {
+                // เจอหัวหน้าที่ level >= 10 — เก็บข้อมูลและหยุด loop
+                $headempid = $currentEmpId;
+                $headlevel = $currentLevel;
+                $heademail = $response['head_email'] ?? "";
+                $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+                break;
+            }
+
+            // หาหัวหน้าคนถัดไป
+            $response = $this->getHeadEmp($currentEmpId);
+            $loopCount++;
         }
+
+        // New Head
         //  dd($headempid);
         // กลุ่มเลขา
         $approve_g = ApproveGroup::where('empid', $empid)->count();
@@ -649,7 +680,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 7)
+            ->where('numlvl', '>=', 8)
             ->first();
 
         // ถ้าไม่เจอข้อมูลเลย

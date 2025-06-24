@@ -162,7 +162,7 @@
                                 </span>
                                 <span id="base-distance-distance-label" style="display:none; color:red;">
                                 </span>
-                                <input type="hidden" id="afdistance" name="afdistance" value="0"/>
+                                <input type="hidden" id="afdistance" name="afdistance" value="0" />
                                 <input type="hidden" id="base_distance" name="basedistance" value="0">
                             </td>
                             <td>
@@ -190,7 +190,8 @@
                     <div class="col-md-8 mb-3"></div>
                     <div class="col-md-12 mb-3">
                         <div class="form-floating form-floating-outline mb-4">
-                            <textarea class="form-control h-px-100" id="distancenote" name="distancenote" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง"></textarea>
+                            <textarea class="form-control h-px-100" id="distancenote" name="distancenote"
+                                placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง"></textarea>
                             <label for="distancenote">ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง</label>
                         </div>
                     </div>
@@ -262,8 +263,8 @@
                                 @endphp
                                 <select id="headapprove" class="select2 form-select form-select-l"
                                     data-style="btn-default" tabindex="null">
-                                    {{-- เงื่อนไขที่ 1 อนุมัติตัวเองกรณี level >= 10 และอยู่ในกลุ่มเลขา --}}
-                                    @if ($headlevel >= 10 || $approve_g > 0)
+                                    {{-- เงื่อนไขที่ 1 อนุมัติตัวเองกรณี อยู่ในกลุ่มเลขา --}}
+                                    @if ($approve_g > 0)
                                         @php
                                             $finalHEmail = $empemail;
                                             $finalHName = $empfullname;
@@ -274,24 +275,35 @@
                                     @else
                                         {{-- เงื่อนไขที่ 2 level < 10 --}}
                                         @if ($headempid == '')
-                                            {{-- เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
+                                            {{-- เงื่อนไขที่ 3 ถ้าไม่มีหัวหน้า ให้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 8 --}}
                                             <option value="">เลือกผู้อนุมัติ</option>
                                         @else
-                                            {{-- งื่อนไขที่ 4 มีหัวหน้า --}}
-                                            @if ($headlevel > 10)
-                                                {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 7 --}}
-                                                <option value="">เลือกผู้อนุมัติ</option>
-                                            @else
-                                                @php
-                                                    $finalHEmail = $heademail;
-                                                    $finalHName = $headname;
-                                                    $finalId = $headempid;
-                                                @endphp
+                                            {{-- เงื่อนไขที่ New มีหัวหน้าและสืบLevel == 10 --}}
+                                            @php
+                                                $finalHEmail = $heademail;
+                                                $finalHName = $headname;
+                                                $finalId = $headempid;
+                                            @endphp
+                                            <option value="{{ $headempid }}">
+                                                {{ $heademail . ' | ' . $headname }}
+                                            </option>
+                                            {{-- Old --}}
+                                                {{-- เงื่อนไขที่ 4 มีหัวหน้า --}}
+                                                {{-- @if ($headlevel >= 10) --}}
+                                                {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 8 --}}
+                                                {{-- <option value="">เลือกผู้อนุมัติ</option>
+                                                @else
+                                                    @php
+                                                        $finalHEmail = $heademail;
+                                                        $finalHName = $headname;
+                                                        $finalId = $headempid;
+                                                    @endphp --}}
                                                 {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
-                                                <option value="{{ $headempid }}">
-                                                    {{ $heademail . ' | ' . $headname }}
-                                                </option>
-                                            @endif
+                                                {{-- <option value="{{ $headempid }}">
+                                                        {{ $heademail . ' | ' . $headname }}
+                                                    </option>
+                                                @endif --}}
+                                            {{-- Old --}}
                                         @endif
 
                                     @endif
