@@ -134,6 +134,16 @@
                                                     onclick="window.location.href='{{ route('Expense.create', $booking->id) }}'"><span
                                                         class="mdi mdi-pencil-circle-outline"></span> เบิก</button>
                                             @endif
+                                            @if (!is_null($approve->typeapprove))
+                                                @if ($approve->typeapprove == 1 && $approve->statusapprove == 0)
+                                                <button class="btn btn-sm btn-danger" onclick="cancelExpense({{ $expense->id }})">
+                                                    <i class="mdi mdi-close-circle-outline"></i> ยกเลิก
+                                                </button>
+                                                @endif
+
+                                             @endif
+
+
 
                                         </td>
                                     </tr>
