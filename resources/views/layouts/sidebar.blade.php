@@ -251,7 +251,7 @@
                 <span class="menu-header-text" data-i18n="บัญชี">บัญชี</span>
             </li>
             <!-- Account -->
-            <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage') || Route::is('Account.view') || Route::is('Account.listhold') ) open @endif">
+            <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage') || Route::is('Account.view') || Route::is('Account.listhold') || Route::is('Account.listapproved')) open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-currency-usd"></i>
                     <div data-i18n="บัญชี">บัญชี</div>
@@ -261,6 +261,11 @@
                     <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage') || Route::is('Account.view')) active @endif">
                         <a href="{{ route('Account.index') }}" class="menu-link">
                             <div data-i18n="รายการกลุ่มอนุมัติ">รายการกลุ่มอนุมัติ</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @if (Route::is('Account.listapproved')) active @endif">
+                        <a href="{{ route('Account.listapproved') }}" class="menu-link">
+                            <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
                     </li>
                     {{-- <li class="menu-item @if (Route::is('Account.listhold')) active @endif">

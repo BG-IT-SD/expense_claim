@@ -17,6 +17,7 @@ class AccountController extends Controller
     {
         $exgroups = Exgroup::where('deleted', 0)
             ->where('typeapprove', 6)
+            ->where('statusapprove',0)
             ->orderByDesc('id')
             ->get();
         return view('back.account.index', compact('exgroups'));
@@ -185,6 +186,20 @@ class AccountController extends Controller
 
         return view('back.account.listhold', compact('expenses', 'page'));
     }
+
+    public function ListApproved()
+    {
+
+        $exgroups = Exgroup::where('deleted', 0)
+        ->where('typeapprove', 6)
+        // ->where('statusapprove',0)
+        ->whereIn('statusapprove', [1, 2])
+        ->orderByDesc('id')
+        ->get();
+     return view('back.account.listapprove', compact('exgroups'));
+    }
+
+
 
     public function confirmHold(Request $request)
     {

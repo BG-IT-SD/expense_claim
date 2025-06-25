@@ -199,6 +199,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
             Route::get('listhold', [AccountController::class, 'ListHold'])->name('listhold');
             Route::post('HoldApprove/confirm', [AccountController::class, 'confirmHold'])->name('HoldApprove.confirm');
+            Route::get('listapproved', [AccountController::class, 'ListApproved'])->name('listapproved');
+
+
         });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')
