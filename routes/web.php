@@ -183,6 +183,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
             Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
+
+            Route::get('export', [HRController::class, 'export'])->name('export');
         });
 
     // Account

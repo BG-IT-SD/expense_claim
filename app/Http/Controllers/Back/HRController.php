@@ -22,32 +22,83 @@ use App\Models\Fuelprice;
 use App\Models\Groupplant;
 use App\Models\Passenger;
 use App\Models\Plant;
+use App\Models\Vbookingall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Exports\HrExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HRController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index()
+    // {
+    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+    //         ->whereHas('latestApprove', function ($query) {
+    //             $query->where(function ($q) {
+    //                 $q->where('typeapprove', 1) // เอาทุก statusapprove
+    //                     ->orWhere(function ($sub) {
+    //                         $sub->where('typeapprove', 3)
+    //                             ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
+    //                     });
+    //             });
+    //         })
+    //         ->whereIn('extype', [1, 3])
+    //         ->where('deleted', 0)
+    //         ->get();
+
+    //         $statusList = [
+    //             0 => 'รออนุมัติ',
+    //             1 => 'รอตรวจสอบ',
+    //             2 => 'ไม่อนุมัติ',
+    //             99 => 'ยกเลิกโดยผู้ใช้',
+    //         ];
+
+    //     return view('back.hr.list', compact('expenses','statusList'));
+    // }
+
+    public function index(Request $request)
     {
+
+        $bookids = [];
+
+        if ($request->filled('exdate')) {
+            $bookids = Vbookingall::whereDate('departure_date', $request->exdate)->pluck('id');
+        }
+
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
             ->whereHas('latestApprove', function ($query) {
                 $query->where(function ($q) {
-                    $q->where('typeapprove', 1) // เอาทุก statusapprove
+                    $q->where('typeapprove', 1)
                         ->orWhere(function ($sub) {
                             $sub->where('typeapprove', 3)
-                                ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
+                                ->where('statusapprove', 0);
                         });
                 });
             })
+            ->when(request()->has('status'), function ($q) {
+                $q->whereHas('latestApprove', function ($sub) {
+                    $sub->where('statusapprove', request('status'));
+                });
+            })
+            ->when(request('exdate'), fn($q) => $q->whereIn('bookid', $bookids))
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
 
-        return view('back.hr.list', compact('expenses'));
+        $statusList = [
+            0 => 'รออนุมัติ',
+            1 => 'รอตรวจสอบ',
+            2 => 'ไม่อนุมัติ',
+            99 => 'ยกเลิกโดยผู้ใช้',
+        ];
+
+        return view('back.hr.list', compact('expenses', 'statusList'));
     }
+
+
 
     public function history()
     {
@@ -67,9 +118,10 @@ class HRController extends Controller
         return view('back.hr.approved', compact('expenses', 'page'));
     }
 
-    public function groupList(){
+    public function groupList()
+    {
         $exgroups = Exgroup::where('deleted', 0)->orderByDesc('id')->get();
-        return view('back.hr.grouplist',compact('exgroups'));
+        return view('back.hr.grouplist', compact('exgroups'));
     }
 
     public function hrdriver()
@@ -592,66 +644,66 @@ class HRController extends Controller
 
     public function reject(Request $request)
     {
-            $request->validate([
-                'rejectremark' => 'required',
-                'rejectidexpense' => 'required'
+        $request->validate([
+            'rejectremark' => 'required',
+            'rejectidexpense' => 'required'
+        ]);
+
+        $id = $request->rejectidexpense ?? "";
+        $empfullname = $request->empfullname ?? "";
+        $departuredaterj = $request->departuredaterj ?? "";
+        $empemailrj = $request->empemailrj ?? "";
+
+        if ($id != "") {
+            $approve = Approve::create([
+                'exid' => $id,
+                'typeapprove' => 3,
+                'empid' => $request->head_idrj,
+                'email' => $request->head_emailrj ?? '',
+                'approvename' => $request->head_namerj ?? '',
+                'emailstatus' => 1,
+                'statusapprove' => 2,
+                'remark' => $request->rejectremark,
             ]);
 
-            $id = $request->rejectidexpense ?? "";
-            $empfullname = $request->empfullname ?? "";
-            $departuredaterj = $request->departuredaterj ?? "";
-            $empemailrj = $request->empemailrj ?? "";
-
-            if ($id != "") {
-                $approve = Approve::create([
-                    'exid' => $id,
-                    'typeapprove' => 3,
-                    'empid' => $request->head_idrj,
-                    'email' => $request->head_emailrj ?? '',
-                    'approvename' => $request->head_namerj ?? '',
-                    'emailstatus' => 1,
-                    'statusapprove' => 2,
+            if ($approve) {
+                // ส่งเมลเฉพาะกรณี reject
+                $data = [
+                    'headname' => $request->head_namerj ?? '', // คนที่ reject
+                    'name' => $empfullname, // user
+                    'expenseid' => $approve->exid, //exid
+                    'departuredate' => $departuredaterj,
                     'remark' => $request->rejectremark,
+                ];
+
+                MailHelper::sendExternalMail(
+                    $empemailrj, // ผู้รับ คือ ผู้ขอเบิก
+                    'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
+                    'mails.reject', // ชื่อ blade view mail
+                    $data,
+                    'Expense Claim System EX' . $id,
+                );
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'ยกเลิกข้อมูลเรียบร้อยแล้ว',
+                    'expense_id' => $id,
+                    'class' => 'success'
                 ]);
-
-                if ($approve) {
-                    // ส่งเมลเฉพาะกรณี reject
-                    $data = [
-                        'headname' => $request->head_namerj ?? '', // คนที่ reject
-                        'name' => $empfullname, // user
-                        'expenseid' => $approve->exid, //exid
-                        'departuredate' => $departuredaterj,
-                        'remark' => $request->rejectremark,
-                    ];
-
-                    MailHelper::sendExternalMail(
-                        $empemailrj, // ผู้รับ คือ ผู้ขอเบิก
-                        'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
-                        'mails.reject', // ชื่อ blade view mail
-                        $data,
-                        'Expense Claim System EX' . $id,
-                    );
-
-                    return response()->json([
-                        'status' => 200,
-                        'message' => 'ยกเลิกข้อมูลเรียบร้อยแล้ว',
-                        'expense_id' => $id,
-                        'class' => 'success'
-                    ]);
-                } else {
-                    return response()->json([
-                        'status' => 500,
-                        'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
-                        'class' => 'error'
-                    ], 500);
-                }
             } else {
                 return response()->json([
-                    'status' => 400,
-                    'message' => 'ไม่พบรหัสอ้างอิงรายการ',
-                    'class' => 'warning'
-                ], 400);
+                    'status' => 500,
+                    'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
+                    'class' => 'error'
+                ], 500);
             }
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'ไม่พบรหัสอ้างอิงรายการ',
+                'class' => 'warning'
+            ], 400);
+        }
     }
     /**
      * Remove the specified resource from storage.
@@ -719,7 +771,7 @@ class HRController extends Controller
                 ->where('status', 1)
                 ->where('deleted', 0)
                 ->limit(1);
-            })
+        })
             ->where('step', 1)
             ->where('status', 1)
             ->where('deleted', 0)
@@ -828,10 +880,11 @@ class HRController extends Controller
         }
     }
 
-    public function groupDetail($id){
+    public function groupDetail($id)
+    {
 
         //ดึงรายการเบิกทั้งหมดในกลุ่ม
-        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','latestApprove'])
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr', 'latestApprove'])
             ->where('exgroup', $id)
             ->get();
         //ดึงข้อมูลกลุ่ม
@@ -841,6 +894,44 @@ class HRController extends Controller
         $nextuser = $exgroup->nextuser->fullname ?? "";
         $finaluser = $exgroup->finaluser->fullname ?? "";
 
-        return view('back.hr.groupdetail',compact('expenses','exgroup','create_by','checked_by','nextuser','finaluser'));
+        return view('back.hr.groupdetail', compact('expenses', 'exgroup', 'create_by', 'checked_by', 'nextuser', 'finaluser'));
+    }
+
+    public function export(Request $request)
+    {
+        $bookids = Vbookingall::when(
+            $request->exdate,
+            fn($q) =>
+            $q->whereDate('departure_date', $request->exdate)
+        )->pluck('id');
+
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','foods'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1)
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0);
+                        });
+                });
+            })
+            ->when(
+                $request->status,
+                fn($q) =>
+                $q->whereHas(
+                    'latestApprove',
+                    fn($sub) =>
+                    $sub->where('statusapprove', $request->status)
+                )
+            )
+            ->when($request->exdate, fn($q) => $q->whereIn('bookid', $bookids))
+            ->whereIn('extype', [1, 3])
+            ->where('deleted', 0)
+            ->get();
+
+            // dd($expenses);
+
+            $date = date('Y-m-d');
+            return Excel::download(new HrExport($expenses), "HRCheck_$date.xlsx");
     }
 }

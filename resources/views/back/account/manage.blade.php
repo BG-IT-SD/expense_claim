@@ -196,7 +196,7 @@
 
                                             </td>
                                             <td>
-                                                {{ number_format($sum_total, 2) }}
+                                                {{ round($sum_total) }}
 
                                             </td>
 
@@ -270,16 +270,16 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ number_format($exgroup->total, 2) }}</span>
+                                                    {{ round($exgroup->total) }}</span>
 
                                             </td>
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpenseNet">
-                                                    {{ number_format($exgroup->total, 2) }}</span>
+                                                    {{ round($exgroup->total) }}</span>
                                                 <input type="hidden" name="nettotal" class="row-totalexNet"
                                                     data-id="{{ $expense->id }}"
-                                                    value="{{ number_format($exgroup->total, 2) }}">
+                                                    value="{{ round($exgroup->total) }}">
                                             </td>
                                         </tr>
 
