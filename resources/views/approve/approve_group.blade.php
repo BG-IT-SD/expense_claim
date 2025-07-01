@@ -125,7 +125,7 @@
                                             <td>{{ number_format($sum_other, 2) }}
                                             </td>
                                             <td>
-                                                {{ number_format($sum_total, 2) }}
+                                                {{ round($sum_total) }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -170,7 +170,7 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ number_format($exgroup->total, 2) }}</span>
+                                                    {{ round($exgroup->total) }}</span>
                                             </td>
                                         </tr>
 

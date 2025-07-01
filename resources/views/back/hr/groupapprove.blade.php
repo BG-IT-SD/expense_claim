@@ -118,8 +118,8 @@
                                             <input type="hidden" name="otherexpenses" value="{{ $sum_other ?? 0 }}">
                                         </td>
                                         <td>
-                                            {{ number_format($sum_total, 2) }}
-                                            <input type="hidden" name="total" value="{{ $sum_total ?? 0 }}">
+                                            {{ round($sum_total) }}
+                                            <input type="hidden" name="total" value="{{ round($sum_total) ?? 0 }}">
                                             <input type="hidden" name="totalother" value="{{ $sumtotalother ?? 0 }}">
                                         </td>
                                     </tr>
@@ -164,7 +164,7 @@
                                         <td>รวม</td>
                                         <td>
                                             <span
-                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ number_format($sum_total, 2) }}</span>
+                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ round($sum_total) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>
