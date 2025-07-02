@@ -37,23 +37,48 @@
 
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="exdate">Date</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="exdate">Start Date</label>
                                         <div class="col-sm-9">
                                             <input type="text" id="exdate" name="exdate"
-                                            value="{{ request('exdate') }}"
-                                            class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD">
+                                                value="{{ request('exdate') }}"
+                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end"
-                                            for="status">Status</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="end_exdate">End Date</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="end_exdate" name="end_exdate"
+                                                value="{{ request('end_exdate') }}"
+                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="bu">BU</label>
+                                        <div class="col-sm-9">
+                                            <select name="bu" id="bu" class="form-select">
+                                                <option value="" disabled selected>-- เลือกBU --</option>
+                                                @foreach ($plants as $key => $plant)
+                                                <option value="{{ $plant->plantname }}">
+                                                    {{ $plant->plantname }}
+                                                </option>
+                                            @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="status">Status</label>
                                         <div class="col-sm-9">
                                             <select name="status" id="status" class="form-select">
                                                 <option value="" disabled selected>-- เลือกสถานะ --</option>
                                                 @foreach ($statusList as $key => $text)
-                                                    <option value="{{ $key }}" >
+                                                    <option value="{{ $key }}">
                                                         {{ $text }}
                                                     </option>
                                                 @endforeach
@@ -70,7 +95,7 @@
                                             <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span></button>
-                                                    <a href="{{ route('HR.index') }}" class="btn btn-outline-secondary">Reset</a>
+                                            <a href="{{ route('HR.index') }}" class="btn btn-outline-secondary">Reset</a>
                                         </div>
                                     </div>
                                 </div>
