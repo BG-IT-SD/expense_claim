@@ -26,6 +26,8 @@ use App\Models\Vbookingall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Exports\HrExport;
+use App\Models\User;
+use App\Models\Valldataemp;
 use Maatwebsite\Excel\Facades\Excel;
 
 class HRController extends Controller
@@ -61,14 +63,32 @@ class HRController extends Controller
 
     public function index(Request $request)
     {
-
         $bookids = [];
 
-        if ($request->filled('exdate')) {
-            $bookids = Vbookingall::whereDate('departure_date', $request->exdate)->pluck('id');
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $bookids = Vbookingall::whereBetween('departure_date', [
+                $request->exdate,
+                $request->end_exdate
+            ])->pluck('id');
         }
 
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+        $filterBu = $request->input('bu');
+        $empids = null; // null = ไม่กรอง
+
+        // ถ้ามีการเลือก BU
+        if ($filterBu) {
+            // ค้นจาก users ก่อน
+            $empids = User::where('bu', $filterBu)->pluck('empid');
+
+            // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+            if ($empids->isEmpty()) {
+                $empids = Valldataemp::where('alias_name', $filterBu)
+                    ->where('STAEMP', '!=', 9)
+                    ->pluck('CODEMPID');
+            }
+        }
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
             ->whereHas('latestApprove', function ($query) {
                 $query->where(function ($q) {
                     $q->where('typeapprove', 1)
@@ -78,12 +98,14 @@ class HRController extends Controller
                         });
                 });
             })
-            ->when(request()->has('status'), function ($q) {
-                $q->whereHas('latestApprove', function ($sub) {
-                    $sub->where('statusapprove', request('status'));
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->whereHas('latestApprove', function ($sub) use ($request) {
+                    $sub->where('statusapprove', $request->status);
                 });
             })
-            ->when(request('exdate'), fn($q) => $q->whereIn('bookid', $bookids))
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
@@ -95,8 +117,13 @@ class HRController extends Controller
             99 => 'ยกเลิกโดยผู้ใช้',
         ];
 
-        return view('back.hr.list', compact('expenses', 'statusList'));
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+        return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
     }
+
+
+
 
 
 
@@ -901,8 +928,27 @@ class HRController extends Controller
     {
         $bookids = [];
 
-        if ($request->filled('exdate')) {
-            $bookids = Vbookingall::whereDate('departure_date', $request->exdate)->pluck('id');
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $bookids = Vbookingall::whereBetween('departure_date', [
+                $request->exdate,
+                $request->end_exdate
+            ])->pluck('id');
+        }
+
+        $filterBu = $request->input('bu');
+        $empids = null; // null = ไม่กรอง
+
+        // ถ้ามีการเลือก BU
+        if ($filterBu) {
+            // ค้นจาก users ก่อน
+            $empids = User::where('bu', $filterBu)->pluck('empid');
+
+            // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+            if ($empids->isEmpty()) {
+                $empids = Valldataemp::where('alias_name', $filterBu)
+                    ->where('STAEMP', '!=', 9)
+                    ->pluck('CODEMPID');
+            }
         }
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr', 'foods'])
@@ -920,44 +966,17 @@ class HRController extends Controller
                     $sub->where('statusapprove', $request->status);
                 });
             })
-            ->when($request->filled('exdate'), fn($q) => $q->whereIn('bookid', $bookids))
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
 
-        // $bookids = Vbookingall::when(
-        //     $request->exdate,
-        //     fn($q) =>
-        //     $q->whereDate('departure_date', $request->exdate)
-        // )->pluck('id');
 
-        // $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','foods'])
-        //     ->whereHas('latestApprove', function ($query) {
-        //         $query->where(function ($q) {
-        //             $q->where('typeapprove', 1)
-        //                 ->orWhere(function ($sub) {
-        //                     $sub->where('typeapprove', 3)
-        //                         ->where('statusapprove', 0);
-        //                 });
-        //         });
-        //     })
-        //     ->when(
-        //         $request->status,
-        //         fn($q) =>
-        //         $q->whereHas(
-        //             'latestApprove',
-        //             fn($sub) =>
-        //             $sub->where('statusapprove', $request->status)
-        //         )
-        //     )
-        //     ->when($request->exdate, fn($q) => $q->whereIn('bookid', $bookids))
-        //     ->whereIn('extype', [1, 3])
-        //     ->where('deleted', 0)
-        //     ->get();
+        // dd($expenses);
 
-            // dd($expenses);
-
-            $date = date('Y-m-d');
-            return Excel::download(new HrExport($expenses), "HRCheck_$date.xlsx");
+        $date = date('Y-m-d');
+        return Excel::download(new HrExport($expenses), "HRCheck_$date.xlsx");
     }
 }
