@@ -899,13 +899,13 @@ class HRController extends Controller
 
     public function export(Request $request)
     {
-        $bookids = Vbookingall::when(
-            $request->exdate,
-            fn($q) =>
-            $q->whereDate('departure_date', $request->exdate)
-        )->pluck('id');
+        $bookids = [];
 
-        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','foods'])
+        if ($request->filled('exdate')) {
+            $bookids = Vbookingall::whereDate('departure_date', $request->exdate)->pluck('id');
+        }
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr', 'foods'])
             ->whereHas('latestApprove', function ($query) {
                 $query->where(function ($q) {
                     $q->where('typeapprove', 1)
@@ -915,19 +915,45 @@ class HRController extends Controller
                         });
                 });
             })
-            ->when(
-                $request->status,
-                fn($q) =>
-                $q->whereHas(
-                    'latestApprove',
-                    fn($sub) =>
-                    $sub->where('statusapprove', $request->status)
-                )
-            )
-            ->when($request->exdate, fn($q) => $q->whereIn('bookid', $bookids))
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->whereHas('latestApprove', function ($sub) use ($request) {
+                    $sub->where('statusapprove', $request->status);
+                });
+            })
+            ->when($request->filled('exdate'), fn($q) => $q->whereIn('bookid', $bookids))
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
+
+        // $bookids = Vbookingall::when(
+        //     $request->exdate,
+        //     fn($q) =>
+        //     $q->whereDate('departure_date', $request->exdate)
+        // )->pluck('id');
+
+        // $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','foods'])
+        //     ->whereHas('latestApprove', function ($query) {
+        //         $query->where(function ($q) {
+        //             $q->where('typeapprove', 1)
+        //                 ->orWhere(function ($sub) {
+        //                     $sub->where('typeapprove', 3)
+        //                         ->where('statusapprove', 0);
+        //                 });
+        //         });
+        //     })
+        //     ->when(
+        //         $request->status,
+        //         fn($q) =>
+        //         $q->whereHas(
+        //             'latestApprove',
+        //             fn($sub) =>
+        //             $sub->where('statusapprove', $request->status)
+        //         )
+        //     )
+        //     ->when($request->exdate, fn($q) => $q->whereIn('bookid', $bookids))
+        //     ->whereIn('extype', [1, 3])
+        //     ->where('deleted', 0)
+        //     ->get();
 
             // dd($expenses);
 

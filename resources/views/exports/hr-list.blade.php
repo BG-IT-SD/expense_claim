@@ -4,32 +4,33 @@
     $sum_food = $sum_gas = $sum_express = $sum_public = $sum_other = $sum_total = 0;
     $morning = 0;
     $lunch = 0;
-    $dinner =  0;
+    $dinner = 0;
     $latenight = 0;
 @endphp
 
-<table border="1" style="border-collapse: collapse; width: 100%; font-size: 12px;">
+<table border="1" style="border-collapse: collapse; width: 100%;">
     <thead>
         <tr align="center" style="background-color: #D9D9D9; text-align: center;">
-            <th rowspan="2">Expense ID</th>
-            <th rowspan="2">ประเภทรถที่ใช้</th>
-            <th rowspan="2">สถานที่ต้นทาง</th>
-            <th rowspan="2">สถานที่ไปปฏิบัติงาน</th>
-            <th rowspan="2">บริษัท</th>
-            <th rowspan="2">รหัสพนักงาน</th>
-            <th rowspan="2">ชื่อ – นามสกุล</th>
-            <th rowspan="2">หน่วยงาน</th>
-            <th rowspan="2">ระดับ</th>
-            <th rowspan="2">วันที่เดินทางไป</th>
-            <th rowspan="2">เวลาเดินทางไป</th>
-            <th rowspan="2">วันที่เดินทางกลับ</th>
-            <th rowspan="2">เวลากลับ</th>
-            <th rowspan="2">จำนวนวัน</th>
+            <th rowspan="2" style="width: 100px;">Expense ID</th>
+            <th rowspan="2" style="width: 100px;">สถานะอนุมัติ</th>
+            <th rowspan="2" style="width: 120px;">ประเภทรถที่ใช้</th>
+            <th rowspan="2" style="width: 80px;">สถานที่<br>ต้นทาง</th>
+            <th rowspan="2" style="width: 80px;">สถานที่ไป<br>ปฏิบัติงาน</th>
+            <th rowspan="2" style="width: 50px;">บริษัท</th>
+            <th rowspan="2" style="width: 80px;">รหัสพนักงาน</th>
+            <th rowspan="2" style="width: 120px;">ชื่อ – นามสกุล</th>
+            <th rowspan="2" style="width: 100px;">หน่วยงาน</th>
+            <th rowspan="2" style="width: 50px;">ระดับ</th>
+            <th rowspan="2" style="width: 100px;">วันที่<br>เดินทางไป</th>
+            <th rowspan="2" style="width: 100px;">เวลา<br>เดินทางไป</th>
+            <th rowspan="2" style="width: 100px;">วันที่<br>เดินทางกลับ</th>
+            <th rowspan="2" style="width: 100px;">เวลา<br>เดินทางกลับ</th>
+            <th rowspan="2" style="width: 50px;">จำนวนวัน</th>
 
             <th colspan="4">1. ค่าเบี้ยเลี้ยง / อาหาร</th>
             <th colspan="2">2. ค่าน้ำมัน</th>
             <th rowspan="2">3. ค่าทางด่วน</th>
-            <th rowspan="2">4. ค่ารถโดยสารสาธารณะ</th>
+            <th rowspan="2">4. ค่ารถโดยสาร<br>สาธารณะ</th>
             <th rowspan="2">5. ค่าใช้จ่ายอื่นๆ</th>
             <th rowspan="2">Total</th>
         </tr>
@@ -46,7 +47,10 @@
     <tbody>
         @foreach ($expenses as $i => $expense)
             @php
-                $fullName = $expense->extype == 2 || $expense->extype == 3 ? $expense->tech->fullname : $expense->user->fullname;
+                $fullName =
+                    $expense->extype == 2 || $expense->extype == 3
+                        ? $expense->tech->fullname
+                        : $expense->user->fullname;
                 $booking = $expense->vbooking;
 
                 $days = Carbon::parse($booking->departure_date)->diffInDays(Carbon::parse($booking->return_date)) + 1;
@@ -77,15 +81,20 @@
                 $sum_other += $other;
                 $sum_total += $total;
                 $location = '';
-                if($booking->location == 12){
-                    $location =  $booking->location_name;
-                }else{
-                    $location =  $booking->locationbu;
+                if ($booking->location == 12) {
+                    $location = $booking->location_name;
+                } else {
+                    $location = $booking->locationbu;
                 }
             @endphp
             <tr>
                 {{-- <td align="center">{{ $i + 1 }}</td> --}}
-                <td align="center">{{ 'EX'.$expense->id }}</td>
+                <td align="center">{{ 'EX' . $expense->id }}</td>
+                <td>
+                    @if (!is_null($expense->latestApprove->statusapprove))
+                        {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
+                    @endif
+                </td>
                 <td>{{ $booking->title ?? '' }}</td>
                 <td>{{ $booking->bu ?? '' }}</td>
                 <td>{{ $location ?? '' }}</td>
@@ -114,7 +123,7 @@
             </tr>
         @endforeach
         <tr style="font-weight: bold;">
-            <td colspan="14" align="center">Total</td>
+            <td colspan="15" align="center">Total</td>
             <td align="right">{{ $sum_morning }}</td>
             <td align="right">{{ $sum_lunch }}</td>
             <td align="right">{{ $sum_dinner }}</td>
@@ -124,7 +133,7 @@
             <td align="right">{{ number_format($sum_express, 2) }}</td>
             <td align="right">{{ number_format($sum_public, 2) }}</td>
             <td align="right">{{ number_format($sum_other, 2) }}</td>
-            <td align="right">{{ number_format($sum_total, 2) }}</td>
+            <td align="right">{{ round($sum_total) }}</td>
         </tr>
     </tbody>
 </table>
