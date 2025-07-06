@@ -81,14 +81,38 @@ class TechClaimController extends Controller
         return view('front.techclaim.list', compact('bookings', 'groupEmpIds'));
     }
 
-    public function history(){
+    public function history(Request $request){
+
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+        ->when(
+            $request->filled('exid'),
+            fn($q) =>
+            $q->where('id', $exid)
+        )
+        ->when(
+            $request->filled('bookid'),
+            fn($q) =>
+            $q->where('bookid', $request->bookid)
+        )
         ->where('extype', 3)
         ->whereHas('latestApprove', function ($query) {
             $query->whereIn('typeapprove', [1, 2, 3, 4, 5,6]);
         })
         ->get();
+
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $expenses = $expenses->filter(function ($exp) use ($request) {
+                $departure = optional($exp->vbooking)->departure_date;
+
+                return $departure &&
+                       $departure >= $request->exdate &&
+                       $departure <= $request->end_exdate;
+            })->values();
+        }
 
     return view('front.techclaim.history', compact('expenses'));
     }
