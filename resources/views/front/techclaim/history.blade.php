@@ -131,6 +131,21 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <a href="{{ route('Expense.show', $expense->id) }}" class="btn btn-sm btn-info" ><span class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                            @php
+                                            $latestApprove = $expense->latestApprove;
+                                            $empid = $expense->empid;
+                                        @endphp
+                                        @if (
+                                            $latestApprove &&
+                                                $latestApprove->statusapprove == 2 &&
+                                                \Carbon\Carbon::parse($latestApprove->updated_at)->diffInDays(now()) <= 30 &&
+                                                !hasReclaimedExpense($expense->bookid, $expense->empid, $expense->id))
+                                                <a href="{{ route('TechClaim.create', ['bookid' => $expense->bookid, 'empid' => $expense->empid]) }}"
+                                                    target="_blank" class="btn btn-sm btn-primary">
+                                                    <span class="mdi mdi-pencil-circle-outline"></span> เบิกอีกครั้ง
+                                                </a>
+                                        @endif
+
 
                                         </td>
                                     </tr>
