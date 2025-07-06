@@ -261,3 +261,17 @@ if (!function_exists('hasReclaimedExpense')) {
             ->exists();
     }
 }
+
+if(!function_exists('searchStatus')){
+    function searchStatus(){
+        $statusList = [
+            0 => 'รออนุมัติ',
+            1 => 'อนุมัติแล้ว',
+            2 => 'ไม่อนุมัติ',
+            99 => 'ยกเลิกโดยผู้ใช้',
+        ];
+
+        return $statusList;
+    }
+
+}
