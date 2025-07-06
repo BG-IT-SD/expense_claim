@@ -35,24 +35,40 @@ class ExpenseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // ข้อมูลจองรถตาม CODEMPID 7 วันย้อนหลัง
         // create view ที่รวมเป็นผู้โดยสารด้วย
         $empid = Auth::user()->empid;
-        // $booking = Vbooking::where('booking_emp_id', "$empid")
-        //     ->orWhere('passenger_empid', "$empid")
-        //     ->get()
-        //     ->unique('id')
-        //     ->values();
+
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
+
         $booking = Vbooking::with([
-            'expense' => function ($q) use ($empid) {
+            'expense' => function ($q) use ($request, $empid) {
                 $q->where('empid', $empid)
-                ->where('status', 1)
-                ->where('deleted', 0)
+                    ->where('status', 1)
+                    ->where('deleted', 0)
                     ->with('latestApprove'); // include latest approve
             }
         ])
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('id', $request->bookid)
+            )
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '<=', $request->end_exdate)
+            )
+
             ->where(function ($q) use ($empid) {
                 $q->where('booking_emp_id', $empid)
                     ->orWhere('passenger_empid', $empid);
@@ -60,21 +76,54 @@ class ExpenseController extends Controller
             ->get()
             ->unique('id')
             ->values();
+
+            //กรอง exid จาก expense
+            if ($exid) {
+                $booking = $booking->filter(function ($b) use ($exid) {
+                    return optional($b->expense)->id == $exid;
+                })->values();
+            }
+
+        // dd($booking);
+
         // dd($booking[0]->expense->id ?? 'no expense');
         return view('front.expenses.list', compact('booking'));
     }
 
-    public function history()
+    public function history(Request $request)
     {
         $currentEmpid = Auth::user()->empid;
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
             ->where('empid', $currentEmpid)
             ->where('status', 1)
             ->where('deleted', 0)
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('bookid', $request->bookid)
+            )
             ->whereHas('latestApprove', function ($query) {
                 $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
             })
             ->get();
+
+            if ($request->filled('exdate') && $request->filled('end_exdate')) {
+                $expenses = $expenses->filter(function ($exp) use ($request) {
+                    $departure = optional($exp->vbooking)->departure_date;
+
+                    return $departure &&
+                           $departure >= $request->exdate &&
+                           $departure <= $request->end_exdate;
+                })->values();
+            }
 
         return view('front.expenses.history', compact('expenses'));
     }
@@ -112,9 +161,13 @@ class ExpenseController extends Controller
         if (!$booking) {
             return redirect()->back()->with('error', 'ไม่พบข้อมูลการจอง');
         }
-        $empid = Auth::user()->empid;
-        $empemail = Auth::user()->email;
-        $empfullname = Auth::user()->fullname;
+        // $empid = Auth::user()->empid;
+        // $empemail = Auth::user()->email;
+        // $empfullname = Auth::user()->fullname;
+        $user = Auth::user();
+        $empid       = $user->empid;
+        $empemail    = $user->email;
+        $empfullname = $user->fullname;
         // $booking->booking_emp_id ?? "";
         // MailHelper::SendMail('kamolwan.b@bgiglass.com', 'Subject from API', 'Some body text', 'dddd');
 
@@ -123,7 +176,8 @@ class ExpenseController extends Controller
         $startplant = "";
         $endplant = "";
         $PlantStart = $booking->bu;
-        $bu = Auth::user()->bu;
+        // $bu = Auth::user()->bu;
+        $bu = $user->bu;
         $level = 1;
         $empLevel = LevelEmp($empid);
         // ession('level')
