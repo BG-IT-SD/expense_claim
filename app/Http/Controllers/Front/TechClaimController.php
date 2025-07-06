@@ -49,6 +49,7 @@ class TechClaimController extends Controller
             $booking->expense = Expense::where('bookid', $booking->id)
                 ->where('empid', $booking->passenger_empid)
                 ->with(['latestApprove', 'user'])
+                ->orderBy('id', 'desc')
                 ->first();
         }
 
