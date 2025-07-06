@@ -28,16 +28,40 @@ class DriverClaimController extends Controller
         return view('front.driver.list', compact('drivers'));
     }
 
-    public function history(){
+    public function history(Request $request){
+
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
+
         $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
-        ->whereHas('latestApprove', function ($query) {
-            $query->whereIn('typeapprove', [1,3,4,5,6]);
-            // ->where('statusapprove', 1);
+        ->whereHas('latestApprove', function ($query) use ($request) {
+            $query->whereIn('typeapprove', [1,3,4,5,6])
+                  ->when(
+                      $request->filled('status'),
+                      fn($q) => $q->where('statusapprove', $request->status)
+                  );
         })
+        ->when(
+            $request->filled('exid'),
+            fn($q) =>
+            $q->where('id', $exid)
+        )
+        ->when(
+            $request->filled('drivers'),
+            fn($q) =>
+            $q->where('empid', $request->drivers)
+        )
+
         ->whereIn('extype', [2])
         ->get();
+
+        // Status
+        $status = searchStatus();
+        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+
         $page = 'DriverClaim.show';
-        return view('back.hr.historydv', compact('expenses','page'));
+        return view('back.hr.historydv', compact('expenses','page','status','drivers'));
     }
 
     /**
