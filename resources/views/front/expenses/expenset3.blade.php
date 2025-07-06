@@ -318,6 +318,11 @@
                                     class="form-control form-control-input">
                                 <input type="hidden" name="empleveldata" id="empleveldata"
                                     value="{{ $empLevel }}">
+                                    @if (isset($pageTech) && $pageTech == 1)
+                                    <input type="text" name="pageTech" id="pageTech" value="{{ $pageTech }}">
+                                    @else
+                                    <input type="text" name="pageTech" id="pageTech" value="0">
+                                    @endif
                             </div>
 
                         </div>

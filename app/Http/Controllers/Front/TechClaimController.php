@@ -172,10 +172,11 @@ class TechClaimController extends Controller
 
 
         $approve_g = 0;
+        $pageTech = 1;
         // ราคาน้ำมัน
         $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        return view('front.techclaim.create', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+        return view('front.techclaim.create', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','pageTech']));
     }
 
     /**

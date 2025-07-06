@@ -159,7 +159,7 @@
     @if (session('message'))
         <script>
             Swal.fire({
-                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
+                title: {!! json_encode(session('message')) !!}, //ป้องกัน Error ใน JavaScript
                 icon: {!! json_encode(session('class')) !!},
                 customClass: {
                     confirmButton: 'btn btn-primary waves-effect waves-light'
