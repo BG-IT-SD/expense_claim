@@ -12,24 +12,24 @@
                     </div>
                     <div class="card-body">
 
-                        <form>
+                        <form id="searchExpense" action="{{ route('TechClaim.index') }}" method="GET">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-first-name">Expense
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="exid">Expense
                                             ID</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-first-name" class="form-control"
+                                            <input type="text" id="exid" name="exid" class="form-control"
                                                 placeholder="">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-last-name">Booking
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="bookid">Booking
                                             ID</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-last-name" class="form-control"
+                                            <input type="text" id="bookid" name="bookid" class="form-control"
                                                 placeholder="">
                                         </div>
                                     </div>
@@ -38,25 +38,24 @@
 
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-birthdate">Date
-                                            Time</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="exdate">Start Date</label>
                                         <div class="col-sm-9">
-                                            <input type="hidden" id="formtabs-birthdate"
-                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD"
-                                                readonly="readonly"><input
-                                                class="form-control dob-picker flatpickr-input flatpickr-mobile"
-                                                tabindex="1" type="date" placeholder="YYYY-MM-DD">
+                                            <input type="text" id="exdate" name="exdate"
+                                                value="{{ request('exdate') }}"
+                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    {{-- <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-phone">Location</label>
+                                    <div class="row">
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="end_exdate">End Date</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-phone" class="form-control phone-mask"
-                                                placeholder="" aria-label="658 799 8941">
+                                            <input type="text" id="end_exdate" name="end_exdate"
+                                                value="{{ request('end_exdate') }}"
+                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD">
                                         </div>
-                                    </div> --}}
+                                    </div>
+
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -64,11 +63,10 @@
                                 <div class="col-md-6">
                                     <div class="row justify-content-end">
                                         <div class="col-sm-9">
-                                            <button type="button"
+                                            <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span></button>
-                                            <button type="reset"
-                                                class="btn btn-outline-secondary waves-effect">Reset</button>
+                                                    <a href="{{ route('TechClaim.index') }}" class="btn btn-outline-secondary">Reset</a>
                                         </div>
                                     </div>
                                 </div>
@@ -177,6 +175,14 @@
                     [2, 'desc']
                 ],
                 lengthMenu: [5, 10, 25, 50, 75, 100],
+            });
+
+            $ ('#exdate').flatpickr ({
+                monthSelectorType: 'static',
+            });
+
+            $ ('#end_exdate').flatpickr ({
+                monthSelectorType: 'static',
             });
         });
     </script>

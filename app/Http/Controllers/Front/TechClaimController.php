@@ -33,15 +33,34 @@ class TechClaimController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $groupEmpIds = GroupSpecial::where('typeid', 3)->pluck('fullname', 'empid')->toArray();
+
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
 
         $bookings = Vbooking::where(function ($q) use ($groupEmpIds) {
                 $q->whereIn('booking_emp_id', array_keys($groupEmpIds))
                   ->orWhereIn('passenger_empid', array_keys($groupEmpIds));
             })
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('id', $request->bookid)
+            )
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '<=', $request->end_exdate)
+            )
             ->get();
 
         // ผูก expense ทีละรายการด้วย passenger_empid
@@ -53,17 +72,47 @@ class TechClaimController extends Controller
                 ->first();
         }
 
+        if ($exid) {
+            $bookings = $bookings->filter(function ($b) use ($exid) {
+                return optional($b->expense)->id == $exid;
+            })->values(); // reset index
+        }
+
         return view('front.techclaim.list', compact('bookings', 'groupEmpIds'));
     }
 
-    public function history(){
+    public function history(Request $request){
+
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+        ->when(
+            $request->filled('exid'),
+            fn($q) =>
+            $q->where('id', $exid)
+        )
+        ->when(
+            $request->filled('bookid'),
+            fn($q) =>
+            $q->where('bookid', $request->bookid)
+        )
         ->where('extype', 3)
         ->whereHas('latestApprove', function ($query) {
             $query->whereIn('typeapprove', [1, 2, 3, 4, 5,6]);
         })
         ->get();
+
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $expenses = $expenses->filter(function ($exp) use ($request) {
+                $departure = optional($exp->vbooking)->departure_date;
+
+                return $departure &&
+                       $departure >= $request->exdate &&
+                       $departure <= $request->end_exdate;
+            })->values();
+        }
 
     return view('front.techclaim.history', compact('expenses'));
     }
