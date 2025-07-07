@@ -26,6 +26,7 @@ use App\Models\Vbookingall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Exports\HrExport;
+use App\Models\GroupSpecial;
 use App\Models\User;
 use App\Models\Valldataemp;
 use Maatwebsite\Excel\Facades\Excel;
@@ -145,28 +146,65 @@ class HRController extends Controller
         return view('back.hr.approved', compact('expenses', 'page'));
     }
 
-    public function groupList()
+    public function groupList(Request $request)
     {
-        $exgroups = Exgroup::where('deleted', 0)->orderByDesc('id')->get();
-        return view('back.hr.grouplist', compact('exgroups'));
+        $exgroups = Exgroup::where('deleted', 0)
+        ->when(
+            $request->filled('exdate'),
+            fn($q) =>
+            $q->whereDate('groupdate', '>=', $request->exdate)
+        )
+        ->when(
+            $request->filled('end_exdate'),
+            fn($q) =>
+            $q->whereDate('groupdate', '<=', $request->end_exdate)
+        )
+        ->when(
+            $request->filled('status'),
+            fn($q) => $q->where('statusapprove', $request->status)
+        )
+        ->orderByDesc('id')->get();
+
+        $statusList = searchStatus();
+        return view('back.hr.grouplist', compact('exgroups','statusList'));
     }
 
-    public function hrdriver()
+    public function hrdriver(Request $request)
     {
+        $exid = $request->filled('exid')
+        ? ltrim($request->exid, 'EX')
+        : null;
+
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
-            ->whereHas('latestApprove', function ($query) {
+            ->whereHas('latestApprove', function ($query) use ($request) {
                 $query->where(function ($q) {
                     $q->where('typeapprove', 1) // เอาทุก statusapprove
                         ->orWhere(function ($sub) {
                             $sub->where('typeapprove', 3)
                                 ->where('statusapprove', 0); // เฉพาะ statusapprove = 0
                         });
+                })->when($request->filled('status'), function ($q) use ($request) {
+                    $q->where('statusapprove', $request->status);
                 });
             })
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('drivers'),
+                fn($q) =>
+                $q->where('empid', $request->drivers)
+            )
             ->whereIn('extype', [2])
             ->get();
 
-        return view('back.hr.listdriver', compact('expenses'));
+            // Status
+        $status = searchStatus();
+        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+
+        return view('back.hr.listdriver', compact('expenses','status','drivers'));
     }
     public function driverhistory()
     {

@@ -13,11 +13,21 @@ use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $exgroups = Exgroup::where('deleted', 0)
             ->where('typeapprove', 6)
             ->where('statusapprove',0)
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '<=', $request->end_exdate)
+            )
             ->orderByDesc('id')
             ->get();
         return view('back.account.index', compact('exgroups'));
@@ -187,13 +197,23 @@ class AccountController extends Controller
         return view('back.account.listhold', compact('expenses', 'page'));
     }
 
-    public function ListApproved()
+    public function ListApproved(Request $request)
     {
 
         $exgroups = Exgroup::where('deleted', 0)
         ->where('typeapprove', 6)
         // ->where('statusapprove',0)
         ->whereIn('statusapprove', [1, 2])
+        ->when(
+            $request->filled('exdate'),
+            fn($q) =>
+            $q->whereDate('paymentdate', '>=', $request->exdate)
+        )
+        ->when(
+            $request->filled('end_exdate'),
+            fn($q) =>
+            $q->whereDate('paymentdate', '<=', $request->end_exdate)
+        )
         ->orderByDesc('id')
         ->get();
      return view('back.account.listapprove', compact('exgroups'));

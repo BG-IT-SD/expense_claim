@@ -25,25 +25,30 @@
                                     aria-label="Close"></button>
                             </div>
                         @endif
-                        <form>
+                        <form id="searchExpense" action="{{ route('HR.hrdriver') }}" method="GET">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-first-name">Expense
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="exid">Expense
                                             ID</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-first-name" class="form-control"
+                                            <input type="text" id="exid" name="exid" class="form-control"
                                                 placeholder="">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-last-name">Booking
-                                            ID</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="status">Status</label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="formtabs-last-name" class="form-control"
-                                                placeholder="">
+                                            <select name="status" id="status" class="form-select">
+                                                <option value="" disabled selected>-- เลือกสถานะ --</option>
+                                                @foreach ($status as $key => $text)
+                                                    <option value="{{ $key }}">
+                                                        {{ $text }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -51,25 +56,22 @@
 
                                 <div class="col-md-6">
                                     <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end" for="formtabs-birthdate">Date
-                                            Time</label>
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="drivers">รายชื่อ
+                                            พขร.</label>
                                         <div class="col-sm-9">
-                                            <input type="hidden" id="formtabs-birthdate"
-                                                class="form-control dob-picker flatpickr-input" placeholder="YYYY-MM-DD"
-                                                readonly="readonly"><input
-                                                class="form-control dob-picker flatpickr-input flatpickr-mobile"
-                                                tabindex="1" type="date" placeholder="YYYY-MM-DD">
+                                            <select name="drivers" id="drivers" class="form-select form-select-l">
+                                                <option value="">เลือกชื่อ</option>
+                                                @foreach ($drivers as $driver)
+                                                    <option value="{{ $driver->empid }}">
+                                                        {{ $driver->empid . ' ' . $driver->fullname }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="row">
-                                        <label class="col-sm-3 col-form-label text-sm-end"
-                                            for="formtabs-phone">Status</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="formtabs-phone" class="form-control phone-mask">
-                                        </div>
-                                    </div>
+
+
                                 </div>
                             </div>
                             <div class="row mt-4">
@@ -77,11 +79,11 @@
                                 <div class="col-md-6">
                                     <div class="row justify-content-end">
                                         <div class="col-sm-9">
-                                            <button type="button"
+                                            <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span></button>
-                                            <button type="reset"
-                                                class="btn btn-outline-secondary waves-effect">Reset</button>
+                                            <a href="{{ route('HR.hrdriver') }}"
+                                                class="btn btn-outline-secondary">Reset</a>
                                         </div>
                                     </div>
                                 </div>
@@ -196,6 +198,13 @@
             </div>
         </div>
     </div>
+@endsection
+@section('csscustom')
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/select2/select2.css') }}" />
+@endsection
+@section('jsvendor')
+    <script src="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
 @endsection
 @section('jscustom')
     @if (session('message'))
