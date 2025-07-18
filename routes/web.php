@@ -11,6 +11,7 @@ use App\Http\Controllers\Back\FuelPriceController;
 use App\Http\Controllers\Back\GrouppriceController;
 use App\Http\Controllers\Back\GroupspecialController;
 use App\Http\Controllers\Back\HRController;
+use App\Http\Controllers\Back\HRgroupController;
 use App\Http\Controllers\Back\ImportlistController;
 use App\Http\Controllers\Back\PricepermealController;
 use App\Http\Controllers\Back\RoleController;
@@ -271,6 +272,15 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::get('import', [ImportlistController::class, 'importuser'])->name('import');
                 Route::post('Excel', [ImportlistController::class, 'importexcel'])->name('excel');
                 Route::delete('delete/{id}', [ImportlistController::class, 'delimport'])->name('destroy');
+            });
+
+            Route::prefix('HRgroup')->name('HRgroup.')->group(function () {
+                Route::get('index',[HRgroupController::class,'index'])->name('index');
+                Route::get('edit/{id}',[HRgroupController::class,'edit'])->name('edit');
+                Route::get('addlist/{id}',[HRgroupController::class,'addList'])->name('addlist');
+                Route::get('addplant/{id}',[HRgroupController::class,'addPlant'])->name('addplant');
+                Route::post('checkemphr',[HRgroupController::class,'CheckEmpID'])->name('checkemphr');
+                Route::post('saveplanthr',[HRgroupController::class,'SavePlant'])->name('saveplant');
             });
         });
 

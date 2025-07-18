@@ -28,7 +28,7 @@ class GroupExport implements FromView, WithStyles,WithDrawings
         $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr','latestApprove'])
         ->whereHas('latestApprove', function ($query) {
             $query->where('typeapprove', 6)
-                ->where('statusapprove', 1);
+                ->whereIn('statusapprove', [0,1]);
         })
             ->where('exgroup', $this->id)
             ->get();

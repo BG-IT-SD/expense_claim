@@ -19,7 +19,7 @@ class ExportController extends Controller
         $expenses = Expense::with(['vbooking', 'user','latestApprove']) // หรือ relation ที่คุณใช้
         ->whereHas('latestApprove', function ($query) {
             $query->where('typeapprove', 6)
-                ->where('statusapprove', 1);
+            ->whereIn('statusapprove', [0,1]);
         })
             ->where('exgroup', $id)
             ->get();

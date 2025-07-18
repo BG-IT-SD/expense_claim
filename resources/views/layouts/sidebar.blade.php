@@ -258,12 +258,12 @@
 
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage') || Route::is('Account.view')) active @endif">
+                    <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage')) active @endif">
                         <a href="{{ route('Account.index') }}" class="menu-link">
                             <div data-i18n="รายการกลุ่มอนุมัติ">รายการกลุ่มอนุมัติ</div>
                         </a>
                     </li>
-                    <li class="menu-item @if (Route::is('Account.listapproved')) active @endif">
+                    <li class="menu-item @if (Route::is('Account.listapproved') || Route::is('Account.view')) active @endif">
                         <a href="{{ route('Account.listapproved') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
                         </a>
@@ -323,7 +323,7 @@
                     Route::is('FuelPrice.create') ||
                     Route::is('importlist.index') ||
                     Route::is('Typegroup.index') ||
-                    Route::is('DistanceRate.index')) active open @endif">
+                    Route::is('DistanceRate.index') || Route::is('HRgroup.index') || Route::is('HRgroup.edit') || Route::is('HRgroup.addlist') || Route::is('HRgroup.addplant')) active open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-cog"></i>
                     <div data-i18n="Setting">Setting</div>
@@ -355,6 +355,13 @@
                             <div data-i18n="Import รายชื่อ">Import รายชื่อ</div>
                         </a>
                     </li>
+
+                    <li class="menu-item @if (Route::is('HRgroup.index') || Route::is('HRgroup.edit') || Route::is('HRgroup.addlist')  || Route::is('HRgroup.addplant')) active @endif">
+                        <a href="{{ route('HRgroup.index') }}" class="menu-link">
+                            <div data-i18n="กลุ่มอนุมัติ HR">กลุ่มอนุมัติ HR</div>
+                        </a>
+                    </li>
+
 
                 </ul>
             </li>

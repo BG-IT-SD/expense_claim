@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Helpers\MailHelper;
+use App\Models\Vbookingall;
 
 class TechClaimController extends Controller
 {
@@ -122,7 +123,9 @@ class TechClaimController extends Controller
      */
     public function create($id, $empid)
     {
-        $booking = Vbooking::find($id);
+        // $booking = Vbooking::find($id);
+
+        $booking = Vbookingall::find($id);
         $person = Valldataemp::where('CODEMPID', $empid)->where('STAEMP', '!=', '9')->first();
         $empemail = $person->EMAIL;
         $empfullname = $person->NAMFIRSTT . ' ' . $person->NAMLASTT;
