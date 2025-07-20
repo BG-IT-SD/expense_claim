@@ -16,7 +16,7 @@
                     </div>
 
                     <div class="card-body pt-0">
-                        <form action="" action="" method="POST">
+                        <form action="{{ route('HRgroup.savelisthr') }}" name="listhrgroup" method="POST">
                             @csrf
                             <div class="row" id="content-check">
                                 <div class="col-md-12 mb-3">
@@ -35,12 +35,17 @@
                             </div>
 
                             <div class="row" id="content-register">
+
                                 <div class="col-md-12 mb-3">
                                     <ul class="list-unstyled my-3 py-1">
                                         <li class="d-flex align-items-center mb-3">
                                             <i class="mdi mdi-identifier mdi-24px"></i><span
                                                 class="fw-medium mx-2">รหัสพนักงาน:</span>
                                             <span id="text-empid"></span>
+                                            <input type="hidden" name="groupid" value="{{ $id }}">
+                                            <input type="hidden" id="emp_data" name="emp_data">
+                                            <input type="hidden" id="email_data" name="email_data">
+                                            <input type="hidden" id="name_data" name="name_data">
                                         </li>
                                         <li class="d-flex align-items-center mb-3">
                                             <i class="mdi mdi-account-outline mdi-24px"></i><span
@@ -63,12 +68,13 @@
                                             <span id="text-bu"></span>
                                         </li>
                                     </ul>
+                                    <hr>
+                                    <div class="mt-3 text-center">
+                                        <button type="submit"  class="btn btn-primary"><span
+                                                class="mdi mdi-content-save"></span> บันทึกข้อมูล</button>
+                                                <a href="{{ route('HRgroup.edit',$id) }}" class="btn btn-danger">กลับ</a>
+                                    </div>
                                 </div>
-                                <hr>
-                                <button type="button" id="saveButton" class="btn btn-primary"><span
-                                        class="mdi mdi-content-save"></span>
-                                    &nbsp;Save</button>
-
 
                             </div>
                         </form>

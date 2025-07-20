@@ -281,6 +281,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::get('addplant/{id}',[HRgroupController::class,'addPlant'])->name('addplant');
                 Route::post('checkemphr',[HRgroupController::class,'CheckEmpID'])->name('checkemphr');
                 Route::post('saveplanthr',[HRgroupController::class,'SavePlant'])->name('saveplant');
+                Route::post('savelisthr',[HRgroupController::class,'SaveList'])->name('savelisthr');
             });
         });
 

@@ -22,7 +22,7 @@ class HRgroupController extends Controller
 
         $hrgroupId= $id;
         $hrplants = Plantsettingdetail::with('plant')->where('headid',$id)->where('deleted',0)->get();
-        $staffapproves = ApproveStaff::where('group',$id)->where('step', 9)->where('deleted', 0)->get();
+        $staffapproves = ApproveStaff::where('group',$id)->whereIn('step', [1,2,9])->where('extype',1)->where('deleted', 0)->get();
         return view('back.hrgroup.edit',compact('hrplants','hrgroupId','staffapproves'));
     }
 
@@ -67,6 +67,37 @@ class HRgroupController extends Controller
 
         }
 
+
+
+    }
+
+    public function SaveList(Request $request){
+        $request->validate([
+            'emp_data' => 'required',
+            'name_data' => 'required',
+            'groupid' => 'required',
+        ]);
+
+        $groupID = isset($request->groupid) ? $request->groupid : null;
+
+        if($groupID != null){
+            try {
+                $create = new ApproveStaff();
+                $create->extype = 1;
+                $create->step = 9;
+                $create->group = $groupID;
+                $create->empid = $request->emp_data;
+                $create->email = $request->email_data;
+                $create->fullname = $request->name_data;
+                $create->save();
+
+                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกไม่สำเร็จ'.$th, 'class' => 'error']);
+            }
+
+        }
 
 
     }
