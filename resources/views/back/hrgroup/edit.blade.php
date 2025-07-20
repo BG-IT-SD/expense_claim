@@ -10,7 +10,9 @@
                             <h5>รายชื่อ Plant </h5>
                         </div>
                         <div class="col-md-6 text-end">
-                            <button class="btn btn-sm btn-primary"  onclick="window.location.href='{{ route('HRgroup.addplant', $hrgroupId) }}'"><i class="mdi mdi-plus-circle"></i> เพิ่ม Plant</button>
+                            <button class="btn btn-sm btn-primary"
+                                onclick="window.location.href='{{ route('HRgroup.addplant', $hrgroupId) }}'"><i
+                                    class="mdi mdi-plus-circle"></i> เพิ่ม Plant</button>
                         </div>
 
                     </div>
@@ -23,29 +25,29 @@
                                     <th>ID</th>
                                     <th>Plant</th>
                                     <th>Status</th>
-                                    {{-- <th>Action</th> --}}
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($hrplants as $hrplant)
-                                <tr>
-                                    <td>{{ $hrplant->id }}</td>
-                                    <td>{{ $hrplant->plant->plantname }}</td>
-                                    <td>
-                                        {!! $hrplant->status == 1
-                                            ? '<span class="badge rounded-pill bg-success">Active</span>'
-                                            : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
-                                    </td>
-                                    {{-- <td>
+                                    <tr>
+                                        <td>{{ $hrplant->id }}</td>
+                                        <td>{{ $hrplant->plant->plantname }}</td>
+                                        <td>
+                                            {!! $hrplant->status == 1
+                                                ? '<span class="badge rounded-pill bg-success">Active</span>'
+                                                : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
+                                        </td>
+                                        <td>
                                         <button class="btn btn-warning btn-sm btngroupedit"
                                         onclick="window.location.href='{{ route('HRgroup.edit', $hrplant->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
                                         <button type="button" class="btn btn-danger btn-sm deleteuser"
                                         data-id="{{ $hrplant->id }}"><i class="mdi mdi-trash-can"></i></button>
-                                    </td> --}}
-                                </tr>
-                            @endforeach
+                                    </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -59,7 +61,9 @@
                             <h5>รายชื่อ HR ในกลุ่ม </h5>
                         </div>
                         <div class="col-md-6 text-end">
-                            <button class="btn btn-sm btn-primary"  onclick="window.location.href='{{ route('HRgroup.addlist', $hrgroupId) }}'"><i class="mdi mdi-plus-circle"></i> เพิ่ม รายชื่อ</button>
+                            <button class="btn btn-sm btn-primary"
+                                onclick="window.location.href='{{ route('HRgroup.addlist', $hrgroupId) }}'"><i
+                                    class="mdi mdi-plus-circle"></i> เพิ่ม รายชื่อ</button>
                         </div>
 
                     </div>
@@ -72,28 +76,85 @@
                                     <th>EMPID</th>
                                     <th>Name</th>
                                     <th>Status</th>
-                                    {{-- <th>Action</th> --}}
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($staffapproves as $staffapprove)
+                                    @if ($staffapprove->step == 9)
+                                        <tr>
+                                            <td>{{ $staffapprove->empid }}</td>
+                                            <td>{{ $staffapprove->fullname }}</td>
+                                            <td>
+                                                {!! $staffapprove->status == 1
+                                                    ? '<span class="badge rounded-pill bg-success">Active</span>'
+                                                    : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
+                                            </td>
+                                            <td>
+                                            <button class="btn btn-warning btn-sm btngroupedit"
+                                        onclick="window.location.href='{{ route('HRgroup.edit', $staffapprove->id) }}'"><i
+                                            class="mdi mdi-pencil-circle-outline"></i>
+                                        edit</button>
+                                             {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
+                                        data-id="{{ $staffapprove->id }}"><i class="mdi mdi-trash-can"></i></button> --}}
+                                        </td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="colxxl">
+                <div class="card">
+                    <div class="card-header row">
+                        <div class="col-md-6">
+                            <h5>รายชื่อ สายอนุมัติ </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-datatable table-responsive pt-0">
+
+                        <table class="datatables-basic table table-bordered text-center" id="hrgrouplist">
+                            <thead>
+                                <tr>
+                                    <th>EMPID</th>
+                                    <th>Name</th>
+                                    <th>POS</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($staffapproves as $staffapprove)
+                                @if (in_array($staffapprove->step, [1, 2]))
                                     <tr>
                                         <td>{{ $staffapprove->empid }}</td>
                                         <td>{{ $staffapprove->fullname }}</td>
+                                        <td>
+                                            {{ $staffapprove->step_text}}
+                                        </td>
                                         <td>
                                             {!! $staffapprove->status == 1
                                                 ? '<span class="badge rounded-pill bg-success">Active</span>'
                                                 : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
                                         </td>
-                                        {{-- <td>
+                                        <td>
                                             <button class="btn btn-warning btn-sm btngroupedit"
                                         onclick="window.location.href='{{ route('HRgroup.edit', $staffapprove->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
-                                             <button type="button" class="btn btn-danger btn-sm deleteuser"
-                                        data-id="{{ $staffapprove->id }}"><i class="mdi mdi-trash-can"></i></button>
-                                        </td> --}}
+                                             {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
+                                        data-id="{{ $staffapprove->id }}"><i class="mdi mdi-trash-can"></i></button> --}}
+                                        </td>
                                     </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>

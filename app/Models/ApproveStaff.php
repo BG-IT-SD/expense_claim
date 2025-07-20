@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Auth;
 
 class ApproveStaff extends Model
 {
@@ -18,5 +19,27 @@ class ApproveStaff extends Model
 
     public function ModifiedBy(){
             return $this->belongsTo(User::class, 'modified_by', 'id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($userrole) {
+            $userrole->created_by = Auth::id();
+        });
+
+        // Set updated_by when updating
+        static::updating(function ($userrole) {
+            $userrole->modified_by = Auth::id();
+        });
+    }
+
+    public function getStepTextAttribute(){
+        return match ($this->step){
+            1 => 'ผู้จัดการส่วน',
+            2 => 'ผู้จัดการฝ่าย',
+            3 => 'ผู้ตรวจสอบ',
+            default => 'Unknow',
+        };
     }
 }
