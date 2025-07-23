@@ -13,6 +13,11 @@ class ApproveStaff extends Model
 
     protected $fillable = ['extype','step','group','empid','email','fullname','status', 'deleted' , 'created_by', 'modified_by'];
 
+    public function plantSettingDetails()
+    {
+        return $this->hasMany(PlantSettingDetail::class, 'headid', 'group');
+    }
+
     public function CreatedBy(){
         return $this->belongsTo(User::class, 'created_by', 'id');
     }

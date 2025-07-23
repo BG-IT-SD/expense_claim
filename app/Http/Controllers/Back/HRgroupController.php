@@ -32,6 +32,13 @@ class HRgroupController extends Controller
     }
 
 
+    public function editList($id){
+        $approveStaff = ApproveStaff::findorFail($id);
+        // dd($approveStaff);
+        return view('back.hrgroup.editlist',compact('approveStaff','id'));
+    }
+
+
     public function addPlant($id){
 
        // ดึง id เช็ค
@@ -102,6 +109,40 @@ class HRgroupController extends Controller
 
     }
 
+    public function UpdateList(Request $request)
+    {
+        $id = $request->input('id', '');
+        $empid = $request->input('head_id', '');
+        $empname = $request->input('head_name', '');
+        $email = $request->input('head_email', '');
+        $status = $request->input('status', '');
+        $groupID = $request->input('groupid','');
+        if ($id != "") {
+            $update = ApproveStaff::findOrFail($id);
+
+            if ($empid != "") {
+                $update->empid = $empid;
+                $update->email = $email;
+                $update->fullname = $empname; // แก้จาก fuulname เป็น fullname
+            }
+
+            if ($status != "") {
+                $update->status = $status;
+            }
+
+            try {
+                $update->save();
+
+                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+            } catch (\Throwable $th) {
+                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกไม่สำเร็จ'.$th, 'class' => 'error']);
+                // $th->getMessage()
+            }
+        }
+        return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'ไม่พบข้อมูลสำหรับอัปเดต', 'class' => 'error']);
+    }
+
+
     public function CheckEmpID(Request $request)
     {
         $request->validate([
@@ -128,5 +169,76 @@ class HRgroupController extends Controller
         } else {
             return response()->json(['status' => 404, 'message' => 'ไม่พบข้อมูล'], 200);
         }
+    }
+
+    public function ListEmpHrms(Request $request){
+
+        $group = $request->input('group');
+        $step = $request->input('step');
+
+        $approveStaff = ApproveStaff::where('deleted',0)->where('group',$group)->where('step',$step)->get();
+        $approveStaffData = $approveStaff?->pluck('empid')
+        ->filter()
+        ->unique()
+        ->values();
+        // dd($approveStaffData);
+        $keyword = $request->input('sKeyword');
+        $page = $request->input('page', 1);
+        $limit = 5;
+
+        $query = Valldataemp::query();
+
+        if ($keyword) {
+            $query->where('EMAIL', 'like', "%$keyword%");
+        }
+
+        $query->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', $approveStaffData)
+            // ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', ])
+            ->where('STAEMP', '!=', 9);
+            // ->where('numlvl', '>=', 7);
+
+        $total = $query->count();
+
+        $results = $query->skip(($page - 1) * $limit)
+            ->take($limit)
+            ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT']) // ดึงหลาย field
+            ->map(function ($item) {
+                return [
+                    'id' => $item->CODEMPID,
+                    'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}"
+                ];
+            });
+
+        return response()->json([
+            'data' => $results,
+            'total_count' => $total,
+        ]);
+    }
+
+    public function getEmpData(Request $request)
+    {
+        $empid = $request->query('emid'); // รับ emid จาก query string
+
+        $data = Valldataemp::where('CODEMPID', $empid)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', ])
+            ->where('STAEMP', '!=', 9)
+            ->first();
+
+        // ถ้าไม่เจอข้อมูลเลย
+        if (!$data) {
+            return response()->json([
+                'message' => 'ไม่พบข้อมูล',
+            ], 404);
+        }
+
+        return response()->json([
+            'Idemp' => $data->CODEMPID,
+            'Emailemp' => $data->EMAIL,
+            'Nameemp' => $data->NAMFIRSTT . ' ' . $data->NAMLASTT,
+        ]);
     }
 }

@@ -28,6 +28,12 @@ class AccountController extends Controller
                 fn($q) =>
                 $q->whereDate('groupdate', '<=', $request->end_exdate)
             )
+            // ถ้าไม่กรอกวันที่เลย ให้ default ย้อนหลัง 1 เดือน
+            ->when(
+                !$request->filled('exdate') && !$request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', now()->subMonth()->startOfDay())
+            )
             ->orderByDesc('id')
             ->get();
         return view('back.account.index', compact('exgroups'));
@@ -213,6 +219,12 @@ class AccountController extends Controller
             $request->filled('end_exdate'),
             fn($q) =>
             $q->whereDate('paymentdate', '<=', $request->end_exdate)
+        )
+        // ถ้าไม่กรอกวันที่เลย ให้ default ย้อนหลัง 1 เดือน
+        ->when(
+            !$request->filled('exdate') && !$request->filled('end_exdate'),
+            fn($q) =>
+            $q->whereDate('paymentdate', '>=', now()->subMonth()->startOfDay())
         )
         ->orderByDesc('id')
         ->get();

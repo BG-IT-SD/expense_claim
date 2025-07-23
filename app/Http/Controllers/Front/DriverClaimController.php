@@ -23,7 +23,7 @@ class DriverClaimController extends Controller
      */
     public function index()
     {
-        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
         return view('front.driver.list', compact('drivers'));
     }
@@ -58,7 +58,7 @@ class DriverClaimController extends Controller
 
         // Status
         $status = searchStatus();
-        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
         $page = 'DriverClaim.show';
         return view('back.hr.historydv', compact('expenses','page','status','drivers'));

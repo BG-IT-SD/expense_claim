@@ -36,57 +36,111 @@ class HRController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index()
+
+    // public function index(Request $request)
     // {
-    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+    //     $empid = Auth::user()->empid;
+    //     $bookids = [];
+
+    //     $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+    //     ->where('empid', $empid)
+    //     ->first();
+
+    //     $plantNames = $staff->plantSettingDetails->pluck('plant.plantname');
+
+    //     // dd($plantNames);
+
+    //     $filterBu = $request->input('bu');
+    //     $empids = null; // null = ไม่กรอง
+
+    //     // ถ้ามีการเลือก BU
+    //     if ($filterBu) {
+    //         // ค้นจาก users ก่อน
+    //         $empids = User::where('bu', $filterBu)->pluck('empid');
+
+    //         // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+    //         if ($empids->isEmpty()) {
+    //             $empids = Valldataemp::where('alias_name', $filterBu)
+    //                 ->where('STAEMP', '!=', 9)
+    //                 ->pluck('CODEMPID');
+    //         }
+    //     }
+
+
+
+    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
     //         ->whereHas('latestApprove', function ($query) {
     //             $query->where(function ($q) {
-    //                 $q->where('typeapprove', 1) // เอาทุก statusapprove
+    //                 $q->where('typeapprove', 1)
     //                     ->orWhere(function ($sub) {
     //                         $sub->where('typeapprove', 3)
-    //                             ->where('statusapprove', 0); // เอาเฉพาะ statusapprove = 0
+    //                             ->where('statusapprove', 0);
     //                     });
+    //             });
+    //         })
+    //         ->when($request->filled('status'), function ($q) use ($request) {
+    //             $q->whereHas('latestApprove', function ($sub) use ($request) {
+    //                 $sub->where('statusapprove', $request->status);
+    //             });
+    //         })
+    //         ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+    //             $q->whereIn('empid', $empids);
+    //         })
+    //         ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+    //             $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+    //         }, function ($q) {
+    //             // ถ้าไม่กรอกวันที่: ดึงย้อนหลัง 1 เดือน
+    //             $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+    //         })
+    //         ->when($plantNames && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
+    //             $q->whereHas('user', function ($query) use ($plantNames) {
+    //                 $query->whereIn('bu', $plantNames);
     //             });
     //         })
     //         ->whereIn('extype', [1, 3])
     //         ->where('deleted', 0)
     //         ->get();
 
-    //         $statusList = [
-    //             0 => 'รออนุมัติ',
-    //             1 => 'รอตรวจสอบ',
-    //             2 => 'ไม่อนุมัติ',
-    //             99 => 'ยกเลิกโดยผู้ใช้',
-    //         ];
+    //     $statusList = [
+    //         0 => 'รออนุมัติ',
+    //         1 => 'รอตรวจสอบ',
+    //         2 => 'ไม่อนุมัติ',
+    //         99 => 'ยกเลิกโดยผู้ใช้',
+    //     ];
 
-    //     return view('back.hr.list', compact('expenses','statusList'));
+    //     $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+    //     return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
     // }
 
     public function index(Request $request)
     {
+        $empid = Auth::user()->empid;
         $bookids = [];
 
-        if ($request->filled('exdate') && $request->filled('end_exdate')) {
-            $bookids = Vbookingall::whereBetween('departure_date', [
-                $request->exdate,
-                $request->end_exdate
-            ])->pluck('id');
-        }
+        // พนักงานที่ login และโรงงานที่เขาดูแล
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+            ->where('empid', $empid)
+            ->where('deleted',0)
+            ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname')
+            ->filter()
+            ->unique()
+            ->values(); // BU ที่เจ้าของ login ดูแล
 
         $filterBu = $request->input('bu');
-        $empids = null; // null = ไม่กรอง
+        $empids = null;
 
-        // ถ้ามีการเลือก BU
         if ($filterBu) {
-            // ค้นจาก users ก่อน
-            $empids = User::where('bu', $filterBu)->pluck('empid');
+            // ดึง empid ที่ belong กับ BU ที่กรอก
+            $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+            $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+                ->where('STAEMP', '!=', 9)
+                ->pluck('CODEMPID');
 
-            // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
-            if ($empids->isEmpty()) {
-                $empids = Valldataemp::where('alias_name', $filterBu)
-                    ->where('STAEMP', '!=', 9)
-                    ->pluck('CODEMPID');
-            }
+            $empids = $empidsFromUser->merge($empidsFromValldataemp)->unique()->values();
         }
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
@@ -107,6 +161,17 @@ class HRController extends Controller
             ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
                 $q->whereIn('empid', $empids);
             })
+            ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+            }, function ($q) {
+                $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+            })
+            // เฉพาะ BU ที่เจ้าของ login ดูแล (ถ้าไม่มี filterBu)
+            ->when(!$filterBu && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
+                $q->whereHas('user', function ($query) use ($plantNames) {
+                    $query->whereIn('bu', $plantNames);
+                });
+            })
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
@@ -122,6 +187,7 @@ class HRController extends Controller
 
         return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
     }
+
 
 
 
@@ -149,31 +215,38 @@ class HRController extends Controller
     public function groupList(Request $request)
     {
         $exgroups = Exgroup::where('deleted', 0)
-        ->when(
-            $request->filled('exdate'),
-            fn($q) =>
-            $q->whereDate('groupdate', '>=', $request->exdate)
-        )
-        ->when(
-            $request->filled('end_exdate'),
-            fn($q) =>
-            $q->whereDate('groupdate', '<=', $request->end_exdate)
-        )
-        ->when(
-            $request->filled('status'),
-            fn($q) => $q->where('statusapprove', $request->status)
-        )
-        ->orderByDesc('id')->get();
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '<=', $request->end_exdate)
+            )
+            // ถ้าไม่กรอกวันที่เลย ให้ default ย้อนหลัง 1 เดือน
+            ->when(
+                !$request->filled('exdate') && !$request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', now()->subMonth()->startOfDay())
+            )
+            ->when(
+                $request->filled('status'),
+                fn($q) => $q->where('statusapprove', $request->status)
+            )
+            ->orderByDesc('id')
+            ->get();
 
         $statusList = searchStatus();
-        return view('back.hr.grouplist', compact('exgroups','statusList'));
+        return view('back.hr.grouplist', compact('exgroups', 'statusList'));
     }
 
     public function hrdriver(Request $request)
     {
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
             ->whereHas('latestApprove', function ($query) use ($request) {
@@ -200,11 +273,11 @@ class HRController extends Controller
             ->whereIn('extype', [2])
             ->get();
 
-            // Status
+        // Status
         $status = searchStatus();
-        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
-        return view('back.hr.listdriver', compact('expenses','status','drivers'));
+        return view('back.hr.listdriver', compact('expenses', 'status', 'drivers'));
     }
     public function driverhistory()
     {
@@ -966,12 +1039,12 @@ class HRController extends Controller
     {
         $bookids = [];
 
-        if ($request->filled('exdate') && $request->filled('end_exdate')) {
-            $bookids = Vbookingall::whereBetween('departure_date', [
-                $request->exdate,
-                $request->end_exdate
-            ])->pluck('id');
-        }
+        // if ($request->filled('exdate') && $request->filled('end_exdate')) {
+        //     $bookids = Vbookingall::whereBetween('departure_date', [
+        //         $request->exdate,
+        //         $request->end_exdate
+        //     ])->pluck('id');
+        // }
 
         $filterBu = $request->input('bu');
         $empids = null; // null = ไม่กรอง
@@ -1006,6 +1079,12 @@ class HRController extends Controller
             })
             ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
                 $q->whereIn('empid', $empids);
+            })
+            ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+            }, function ($q) {
+                // ถ้าไม่กรอกวันที่: ดึงย้อนหลัง 1 เดือน
+                $q->where('created_at', '>=', now()->subMonth()->startOfDay());
             })
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)

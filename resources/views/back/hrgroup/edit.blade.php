@@ -92,7 +92,7 @@
                                             </td>
                                             <td>
                                             <button class="btn btn-warning btn-sm btngroupedit"
-                                        onclick="window.location.href='{{ route('HRgroup.edit', $staffapprove->id) }}'"><i
+                                        onclick="window.location.href='{{ route('HRgroup.editlist', $staffapprove->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
                                              {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
@@ -147,7 +147,7 @@
                                         </td>
                                         <td>
                                             <button class="btn btn-warning btn-sm btngroupedit"
-                                        onclick="window.location.href='{{ route('HRgroup.edit', $staffapprove->id) }}'"><i
+                                        onclick="window.location.href='{{ route('HRgroup.editlist', $staffapprove->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
                                              {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
