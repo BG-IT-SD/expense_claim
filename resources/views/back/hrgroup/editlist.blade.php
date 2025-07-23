@@ -25,11 +25,11 @@
                                             <option value="{{ $approveStaff->empid }}">{{ $approveStaff->email.' | '.$approveStaff->fullname}}</option>
                                         </select>
                                         <input type="hidden" name="id" value="{{ $id }}">
-                                        <input type="text" id="head_email" name="head_email">
-                                        <input type="text" id="head_name" name="head_name">
-                                        <input type="text" id="head_id" name="head_id">
-                                        <input type="text" name="groupid" id="groupid" value="{{ $approveStaff->group }}">
-                                        <input type="text" name="step" id="step" value="{{ $approveStaff->step }}">
+                                        <input type="hidden" id="head_email" name="head_email">
+                                        <input type="hidden" id="head_name" name="head_name">
+                                        <input type="hidden" id="head_id" name="head_id">
+                                        <input type="hidden" name="groupid" id="groupid" value="{{ $approveStaff->group }}">
+                                        <input type="hidden" name="step" id="step" value="{{ $approveStaff->step }}">
                                     </div>
                                 </div>
                                 @if($approveStaff->step == 9)

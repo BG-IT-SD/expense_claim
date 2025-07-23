@@ -13,35 +13,53 @@ use Illuminate\Validation\Rule;
 
 class HRgroupController extends Controller
 {
-    public function index(){
-        $hrgroups = Plantsettinghead::where('deleted',0)->get();
-        return view('back.hrgroup.index',compact('hrgroups'));
+    public function index()
+    {
+        $hrgroups = Plantsettinghead::where('deleted', 0)->get();
+        return view('back.hrgroup.index', compact('hrgroups'));
     }
 
-    public function edit($id){
+    public function edit($id)
+    {
 
-        $hrgroupId= $id;
-        $hrplants = Plantsettingdetail::with('plant')->where('headid',$id)->where('deleted',0)->get();
-        $staffapproves = ApproveStaff::where('group',$id)->whereIn('step', [1,2,9])->where('extype',1)->where('deleted', 0)->get();
-        return view('back.hrgroup.edit',compact('hrplants','hrgroupId','staffapproves'));
+        $hrgroupId = $id;
+        $hrplants = Plantsettingdetail::with('plant')->where('headid', $id)->where('deleted', 0)->get();
+        $staffapproves = ApproveStaff::where('group', $id)->whereIn('step', [1, 2, 9])->where('extype', 1)->where('deleted', 0)->get();
+        return view('back.hrgroup.edit', compact('hrplants', 'hrgroupId', 'staffapproves'));
     }
 
-    public function addList($id){
+    public function addList($id)
+    {
 
-        return view('back.hrgroup.addlist',compact('id'));
+        return view('back.hrgroup.addlist', compact('id'));
     }
 
 
-    public function editList($id){
+    public function editList($id)
+    {
         $approveStaff = ApproveStaff::findorFail($id);
         // dd($approveStaff);
-        return view('back.hrgroup.editlist',compact('approveStaff','id'));
+        return view('back.hrgroup.editlist', compact('approveStaff', 'id'));
     }
 
 
-    public function addPlant($id){
+    public function addPlant($id)
+    {
 
-       // ดึง id เช็ค
+        // ดึง id เช็ค
+        $plantedIds = Plantsettingdetail::where('deleted', 0)->pluck('plantid')->toArray();
+
+        // เอาเฉพาะ plant ที่ยังไม่อยู่ใน รายการแต่ละกลุ่ม
+        $plants = Plant::where('deleted', 0)
+            ->whereNotIn('id', $plantedIds)
+            ->get();
+        $action = 'Add';
+
+        return view('back.hrgroup.addplant', compact('id', 'plants','action'));
+    }
+
+    public function editPlant($id){
+        // ดึง id เช็ค
         $plantedIds = Plantsettingdetail::where('deleted', 0)->pluck('plantid')->toArray();
 
         // เอาเฉพาะ plant ที่ยังไม่อยู่ใน รายการแต่ละกลุ่ม
@@ -49,36 +67,51 @@ class HRgroupController extends Controller
             ->whereNotIn('id', $plantedIds)
             ->get();
 
-        return view('back.hrgroup.addplant',compact('id','plants'));
+        $plantToGroup = Plantsettingdetail::findorfail($id);
+        // dd($plantToGroup);
+
+        $action = 'Edit';
+        return view('back.hrgroup.addplant', compact('id', 'plants','action','plantToGroup'));
     }
 
-    public function SavePlant(Request $request){
-        $request->validate([
+    public function SavePlant(Request $request)
+    {
+      $request->validate([
             'plant' => 'required',
+            'groupid' => 'required',
+            'action' => 'required|in:Add,Edit',
         ]);
-        $groupID = isset($request->groupid) ? $request->groupid : null;
-        if($groupID != null){
-            try {
+
+        $groupID = $request->input('groupid');
+        $action = $request->input('action');
+        $pageID = $groupID; // default
+
+        try {
+            if ($action === 'Add') {
                 $create = new Plantsettingdetail;
                 $create->headid = $groupID;
-                $create->plantid = $request->plant;
+                $create->plantid = $request->input('plant');
                 $create->save();
-
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
-            } catch (\Throwable $th) {
-                //throw $th;
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกไม่สำเร็จ', 'class' => 'error']);
+            } elseif ($action === 'Edit') {
+                $update = Plantsettingdetail::findOrFail($groupID);
+                $update->plantid = $request->input('plant');
+                $update->save();
+                $pageID = $update->headid;
             }
 
-
-
+            return redirect()
+                ->route('HRgroup.edit', $pageID)
+                ->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+        } catch (\Throwable $th) {
+            return redirect()
+                ->route('HRgroup.edit', $pageID)
+                ->with(['message' => 'บันทึกไม่สำเร็จ', 'class' => 'error']);
         }
-
-
-
     }
 
-    public function SaveList(Request $request){
+
+    public function SaveList(Request $request)
+    {
         $request->validate([
             'emp_data' => 'required',
             'name_data' => 'required',
@@ -87,7 +120,7 @@ class HRgroupController extends Controller
 
         $groupID = isset($request->groupid) ? $request->groupid : null;
 
-        if($groupID != null){
+        if ($groupID != null) {
             try {
                 $create = new ApproveStaff();
                 $create->extype = 1;
@@ -98,15 +131,12 @@ class HRgroupController extends Controller
                 $create->fullname = $request->name_data;
                 $create->save();
 
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
             } catch (\Throwable $th) {
                 //throw $th;
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกไม่สำเร็จ'.$th, 'class' => 'error']);
+                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
             }
-
         }
-
-
     }
 
     public function UpdateList(Request $request)
@@ -116,30 +146,73 @@ class HRgroupController extends Controller
         $empname = $request->input('head_name', '');
         $email = $request->input('head_email', '');
         $status = $request->input('status', '');
-        $groupID = $request->input('groupid','');
+        $groupID = $request->input('groupid', '');
+        $step = $request->input('step', '');
+
         if ($id != "") {
+
             $update = ApproveStaff::findOrFail($id);
 
-            if ($empid != "") {
-                $update->empid = $empid;
-                $update->email = $email;
-                $update->fullname = $empname; // แก้จาก fuulname เป็น fullname
+            if (in_array($step, [1, 2])) {
+                //ถ้าเป็น ผู้จัดการส่วน หรือ ผู้จัดการฝ่าย ให้ insert คนใหม่เข้าไปและ update คนเก่าเป็น Inactive
+                if ($empid != "") {
+                    $create = new ApproveStaff();
+                    $create->empid = $empid;
+                    $create->email = $email;
+                    $create->fullname = $empname;
+                    $create->extype = $update->extype;
+                    $create->step = $step;
+                    $create->group = $groupID;
+                    $update->status = 0;
+                    $create->save();
+                }else{
+                    $update->status = 1;
+                }
+
+
+            } else {
+
+                if ($empid != "") {
+
+                    $update->empid = $empid;
+                    $update->email = $email;
+                    $update->fullname = $empname; // แก้จาก fuulname เป็น fullname
+                }
+
+                if ($status != "") {
+                    $update->status = $status;
+                }
             }
 
-            if ($status != "") {
-                $update->status = $status;
-            }
 
             try {
                 $update->save();
 
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
             } catch (\Throwable $th) {
-                return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'บันทึกไม่สำเร็จ'.$th, 'class' => 'error']);
+                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
                 // $th->getMessage()
             }
         }
-        return redirect()->route('HRgroup.edit',$groupID)->with(['message' => 'ไม่พบข้อมูลสำหรับอัปเดต', 'class' => 'error']);
+        return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'ไม่พบข้อมูลสำหรับอัปเดต', 'class' => 'error']);
+    }
+
+    public function delPlant($id){
+
+        if($id != ""){
+
+            $delete = Plantsettingdetail::findorFail($id);
+            $delete->deleted = 1;
+            $delete->status = 0;
+
+            try {
+                $delete->save();
+                return response()->json(['message' => 'ลบข้อมูลเรียบร้อย', 'class' => 'success'], 200);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return response()->json(['message' => 'ลบข้อมูลไม่สำเร็จ', 'class' => 'error'], 200);
+            }
+        }
     }
 
 
@@ -171,16 +244,17 @@ class HRgroupController extends Controller
         }
     }
 
-    public function ListEmpHrms(Request $request){
+    public function ListEmpHrms(Request $request)
+    {
 
         $group = $request->input('group');
         $step = $request->input('step');
 
-        $approveStaff = ApproveStaff::where('deleted',0)->where('group',$group)->where('step',$step)->get();
+        $approveStaff = ApproveStaff::where('deleted', 0)->where('group', $group)->where('step', $step)->get();
         $approveStaffData = $approveStaff?->pluck('empid')
-        ->filter()
-        ->unique()
-        ->values();
+            ->filter()
+            ->unique()
+            ->values();
         // dd($approveStaffData);
         $keyword = $request->input('sKeyword');
         $page = $request->input('page', 1);
@@ -197,7 +271,7 @@ class HRgroupController extends Controller
             ->whereNotIn('CODEMPID', $approveStaffData)
             // ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', ])
             ->where('STAEMP', '!=', 9);
-            // ->where('numlvl', '>=', 7);
+        // ->where('numlvl', '>=', 7);
 
         $total = $query->count();
 
@@ -224,7 +298,7 @@ class HRgroupController extends Controller
         $data = Valldataemp::where('CODEMPID', $empid)
             ->where('status', 1)
             ->where('deleted', 0)
-            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', ])
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033',])
             ->where('STAEMP', '!=', 9)
             ->first();
 

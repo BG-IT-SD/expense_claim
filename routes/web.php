@@ -286,6 +286,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::get('listemphrms',[HRgroupController::class,'ListEmpHrms'])->name('listemphrms');
                 Route::get('emphrmsdata',[HRgroupController::class,'getEmpData'])->name('emphrmsdata');
                 Route::post('updatelist',[HRgroupController::class,'UpdateList'])->name('updatelist');
+                Route::get('editplant/{id}',[HRgroupController::class,'editPlant'])->name('editplant');
+                Route::delete('delplant/{id}',[HRgroupController::class,'delPlant'])->name('delplant');
+
 
             });
         });

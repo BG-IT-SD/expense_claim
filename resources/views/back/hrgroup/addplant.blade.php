@@ -28,6 +28,7 @@
                                             @endforeach
                                         </select>
                                         <input type="hidden" name="groupid" value="{{ $id }}">
+                                        <input type="hidden" name="action" value="{{ $action }}">
                                     </div>
 
 
@@ -35,7 +36,12 @@
                                 <div class="mt-3 text-center">
                                     <button type="submit"  class="btn btn-primary"><span
                                             class="mdi mdi-check-circle"></span> บันทึกข้อมูล</button>
-                                            <a href="{{ route('HRgroup.edit',$id) }}" class="btn btn-danger">กลับ</a>
+                                           @if ($action == 'Add')
+                                           <a href="{{ route('HRgroup.edit',$id) }}" class="btn btn-danger">กลับ</a>
+                                           @else
+                                            <a href="{{ route('HRgroup.edit',$plantToGroup->headid) }}" class="btn btn-danger">กลับ</a>
+                                           @endif
+
                                 </div>
                             </div>
                         </form>
