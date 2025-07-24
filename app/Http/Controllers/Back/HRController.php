@@ -188,14 +188,22 @@ class HRController extends Controller
         return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
     }
 
-
-
-
-
-
-
     public function history()
     {
+        $empid = Auth::user()->empid;
+        // พนักงานที่ login และโรงงานที่เขาดูแล
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+        ->where('empid', $empid)
+        ->where('deleted',0)
+        ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+        ->pluck('plant.plantname')
+        ->filter()
+        ->unique()
+        ->values();
+        // dd($plantNames);
+
         $usercheck = Auth::user()->empid;
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
@@ -209,7 +217,7 @@ class HRController extends Controller
 
         $page = 'HR.show';
 
-        return view('back.hr.approved', compact('expenses', 'page'));
+        return view('back.hr.approved', compact('expenses', 'page','plantNames'));
     }
 
     public function groupList(Request $request)
@@ -291,8 +299,6 @@ class HRController extends Controller
         $page = 'HR.show';
         return view('back.hr.historydv', compact('expenses', 'page'));
     }
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -507,13 +513,13 @@ class HRController extends Controller
         // ลำดับถัดไป
         $nextStepApprove = Approvestep($bu, 1, 1);
         // dd($nextStepApprove);
-        // $finalHEmailNext = $nextStepApprove["email"];
+        $finalHEmailNext = $nextStepApprove["email"];
         $finalHNameNext = $nextStepApprove["fullname"];
-        // $finalIdNext = $nextStepApprove["empid"];
+        $finalIdNext = $nextStepApprove["empid"];
 
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
         // $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        // $finalIdNext = '66000510';
 
         // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
         // $finalHNameNext = 'เสาวภา เข็มเหลือง';

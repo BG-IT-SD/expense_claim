@@ -134,9 +134,10 @@
                                                     class="form-check-input meal-checkbox"
                                                     name="days[{{ $index }}][meal{{ $i }}][]"
                                                     data-price="{{ $groupplant->meal->{'meal'.$i} }}"
+                                                    data-day="{{ $usedDateStr }}"
                                                     value="{{ $groupplant->meal->{'meal'.$i} }}"
                                                     {{ ${'mealchecked_'.$i} }}
-                                                    onclick="return false;">
+                                                    @if ($isView == 0) onclick="return false;" @endif>
                                             </div>
                                         </td>
                                     @endfor
