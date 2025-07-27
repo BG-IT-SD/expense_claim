@@ -129,12 +129,12 @@ class DriverClaimController extends Controller
         // คนอนุมัติ
         $bu = BuEmp($driver_empid);
         $nextStepApprove = Approvestep($bu, 2, 1, 1);
-        // $finalHEmailNext = $nextStepApprove["email"];
-        // $finalHNameNext = $nextStepApprove["fullname"];
-        // $finalIdNext = $nextStepApprove["empid"];
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        $finalHEmailNext = $nextStepApprove["email"];
+        $finalHNameNext = $nextStepApprove["fullname"];
+        $finalIdNext = $nextStepApprove["empid"];
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
 
         return view('front.driver.create', compact('bookings', 'driver_empid', 'driver_name', 'Alldayfood', 'groupedTimeRanges', 'prices', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext'));
     }
