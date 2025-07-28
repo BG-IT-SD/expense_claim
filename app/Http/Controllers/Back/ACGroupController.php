@@ -1,8 +1,12 @@
 <?php
 
+
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accountplant;
+use App\Models\Accountsetplanthead;
+use App\Models\Accountstep;
 use App\Models\ApproveStaff;
 use App\Models\Plant;
 use App\Models\Plantsettingdetail;
@@ -11,35 +15,35 @@ use App\Models\Valldataemp;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-class HRgroupController extends Controller
+class ACGroupController extends Controller
 {
     public function index()
     {
-        $hrgroups = Plantsettinghead::where('deleted', 0)->get();
-        return view('back.hrgroup.index', compact('hrgroups'));
+        $hrgroups = Accountsetplanthead::where('deleted', 0)->get();
+        return view('back.acgroup.index', compact('hrgroups'));
     }
 
     public function edit($id)
     {
 
         $hrgroupId = $id;
-        $hrplants = Plantsettingdetail::with('plant')->where('headid', $id)->where('deleted', 0)->get();
-        $staffapproves = ApproveStaff::where('group', $id)->whereIn('step', [1, 2, 9])->where('extype', 1)->where('deleted', 0)->get();
-        return view('back.hrgroup.edit', compact('hrplants', 'hrgroupId', 'staffapproves'));
+        $hrplants = Accountplant::with('plant')->where('headid', $id)->where('deleted', 0)->get();
+        $staffapproves = Accountstep::where('headid', $id)->whereIn('step', [1, 2, 9])->where('deleted', 0)->get();
+        return view('back.acgroup.edit', compact('hrplants', 'hrgroupId', 'staffapproves'));
     }
 
     public function addList($id)
     {
 
-        return view('back.hrgroup.addlist', compact('id'));
+        return view('back.acgroup.addlist', compact('id'));
     }
 
 
     public function editList($id)
     {
-        $approveStaff = ApproveStaff::findorFail($id);
+        $approveStaff = Accountstep::findorFail($id);
         // dd($approveStaff);
-        return view('back.hrgroup.editlist', compact('approveStaff', 'id'));
+        return view('back.acgroup.editlist', compact('approveStaff', 'id'));
     }
 
 
@@ -47,7 +51,7 @@ class HRgroupController extends Controller
     {
 
         // ดึง id เช็ค
-        $plantedIds = Plantsettingdetail::where('deleted', 0)->pluck('plantid')->toArray();
+        $plantedIds = Accountplant::where('deleted', 0)->pluck('plantid')->toArray();
 
         // เอาเฉพาะ plant ที่ยังไม่อยู่ใน รายการแต่ละกลุ่ม
         $plants = Plant::where('deleted', 0)
@@ -55,23 +59,23 @@ class HRgroupController extends Controller
             ->get();
         $action = 'Add';
 
-        return view('back.hrgroup.addplant', compact('id', 'plants','action'));
+        return view('back.acgroup.addplant', compact('id', 'plants','action'));
     }
 
     public function editPlant($id){
         // ดึง id เช็ค
-        $plantedIds = Plantsettingdetail::where('deleted', 0)->pluck('plantid')->toArray();
+        $plantedIds = Accountplant::where('deleted', 0)->pluck('plantid')->toArray();
 
         // เอาเฉพาะ plant ที่ยังไม่อยู่ใน รายการแต่ละกลุ่ม
         $plants = Plant::where('deleted', 0)
             ->whereNotIn('id', $plantedIds)
             ->get();
 
-        $plantToGroup = Plantsettingdetail::findorfail($id);
+        $plantToGroup = Accountplant::findorfail($id);
         // dd($plantToGroup);
 
         $action = 'Edit';
-        return view('back.hrgroup.addplant', compact('id', 'plants','action','plantToGroup'));
+        return view('back.acgroup.addplant', compact('id', 'plants','action','plantToGroup'));
     }
 
     public function SavePlant(Request $request)
@@ -88,23 +92,23 @@ class HRgroupController extends Controller
 
         try {
             if ($action === 'Add') {
-                $create = new Plantsettingdetail;
+                $create = new Accountplant;
                 $create->headid = $groupID;
                 $create->plantid = $request->input('plant');
                 $create->save();
             } elseif ($action === 'Edit') {
-                $update = Plantsettingdetail::findOrFail($groupID);
+                $update = Accountplant::findOrFail($groupID);
                 $update->plantid = $request->input('plant');
                 $update->save();
                 $pageID = $update->headid;
             }
 
             return redirect()
-                ->route('HRgroup.edit', $pageID)
+                ->route('ACgroup.edit', $pageID)
                 ->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
         } catch (\Throwable $th) {
             return redirect()
-                ->route('HRgroup.edit', $pageID)
+                ->route('ACgroup.edit', $pageID)
                 ->with(['message' => 'บันทึกไม่สำเร็จ', 'class' => 'error']);
         }
     }
@@ -122,19 +126,18 @@ class HRgroupController extends Controller
 
         if ($groupID != null) {
             try {
-                $create = new ApproveStaff();
-                $create->extype = 1;
-                $create->step = 9;
-                $create->group = $groupID;
+                $create = new Accountstep();
+                $create->step = 1;
+                $create->headid = $groupID;
                 $create->empid = $request->emp_data;
                 $create->email = $request->email_data;
                 $create->fullname = $request->name_data;
                 $create->save();
 
-                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+                return redirect()->route('ACgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
             } catch (\Throwable $th) {
                 //throw $th;
-                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
+                return redirect()->route('ACgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
             }
         }
     }
@@ -151,26 +154,7 @@ class HRgroupController extends Controller
 
         if ($id != "") {
 
-            $update = ApproveStaff::findOrFail($id);
-
-            if (in_array($step, [1, 2])) {
-                //ถ้าเป็น ผู้จัดการส่วน หรือ ผู้จัดการฝ่าย ให้ insert คนใหม่เข้าไปและ update คนเก่าเป็น Inactive
-                if ($empid != "") {
-                    $create = new ApproveStaff();
-                    $create->empid = $empid;
-                    $create->email = $email;
-                    $create->fullname = $empname;
-                    $create->extype = $update->extype;
-                    $create->step = $step;
-                    $create->group = $groupID;
-                    $update->status = 0;
-                    $create->save();
-                }else{
-                    $update->status = 1;
-                }
-
-
-            } else {
+            $update = Accountstep::findOrFail($id);
 
                 if ($empid != "") {
 
@@ -182,26 +166,26 @@ class HRgroupController extends Controller
                 if ($status != "") {
                     $update->status = $status;
                 }
-            }
+
 
 
             try {
                 $update->save();
 
-                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
+                return redirect()->route('ACgroup.edit', $groupID)->with(['message' => 'บันทึกสำเร็จ', 'class' => 'success']);
             } catch (\Throwable $th) {
-                return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
+                return redirect()->route('ACgroup.edit', $groupID)->with(['message' => 'บันทึกไม่สำเร็จ' . $th, 'class' => 'error']);
                 // $th->getMessage()
             }
         }
-        return redirect()->route('HRgroup.edit', $groupID)->with(['message' => 'ไม่พบข้อมูลสำหรับอัปเดต', 'class' => 'error']);
+        return redirect()->route('ACgroup.edit', $groupID)->with(['message' => 'ไม่พบข้อมูลสำหรับอัปเดต', 'class' => 'error']);
     }
 
     public function delPlant($id){
 
         if($id != ""){
 
-            $delete = Plantsettingdetail::findorFail($id);
+            $delete = Accountplant::findorFail($id);
             $delete->deleted = 1;
             $delete->status = 0;
 
@@ -221,7 +205,7 @@ class HRgroupController extends Controller
         $request->validate([
             'empid' => [
                 'required',
-                Rule::unique('approvestaff')->where(function ($query) {
+                Rule::unique('accountstep')->where(function ($query) {
                     return $query->where('deleted', 0);
                 }),
             ],
@@ -250,7 +234,7 @@ class HRgroupController extends Controller
         $group = $request->input('group');
         $step = $request->input('step');
 
-        $approveStaff = ApproveStaff::where('deleted', 0)->where('group', $group)->where('step', $step)->get();
+        $approveStaff = Accountstep::where('deleted', 0)->where('headid', $group)->where('step', $step)->get();
         $approveStaffData = $approveStaff?->pluck('empid')
             ->filter()
             ->unique()
@@ -316,3 +300,4 @@ class HRgroupController extends Controller
         ]);
     }
 }
+

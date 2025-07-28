@@ -12,7 +12,7 @@
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-sm btn-primary"
-                                onclick="window.location.href='{{ route('HRgroup.addlist', $hrgroupId) }}'"><i
+                                onclick="window.location.href='{{ route('ACgroup.addlist', $hrgroupId) }}'"><i
                                     class="mdi mdi-plus-circle"></i> เพิ่ม รายชื่อ</button>
                         </div>
 
@@ -31,7 +31,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($staffapproves as $staffapprove)
-                                    @if ($staffapprove->step == 9)
+                                    @if ($staffapprove->step == 1)
                                         <tr>
                                             <td>{{ $staffapprove->empid }}</td>
                                             <td>{{ $staffapprove->fullname }}</td>
@@ -42,7 +42,7 @@
                                             </td>
                                             <td>
                                             <button class="btn btn-warning btn-sm btngroupedit"
-                                        onclick="window.location.href='{{ route('HRgroup.editlist', $staffapprove->id) }}'"><i
+                                        onclick="window.location.href='{{ route('ACgroup.editlist', $staffapprove->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
                                              {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
@@ -65,7 +65,7 @@
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-sm btn-primary"
-                                onclick="window.location.href='{{ route('HRgroup.addplant', $hrgroupId) }}'"><i
+                                onclick="window.location.href='{{ route('ACgroup.addplant', $hrgroupId) }}'"><i
                                     class="mdi mdi-plus-circle"></i> เพิ่ม Plant</button>
                         </div>
 
@@ -94,7 +94,7 @@
                                         </td>
                                         <td>
                                         <button class="btn btn-warning btn-sm btngroupedit"
-                                        onclick="window.location.href='{{ route('HRgroup.editplant', $hrplant->id) }}'"><i
+                                        onclick="window.location.href='{{ route('ACgroup.editplant', $hrplant->id) }}'"><i
                                             class="mdi mdi-pencil-circle-outline"></i>
                                         edit</button>
                                         <button type="button" class="btn btn-danger btn-sm deleteplant"
@@ -108,66 +108,10 @@
                 </div>
             </div>
             <hr>
-            <div class="colxxl">
-                <div class="card">
-                    <div class="card-header row">
-                        <div class="col-md-6">
-                            <h5>รายชื่อ สายอนุมัติ </h5>
-                        </div>
-                        <div class="col-md-6 text-end">
-
-                        </div>
-
-                    </div>
-
-                    <div class="card-datatable table-responsive pt-0">
-
-                        <table class="datatables-basic table table-bordered text-center" id="hrgrouplist">
-                            <thead>
-                                <tr>
-                                    <th>EMPID</th>
-                                    <th>Name</th>
-                                    <th>POS</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($staffapproves as $staffapprove)
-                                @if (in_array($staffapprove->step, [1, 2]))
-                                    @if ($staffapprove->status == 1)
-                                    <tr>
-                                        <td>{{ $staffapprove->empid }}</td>
-                                        <td>{{ $staffapprove->fullname }}</td>
-                                        <td>
-                                            {{ $staffapprove->step_text}}
-                                        </td>
-                                        <td>
-                                            {!! $staffapprove->status == 1
-                                                ? '<span class="badge rounded-pill bg-success">Active</span>'
-                                                : '<span class="badge rounded-pill bg-danger">Inactive</span>' !!}
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-warning btn-sm btngroupedit"
-                                        onclick="window.location.href='{{ route('HRgroup.editlist', $staffapprove->id) }}'"><i
-                                            class="mdi mdi-pencil-circle-outline"></i>
-                                        edit</button>
-                                             {{-- <button type="button" class="btn btn-danger btn-sm deleteuser"
-                                        data-id="{{ $staffapprove->id }}"><i class="mdi mdi-trash-can"></i></button> --}}
-                                        </td>
-                                    </tr>
-                                    @endif
-                                    @endif
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
 
         </div>
     </div>
-    @include('back.hrgroup.modal_list')
+    @include('back.ACgroup.modal_list')
 @endsection
 @section('jscustom')
     @if (session('message'))
@@ -183,7 +127,7 @@
         </script>
     @endif
     <script>
-        const PlantDelUrl = "{{ route('HRgroup.delplant', ':id') }}";
+        const PlantDelUrl = "{{ route('ACgroup.delplant', ':id') }}";
     </script>
-    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/hrgroup.js']) }}"></script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/acgroup.js']) }}"></script>
 @endsection

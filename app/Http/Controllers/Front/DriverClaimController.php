@@ -23,7 +23,7 @@ class DriverClaimController extends Controller
      */
     public function index()
     {
-        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
         return view('front.driver.list', compact('drivers'));
     }
@@ -58,7 +58,7 @@ class DriverClaimController extends Controller
 
         // Status
         $status = searchStatus();
-        $drivers = GroupSpecial::whereIn('typeid', [1, 2])->where("deleted", 0)->where("status", 1)->get();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
         $page = 'DriverClaim.show';
         return view('back.hr.historydv', compact('expenses','page','status','drivers'));
@@ -129,12 +129,12 @@ class DriverClaimController extends Controller
         // คนอนุมัติ
         $bu = BuEmp($driver_empid);
         $nextStepApprove = Approvestep($bu, 2, 1, 1);
-        // $finalHEmailNext = $nextStepApprove["email"];
-        // $finalHNameNext = $nextStepApprove["fullname"];
-        // $finalIdNext = $nextStepApprove["empid"];
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        $finalHEmailNext = $nextStepApprove["email"];
+        $finalHNameNext = $nextStepApprove["fullname"];
+        $finalIdNext = $nextStepApprove["empid"];
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
 
         return view('front.driver.create', compact('bookings', 'driver_empid', 'driver_name', 'Alldayfood', 'groupedTimeRanges', 'prices', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext'));
     }

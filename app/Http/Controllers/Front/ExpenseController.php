@@ -260,31 +260,31 @@ class ExpenseController extends Controller
         // New Head
         $response = $this->getHeadEmp($empid);
 
-        $headempid = "66000510";
-        $headlevel = "10";
-        $heademail = "kamolwan.b@bgiglass.com";
-        $headname = "กมลวรรณ บรรชา";
+        // $headempid = "66000510";
+        // $headlevel = "10";
+        // $heademail = "kamolwan.b@bgiglass.com";
+        // $headname = "กมลวรรณ บรรชา";
 
         $loopCount = 0;
         $maxLoop = 5;
 
-        // while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
-        //     $currentEmpId = $response['head_emp_id'] ?? "";
-        //     $currentLevel = LevelEmp($currentEmpId);
+        while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
+            $currentEmpId = $response['head_emp_id'] ?? "";
+            $currentLevel = LevelEmp($currentEmpId);
 
-        //     if ($currentLevel >= 10) {
-        //         // เจอหัวหน้าที่ level >= 10 — เก็บข้อมูลและหยุด loop
-        //         $headempid = $currentEmpId;
-        //         $headlevel = $currentLevel;
-        //         $heademail = $response['head_email'] ?? "";
-        //         $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
-        //         break;
-        //     }
+            if ($currentLevel >= 10) {
+                // เจอหัวหน้าที่ level >= 10 — เก็บข้อมูลและหยุด loop
+                $headempid = $currentEmpId;
+                $headlevel = $currentLevel;
+                $heademail = $response['head_email'] ?? "";
+                $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+                break;
+            }
 
-        //     // หาหัวหน้าคนถัดไป
-        //     $response = $this->getHeadEmp($currentEmpId);
-        //     $loopCount++;
-        // }
+            // หาหัวหน้าคนถัดไป
+            $response = $this->getHeadEmp($currentEmpId);
+            $loopCount++;
+        }
 
         // New Head
         //  dd($headempid);

@@ -137,11 +137,12 @@
                                     <tr>
                                         <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
-                                            {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
+                                            {{ \Carbon\Carbon::parse($expense->created_at) }}
+                                            {{-- {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                 'd/m/Y H:i',
                                             ) .
                                                 ' - ' .
-                                                \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }} --}}
                                         </td>
                                         <td>{{ $expense->bookid }}</td>
                                         <td class="text-wrap">

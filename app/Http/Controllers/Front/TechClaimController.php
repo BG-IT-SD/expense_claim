@@ -215,11 +215,11 @@ class TechClaimController extends Controller
         }
         $nextStepApprove = Approvestep($bu,3,$nextStep,$groupData);
         // dd($nextStepApprove);
-        // $heademail = $nextStepApprove["email"];
+        $heademail = $nextStepApprove["email"];
         $headname = $nextStepApprove["fullname"];
         $headempid = $nextStepApprove["empid"];
 
-        $heademail = 'Kamolwan.b@bgiglass.com';
+        // $heademail = 'Kamolwan.b@bgiglass.com';
         // $headname = 'กมลวรรณ บรรชา';
         // $headempid = '66000510';
 

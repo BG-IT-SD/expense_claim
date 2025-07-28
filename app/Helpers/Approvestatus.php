@@ -136,55 +136,102 @@ if (!function_exists('Approvestep')) {
 
     function Approvestep($bu, $type, $nextstep, $groups = null)
     {
-        $step = "";
-        $group = "";
-        $email = "";
-        $fullname = "";
-        $empid = "";
+        $group = null;
+        $step = $nextstep;
 
-
+        // Map BU to group (ถ้า type == 1)
         if ($type == 1) {
-
-            if ($bu == 'BG' || $bu == 'BGE' || $bu == 'BGER' || $bu == 'BGA') {
-                $group = 1;
-                $step = $nextstep;
-            } elseif ($bu == 'KBI' || $bu == 'BGCP') {
-                $group = 2;
-                $step = $nextstep;
-            } elseif ($bu == 'PTI') {
-                $group = 3;
-                $step = $nextstep;
-            } elseif ($bu == 'BGC') {
-                // check BGC By BG Codeemp 011-010 | BGC
-                $group = 2;
-                $step = $nextstep;
-            }
-        } elseif ($type == 2) {
-            $group = $groups;
-            $step = $nextstep;
-        } elseif ($type == 3) {
-            $group = $groups;
-            $step = $nextstep;
+            $buGroupMap = [
+                'BG'   => 1,
+                'BGE' => 1,
+                'BGER' => 1,
+                'BGA' => 1,
+                'BGC BY BG' => 1,
+                'KBI'  => 2,
+                'BGCP' => 2,
+                'BGC' => 2, // 'BGC' -> 2
+                'PTI'  => 3,
+            ];
+            $group = $buGroupMap[$bu] ?? null;
+        } else {
+            $group = $groups; // สำหรับ type 2 และ 3
         }
 
+        // ถ้า group ไม่เจอ ไม่ถูกต้อง return empty
+        if (empty($group) || empty($step)) {
+            return [
+                "email" => null,
+                "fullname" => null,
+                "empid" => null,
+            ];
+        }
+
+        // Find next approver
         $nextApprove = ApproveStaff::where('extype', $type)
-            ->where("group", $group)
-            ->where("step", $step)
-            ->where("deleted", 0)
-            ->where("status", 1)
+            ->where('group', $group)
+            ->where('step', $step)
+            ->where('deleted', 0)
+            ->where('status', 1)
             ->first();
 
-        $email = $nextApprove->email;
-        $fullname = $nextApprove->fullname;
-        $empid = $nextApprove->empid;
-
-
         return [
-            "email" => $email,
-            "fullname" => $fullname,
-            "empid" => $empid,
+            "email"    => $nextApprove->email    ?? null,
+            "fullname" => $nextApprove->fullname ?? null,
+            "empid"    => $nextApprove->empid    ?? null,
         ];
     }
+
+    // function Approvestep($bu, $type, $nextstep, $groups = null)
+    // {
+    //     $step = "";
+    //     $group = "";
+    //     $email = "";
+    //     $fullname = "";
+    //     $empid = "";
+
+
+    //     if ($type == 1) {
+
+    //         if ($bu == 'BG' || $bu == 'BGE' || $bu == 'BGER' || $bu == 'BGA') {
+    //             $group = 1;
+    //             $step = $nextstep;
+    //         } elseif ($bu == 'KBI' || $bu == 'BGCP') {
+    //             $group = 2;
+    //             $step = $nextstep;
+    //         } elseif ($bu == 'PTI') {
+    //             $group = 3;
+    //             $step = $nextstep;
+    //         } elseif ($bu == 'BGC') {
+    //             // check BGC By BG Codeemp 011-010 | BGC
+    //             $group = 2;
+    //             $step = $nextstep;
+    //         }
+    //     } elseif ($type == 2) {
+    //         $group = $groups;
+    //         $step = $nextstep;
+    //     } elseif ($type == 3) {
+    //         $group = $groups;
+    //         $step = $nextstep;
+    //     }
+
+    //     $nextApprove = ApproveStaff::where('extype', $type)
+    //         ->where("group", $group)
+    //         ->where("step", $step)
+    //         ->where("deleted", 0)
+    //         ->where("status", 1)
+    //         ->first();
+
+    //     $email = $nextApprove->email;
+    //     $fullname = $nextApprove->fullname;
+    //     $empid = $nextApprove->empid;
+
+
+    //     return [
+    //         "email" => $email,
+    //         "fullname" => $fullname,
+    //         "empid" => $empid,
+    //     ];
+    // }
 }
 
 if (!function_exists('logAction')) {
@@ -262,8 +309,9 @@ if (!function_exists('hasReclaimedExpense')) {
     }
 }
 
-if(!function_exists('searchStatus')){
-    function searchStatus(){
+if (!function_exists('searchStatus')) {
+    function searchStatus()
+    {
         $statusList = [
             0 => 'รออนุมัติ',
             1 => 'อนุมัติแล้ว',
@@ -273,5 +321,4 @@ if(!function_exists('searchStatus')){
 
         return $statusList;
     }
-
 }
