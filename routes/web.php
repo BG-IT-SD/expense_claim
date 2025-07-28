@@ -4,6 +4,7 @@ use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Back\AccountController;
+use App\Http\Controllers\Back\ACGroupController;
 use App\Http\Controllers\Back\DistanceRateController;
 use App\Http\Controllers\Back\ExportController;
 use App\Http\Controllers\Back\FuelPrice91Controller;
@@ -289,6 +290,23 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::get('editplant/{id}',[HRgroupController::class,'editPlant'])->name('editplant');
                 Route::delete('delplant/{id}',[HRgroupController::class,'delPlant'])->name('delplant');
 
+
+            });
+
+            Route::prefix('ACgroup')->name('ACgroup.')->group(function () {
+                Route::get('index',[ACGroupController::class,'index'])->name('index');
+                Route::get('edit/{id}',[ACGroupController::class,'edit'])->name('edit');
+                Route::get('addlist/{id}',[ACGroupController::class,'addList'])->name('addlist');
+                Route::get('addplant/{id}',[ACGroupController::class,'addPlant'])->name('addplant');
+                Route::post('checkemphr',[ACGroupController::class,'CheckEmpID'])->name('checkemphr');
+                Route::post('saveplanthr',[ACGroupController::class,'SavePlant'])->name('saveplant');
+                Route::post('savelisthr',[ACGroupController::class,'SaveList'])->name('savelisthr');
+                Route::get('editlist/{id}',[ACGroupController::class,'editList'])->name('editlist');
+                Route::get('listemphrms',[ACGroupController::class,'ListEmpHrms'])->name('listemphrms');
+                Route::get('emphrmsdata',[ACGroupController::class,'getEmpData'])->name('emphrmsdata');
+                Route::post('updatelist',[ACGroupController::class,'UpdateList'])->name('updatelist');
+                Route::get('editplant/{id}',[ACGroupController::class,'editPlant'])->name('editplant');
+                Route::delete('delplant/{id}',[ACGroupController::class,'delPlant'])->name('delplant');
 
             });
         });

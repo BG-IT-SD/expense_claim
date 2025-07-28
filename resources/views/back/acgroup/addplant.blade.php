@@ -16,7 +16,7 @@
                     </div>
 
                     <div class="card-body pt-0">
-                        <form action="{{ route('HRgroup.saveplant') }}" id="addplantHR" method="POST">
+                        <form action="{{ route('ACgroup.saveplant') }}" id="addplantHR" method="POST">
                             @csrf
                             <div class="row" id="content-check">
                                 <div class="col-md-12 mb-3">
@@ -37,9 +37,9 @@
                                     <button type="submit"  class="btn btn-primary"><span
                                             class="mdi mdi-check-circle"></span> บันทึกข้อมูล</button>
                                            @if ($action == 'Add')
-                                           <a href="{{ route('HRgroup.edit',$id) }}" class="btn btn-danger">กลับ</a>
+                                           <a href="{{ route('ACgroup.edit',$id) }}" class="btn btn-danger">กลับ</a>
                                            @else
-                                            <a href="{{ route('HRgroup.edit',$plantToGroup->headid) }}" class="btn btn-danger">กลับ</a>
+                                            <a href="{{ route('ACgroup.edit',$plantToGroup->headid) }}" class="btn btn-danger">กลับ</a>
                                            @endif
 
                                 </div>
@@ -53,5 +53,5 @@
     </div>
 @endsection
 @section('jscustom')
-    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/hrgroup.js']) }}"></script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/setting/acgroup.js']) }}"></script>
 @endsection

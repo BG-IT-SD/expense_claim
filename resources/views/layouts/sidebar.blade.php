@@ -323,7 +323,17 @@
                     Route::is('FuelPrice.create') ||
                     Route::is('importlist.index') ||
                     Route::is('Typegroup.index') ||
-                    Route::is('DistanceRate.index') || Route::is('HRgroup.index') || Route::is('HRgroup.edit') || Route::is('HRgroup.addlist') || Route::is('HRgroup.addplant')) active open @endif">
+                    Route::is('DistanceRate.index') ||
+                    Route::is('HRgroup.index') ||
+                    Route::is('HRgroup.edit') ||
+                    Route::is('HRgroup.addlist') ||
+                    Route::is('HRgroup.addplant') ||
+
+                     Route::is('ACgroup.index') ||
+                    Route::is('ACgroup.edit') ||
+                    Route::is('ACgroup.addlist') ||
+                    Route::is('ACgroup.addplant')
+                    ) active open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-cog"></i>
                     <div data-i18n="Setting">Setting</div>
@@ -359,6 +369,12 @@
                     <li class="menu-item @if (Route::is('HRgroup.index') || Route::is('HRgroup.edit') || Route::is('HRgroup.addlist')  || Route::is('HRgroup.addplant')) active @endif">
                         <a href="{{ route('HRgroup.index') }}" class="menu-link">
                             <div data-i18n="กลุ่มอนุมัติ HR">กลุ่มอนุมัติ HR</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item @if (Route::is('ACgroup.index') || Route::is('ACgroup.edit') || Route::is('ACgroup.addlist')  || Route::is('ACgroup.addplant')) active @endif">
+                        <a href="{{ route('ACgroup.index') }}" class="menu-link">
+                            <div data-i18n="กลุ่มอนุมัติ บัญชี">กลุ่มอนุมัติ บัญชี</div>
                         </a>
                     </li>
 
