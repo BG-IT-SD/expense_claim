@@ -81,6 +81,7 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>EXGROUPID</th>
+                                    <th>BU</th>
                                     <th>DATE</th>
                                     <th>ยอดรวม</th>
                                     <th>ค่าอาหาร</th>
@@ -96,6 +97,7 @@
                                 @foreach ($exgroups as $exgroup)
                                     <tr>
                                         <td>{{ $exgroup->id }}</td>
+                                        <td>{{ $exgroup->plantname }}</td>
                                         <td>{{ \Carbon\Carbon::parse($exgroup->groupdate)->format('d/m/Y') }}</td>
                                         <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}</td>
                                         <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfood, 2) : number_format($exgroup->totalfood, 2) }}</td>

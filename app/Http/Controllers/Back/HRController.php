@@ -198,9 +198,11 @@ class HRController extends Controller
         ->first();
 
         $plantNames = $staff?->plantSettingDetails
-        ->pluck('plant.plantname')
+        ->pluck('plant.plantname', 'plant.id')
         ->filter()
-        ->unique()
+        ->map(function($name, $id) {
+            return ['id' => $id, 'name' => $name];
+        })
         ->values();
         // dd($plantNames);
 
@@ -905,6 +907,9 @@ class HRController extends Controller
     public function hrNextApprove(Request $request)
     {
         $ids = $request->input('expense_ids', []);
+        $plantName = $request->input('plant_name');
+        $plantID = $request->input('plant_id');
+        // dd($request->input('plant_name'));
         $makeuserempid = Auth::user()->empid;
         $makeusername = Auth::user()->fullname;
 
@@ -926,7 +931,7 @@ class HRController extends Controller
             ->whereIn('id', $ids)
             ->get();
 
-        return view('back.hr.groupapprove', compact('expenses', 'makeuserempid', 'makeusername', 'nextstaffgroup'));
+        return view('back.hr.groupapprove', compact('expenses', 'makeuserempid', 'makeusername', 'nextstaffgroup','plantName','plantID'));
     }
 
     public function hrHextApprove(Request $request)
@@ -952,6 +957,8 @@ class HRController extends Controller
                 'otherexpenses' =>  $request->otherexpenses,
                 'totalother' => $request->totalother,
                 'total' => $request->total,
+                'plantid' => $request->plantid,
+                'plantname' => $request->plantname,
             ]);
 
             $exgroupId = $exgroup->id;

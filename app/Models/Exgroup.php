@@ -41,6 +41,8 @@ class Exgroup extends Model
         'nettotalother',
         'nettotalfuel',
         'paymentdate',
+        'plantid',
+        'plantname',
 
     ];
 
