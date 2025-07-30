@@ -8,8 +8,8 @@
                     <h5 class="card-header"><i class="mdi mdi-view-list"></i> รายการเบิกที่ตรวจสอบแล้ว</h5>
                     <div class="row">
                         <div class="col-md-6 mt-3 mb-3">
-                            <input type="text" id="plantName" value="">
-                            <input type="text" id="plantID" value="">
+                            <input type="hidden" id="selectedPlantName" name="plant_name" value="">
+                            <input type="hidden" id="plantID"  name="plant_id" value="">
                         </div>
                         <div class="col-md-6 mt-3 mb-3 text-end"> <button type="button" class="btn btn-primary"
                                 id="sendSelected">
@@ -23,14 +23,16 @@
                             <div class="nav-align-top">
                                 <ul class="nav nav-tabs" role="tablist">
                                     {{-- Head Tabs active --}}
-                                    @foreach ($plantNames as $plantName)
+                                    @foreach ($plantNames as $plant)
                                         <li class="nav-item" role="presentation">
                                             <button type="button"
                                                 class="nav-link  {{ $loop->first ? 'active' : '' }} waves-effect"
-                                                role="tab" data-bs-toggle="tab" data-bs-target="#{{ $plantName }}"
-                                                aria-controls="{{ $plantName }}"
+                                                role="tab" data-bs-toggle="tab" data-bs-target="#plant_{{ $plant['id'] }}"
+                                                aria-controls="{{ $plant['id'] }}"
+                                                data-plantname="{{ $plant['name'] }}"
+                                                data-plantid="{{ $plant['id'] }}"
                                                 aria-selected="{{ $loop->first ? 'true' : 'false' }}">
-                                                {{ $plantName }}
+                                                {{ $plant['name'] }}
                                             </button>
                                         </li>
                                     @endforeach
@@ -43,16 +45,19 @@
                         <div class="card-body">
                             <div class="tab-content p-0">
                                 {{-- content Tabs show active --}}
-                                @foreach ($plantNames as $plantName)
+                                @foreach ($plantNames as $plant)
                                     <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
-                                        id="{{ $plantName }}" role="tabpanel">
+                                        id="plant_{{ $plant['id'] }}" role="tabpanel">
+
+                                        {{-- <input type="text" class="current-plant" name="current_plant[]" value="{{ $plant['id'] }}">
+                                        <input type="text" class="current-plant-name" name="current_plant_name[]" value="{{ $plant['name'] }}"> --}}
                                         {{-- Tables --}}
 
                                         <div class="table-responsive text-nowrap2">
-                                            <table class="table appex" id="appex">
+                                            <table class="table appex" id="appex-{{ $plant['id'] }}">
                                                 <thead class="table-dark">
                                                     <tr>
-                                                        <th><input type="checkbox" id="selectAll" /></th>
+                                                        <th><input type="checkbox" class="selectAll" data-plant="plant_{{ $plant['id'] }}" /></th>
                                                         <th>Expense ID</th>
                                                         <th>Date Time</th>
                                                         <th>Booking ID</th>
@@ -68,11 +73,12 @@
                                                 </thead>
                                                 <tbody class="table-border-bottom-0">
                                                     @foreach ($expenses as $key => $expense)
-                                                        @if (BuEmp($expense->empid) == $plantName)
+                                                        @if (BuEmp($expense->empid) == $plant['name'])
                                                             <tr>
                                                                 <td>
                                                                     <input type="checkbox" name="expense_ids[]"
                                                                         class="expense-checkbox"
+                                                                        data-plant="plant_{{ $plant['id'] }}"
                                                                         value="{{ $expense->id }}">
                                                                 </td>
                                                                 <td>{{ $expense->prefix . $expense->id }}</td>

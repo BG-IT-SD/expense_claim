@@ -7,7 +7,7 @@
                     @csrf
                     <div class="card p-5">
                         <h5 class="card-header"><i class="mdi mdi-view-list"></i> สรุปรายชื่อพนักงาน
-                            เบิกค่าเดินทาง/เบี้ยเลี้ยง
+                            เบิกค่าเดินทาง/เบี้ยเลี้ยง {{ $plantName }}
                         </h5>
                         <p>ประจำสัปดาห์: {{ Thaidatenow(\Carbon\Carbon::now()) }}</p>
                         <div class="table-responsive text-nowrap">
@@ -211,6 +211,8 @@
 
                             </div>
                             <hr>
+                            <input type="hidden" name="plantid" value="{{ $plantID }}">
+                            <input type="hidden" name="plantname" value="{{ $plantName }}">
                             <div class="col-md-12">
                                 <button type="button" id="confrimapprove" class="btn btn-primary"><span
                                         class="mdi mdi-content-save"></span>

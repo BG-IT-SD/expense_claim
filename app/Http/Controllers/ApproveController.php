@@ -257,6 +257,7 @@ class ApproveController extends Controller
                 ->limit(1);
         })
             ->where('step', 2)
+            ->where('extype',1)
             ->where('status', 1)
             ->where('deleted', 0)
             ->first();
