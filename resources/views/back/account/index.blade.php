@@ -49,6 +49,21 @@
                                     </div>
 
                                 </div>
+                                {{-- <div class="col-md-6">
+                                    <div class="row">
+                                        <label class="col-sm-3 col-form-label text-sm-end" for="bu">BU</label>
+                                        <div class="col-sm-9">
+                                            <select name="bu" id="bu" class="form-select">
+                                                <option value="" disabled selected>-- เลือกBU --</option>
+                                                @foreach ($plants as $key => $plant)
+                                                <option value="{{ $plant->plantname }}">
+                                                    {{ $plant->plantname }}
+                                                </option>
+                                            @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div> --}}
 
                             </div>
                             <div class="row mt-4">

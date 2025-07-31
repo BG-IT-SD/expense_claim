@@ -122,6 +122,7 @@ class HRController extends Controller
         $staff = ApproveStaff::with(['plantSettingDetails.plant'])
             ->where('empid', $empid)
             ->where('deleted',0)
+            ->where('step',9)
             ->first();
 
         $plantNames = $staff?->plantSettingDetails
@@ -195,6 +196,7 @@ class HRController extends Controller
         $staff = ApproveStaff::with(['plantSettingDetails.plant'])
         ->where('empid', $empid)
         ->where('deleted',0)
+        ->where('step',9)
         ->first();
 
         $plantNames = $staff?->plantSettingDetails
