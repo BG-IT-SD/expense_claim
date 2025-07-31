@@ -10,7 +10,7 @@
 
 <table>
     <tr>
-        <td colspan="18" align="center"><strong>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง</strong></td>
+        <td colspan="18" align="center"><strong>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท {{ $exgroup->plantname }}</strong></td>
     </tr>
     <tr>
         <td colspan="18" align="center">ประจำสัปดาห์ {{ Thaidatenow(Carbon::parse($exgroup->groupdate)) }}</td>

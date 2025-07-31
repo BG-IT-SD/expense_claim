@@ -50,7 +50,7 @@ class GroupExport implements FromView, WithStyles,WithDrawings
         })
             ->where('exgroup', $this->id)
             ->get();
-        $baseRow = $expenses->count() + 13;
+        $baseRow = $expenses->count() + 14;
 
         $drawings = [];
 

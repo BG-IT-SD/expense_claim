@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Back;
 
 use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Accountstep;
 use App\Models\Approve;
+use App\Models\ApproveStaff;
 use App\Models\Exgroup;
 use App\Models\Expense;
+use App\Models\Plant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,9 +18,29 @@ class AccountController extends Controller
 {
     public function index(Request $request)
     {
+        $empid = Auth::user()->empid;
+        // พนักงานที่ login และโรงงานที่เขาดูแล
+        $staff = Accountstep::with(['plantSettingDetails.plant'])
+        ->where('empid', $empid)
+        ->where('deleted',0)
+        ->where('step',1)
+        ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+        ->pluck('plant.plantname', 'plant.id')
+        ->filter()
+        ->map(function($name, $id) {
+            return ['id' => $id, 'name' => $name];
+        })
+        ->values();
+
+        // $plantIds = $plantNames->pluck('id')->toArray();
+        $plantIds = ($plantNames ?? collect())->pluck('id')->toArray();
+
         $exgroups = Exgroup::where('deleted', 0)
             ->where('typeapprove', 6)
             ->where('statusapprove',0)
+            ->whereIn('plantid',$plantIds)
             ->when(
                 $request->filled('exdate'),
                 fn($q) =>
@@ -36,7 +59,10 @@ class AccountController extends Controller
             )
             ->orderByDesc('id')
             ->get();
-        return view('back.account.index', compact('exgroups'));
+
+            $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+        return view('back.account.index', compact('exgroups','plants'));
     }
 
     public function manage($id)

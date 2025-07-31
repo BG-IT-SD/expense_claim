@@ -22,6 +22,12 @@ class Accountstep extends Model
         'deleted',
     ];
 
+    public function plantSettingDetails()
+    {
+        return $this->hasMany(Accountplant::class, 'headid', 'headid');
+    }
+
+
     public function CreatedBy()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
