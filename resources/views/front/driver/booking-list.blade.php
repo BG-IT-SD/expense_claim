@@ -23,16 +23,21 @@
                                             value="{{ $booking->id }}">
                                     </td>
                                     <td>{{ $booking->id }}</td>
-                                    <td>{{ $booking->departure_date . ' : ' . $booking->departure_time.' - '.$booking->return_date . ' : ' . $booking->return_time }}</td>
+                                    <td>{{ $booking->departure_date . ' : ' . $booking->departure_time . ' - ' . $booking->return_date . ' : ' . $booking->return_time }}
+                                    </td>
                                     <td>{{ $booking->location_name }}</td>
                                     <td>{{ $booking->type_travel }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-                    <div class="div mt-3 mb-3 text-center">
-                        <button type="submit" class="btn btn-primary mt-2" id="claimBtn">เบิกรายการที่เลือก</button>
-                    </div>
+
+                    @if(count($bookings) > 0)
+                        <div class="div mt-3 mb-3 text-center">
+                            <button type="submit" class="btn btn-primary mt-2"
+                                id="claimBtn">เบิกรายการที่เลือก</button>
+                        </div>
+                    @endif
 
                 </form>
 
@@ -41,8 +46,8 @@
     </div>
 </div>
 <script>
-    $(document).ready(function () {
-        $('.booking-checkbox').on('change', function () {
+    $(document).ready(function() {
+        $('.booking-checkbox').on('change', function() {
             if ($('.booking-checkbox:checked').length > 7) {
                 $(this).prop('checked', false);
                 alert('เลือกได้ไม่เกิน 7 รายการเท่านั้น');
@@ -50,9 +55,9 @@
         });
 
         // ถ้าอยากเลือกทั้งหมด
-        $('#selectAll').on('change', function () {
+        $('#selectAll').on('change', function() {
             if ($(this).is(':checked')) {
-                $('.booking-checkbox').each(function (index) {
+                $('.booking-checkbox').each(function(index) {
                     if (index < 7) {
                         $(this).prop('checked', true);
                     } else {
@@ -64,26 +69,5 @@
             }
         });
 
-        // กดส่งฟอร์ม
-        // $('#bookingForm').on('submit', function (e) {
-        //     e.preventDefault();
-
-        //     const selected = $('.booking-checkbox:checked').map(function () {
-        //         return $(this).val();
-        //     }).get();
-
-        //     if (selected.length === 0) {
-        //         alert('กรุณาเลือกรายการอย่างน้อย 1 รายการ');
-        //         return;
-        //     }
-
-        //     // ✅ ส่งไปเบิก
-        //     console.log('รายการที่เลือก:', selected);
-        //     // ตัวอย่างส่งด้วย AJAX หรือ redirect ได้ตามต้องการ
-        //     // $.post('/driver/claim', { bookings: selected }, ... );
-        // });
     });
-    </script>
-
-
-
+</script>
