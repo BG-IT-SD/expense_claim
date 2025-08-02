@@ -17,7 +17,7 @@
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span>
                             รายการขอเบิกเบี้ยเลี้ยงและค่าเดินทางกลุ่ม:
-                            {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }}</h3>
+                            {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate. ' [ BU : ' . $exgroup->plantname. ' ]' }}</h3>
                     </div>
                     <div class="card-body row">
                         <form id="approveForm" action="{{ route('Account.exgroup.approve') }}" method="POST">

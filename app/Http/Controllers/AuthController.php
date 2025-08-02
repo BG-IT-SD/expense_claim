@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Msbu;
 use App\Models\User;
 use App\Models\Valldataemp;
 use Illuminate\Http\Request;
@@ -129,12 +130,23 @@ class AuthController extends Controller
             ->where('STAEMP', '!=', '9')
             ->first();
 
+            // Check BGC BY BG
+            $bu = $DetailEmp?->alias_name;
+            $code9 = substr($DetailEmp?->CODCOMP, 0, 9);
+            if($bu == 'BGC'){
+                $company = Msbu::where('code', $code9)->first();
+                $last_bu = $company?->company;
+            }else{
+                $last_bu = $bu;
+            }
+
         if ($DetailEmp) {
             User::create([
                 'empid' => $DetailEmp->CODEMPID,
                 'fullname' => $DetailEmp->NAMFIRSTT . ' ' . $DetailEmp->NAMLASTT,
                 'email' => $DetailEmp->EMAIL ?? "",
-                'bu' => $DetailEmp->alias_name,
+                // 'bu' => $DetailEmp->alias_name,
+                'bu' => $last_bu,
                 'dept' => $DetailEmp->DEPT,
                 // 'status' => $DetailEmp->STAEMP,
                 'password' => Hash::make($password),
