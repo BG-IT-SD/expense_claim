@@ -78,24 +78,5 @@
     <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
 @endsection
 @section('jscustom')
-    <script>
-        $(document).ready(function() {
-            $('#drivers').select2();
-            $('#searchForm').on('submit', function(e) {
-                e.preventDefault();
-
-                const empid = $('#drivers').val();
-                if (!empid) return;
-
-                $.get('/DriverClaim/search-booking', {
-                    empid
-                }, function(res) {
-                    $('#resultArea').html(res); // แสดงผล HTML ที่ได้จาก controller
-                }).fail(function() {
-                    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
-                });
-            });
-
-        });
-    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/driver/driver.js']) }}"></script>
 @endsection
