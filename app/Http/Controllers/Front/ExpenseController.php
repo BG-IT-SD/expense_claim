@@ -42,8 +42,8 @@ class ExpenseController extends Controller
         $empid = Auth::user()->empid;
 
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
 
         $booking = Vbooking::with([
             'expense' => function ($q) use ($request, $empid) {
@@ -77,12 +77,12 @@ class ExpenseController extends Controller
             ->unique('id')
             ->values();
 
-            //กรอง exid จาก expense
-            if ($exid) {
-                $booking = $booking->filter(function ($b) use ($exid) {
-                    return optional($b->expense)->id == $exid;
-                })->values();
-            }
+        //กรอง exid จาก expense
+        if ($exid) {
+            $booking = $booking->filter(function ($b) use ($exid) {
+                return optional($b->expense)->id == $exid;
+            })->values();
+        }
 
         // dd($booking);
 
@@ -94,8 +94,8 @@ class ExpenseController extends Controller
     {
         $currentEmpid = Auth::user()->empid;
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
             ->where('empid', $currentEmpid)
             ->where('status', 1)
@@ -115,15 +115,15 @@ class ExpenseController extends Controller
             })
             ->get();
 
-            if ($request->filled('exdate') && $request->filled('end_exdate')) {
-                $expenses = $expenses->filter(function ($exp) use ($request) {
-                    $departure = optional($exp->vbooking)->departure_date;
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $expenses = $expenses->filter(function ($exp) use ($request) {
+                $departure = optional($exp->vbooking)->departure_date;
 
-                    return $departure &&
-                           $departure >= $request->exdate &&
-                           $departure <= $request->end_exdate;
-                })->values();
-            }
+                return $departure &&
+                    $departure >= $request->exdate &&
+                    $departure <= $request->end_exdate;
+            })->values();
+        }
 
         return view('front.expenses.history', compact('expenses'));
     }
@@ -538,6 +538,12 @@ class ExpenseController extends Controller
 
             #log
             $json = "";
+            $json = json_encode([
+                'expense' => $expense->toArray(),
+                'foods' => ExpenseFood::where('exid', $expense->id)->get()->toArray(),
+                'approve' => $approve->toArray(),
+                'files' => ExpenseFile::where('exid', $expense->id)->get()->toArray(),
+            ]);
             logAction('add', 'Expense', 'บันทึกการเบิก EX' . $expense->id, $json);
 
             return response()->json([
@@ -692,6 +698,8 @@ class ExpenseController extends Controller
     {
         $expense = Expense::findOrFail($id);
 
+
+
         $approve = Approve::where('exid', $expense->id)
             ->where('typeapprove', 1)
             ->orderByDesc('id')
@@ -711,6 +719,14 @@ class ExpenseController extends Controller
                 'status' => 0,
                 'deleted' => 1,
             ]);
+
+            #log
+            $json  = "";
+            $json = json_encode([
+                'expense' => $expense->toArray(),
+                'approves' => Approve::where('exid', $expense->id)->get()->toArray(),
+            ]);
+            logAction('delete', 'Expense', 'ยกเลิกรายการเบิก EX' . $expense->id, $json);
 
             return response()->json([
                 'status' => 'success',
