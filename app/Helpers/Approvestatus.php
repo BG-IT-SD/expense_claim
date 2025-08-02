@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Valldataemp;
 use App\Models\ActivityLog;
 use App\Models\Expense;
+use App\Models\Msbu;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
@@ -128,7 +129,16 @@ if (!function_exists('BuEmp')) {
             ->where('STAEMP', '!=', '9')
             ->first();
         $bu = $user?->alias_name ?? "";
-        return  $bu;
+        $code9 = substr($user?->CODCOMP, 0, 9);
+        if($bu == 'BGC')
+        {
+            $company = Msbu::where('code', $code9)->first();
+            $last_bu = $company?->company;
+        }else{
+
+            $last_bu = $bu;
+        }
+        return  $last_bu;
     }
 }
 

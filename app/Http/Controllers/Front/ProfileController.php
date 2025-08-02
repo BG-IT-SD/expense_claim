@@ -17,6 +17,14 @@ class ProfileController extends Controller
         $id = Auth::user()->id;
         $users = User::find($id);
         $empid = $users->empid ?? "";
+
+        // $user = Valldataemp::where('CODEMPID', $empid)
+        // ->where('STAEMP', '!=', '9')
+        // ->first();
+        // $bu = $user?->alias_name ?? "";
+        // $code9 = substr($user?->CODCOMP, 0, 9);
+        // dd($code9);
+
         if ($empid != "") {
             $account = Valldataemp::where('CODEMPID', $empid)
                 ->where('STAEMP', '!=', '9')
