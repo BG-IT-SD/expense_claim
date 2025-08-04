@@ -296,6 +296,19 @@ class DriverClaimController extends Controller
              );
              //End Sent Mail
 
+             $logData = [
+                'expense'      => $expense->toArray(),
+                'foods'        => ExpenseFood::where('exid', $expense->id)->get()->toArray(),
+                'logs'         => ExpenseLog::where('exid', $expense->id)->get()->toArray(),
+                'approve'      => Approve::where('exid', $expense->id)->get()->toArray(),
+            ];
+            logAction(
+                'add',
+                'Expense',
+                'บันทึกการเบิก พขร EX' . $expense->id,
+                json_encode($logData)
+            );
+
             return redirect()->route('DriverClaim.index')->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
         } catch (\Exception $e) {
             DB::rollBack();

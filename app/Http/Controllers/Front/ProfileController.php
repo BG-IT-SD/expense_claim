@@ -67,6 +67,14 @@ class ProfileController extends Controller
             'password' => Hash::make($request->new_password),
         ]);
 
+         #log
+         $json  = "";
+         $json = json_encode([
+             'user' => $user->toArray(),
+         ]);
+         logAction('update', 'Profile', 'เปลี่ยนแปลงรหัสผ่าน ' . $user->id, $json);
+
+
         // Log out user
         Auth::logout();
 

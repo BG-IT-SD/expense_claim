@@ -654,6 +654,18 @@ class HRController extends Controller
             // );
             //End Sent Mail
 
+            $logData = [
+                'expense'  => $update ? $update->toArray() : null,
+                'foods'    => ExpenseFood::where('exid', $id)->get()->toArray(),
+                'approve'  => $approve->toArray(),
+            ];
+            logAction(
+                'update',
+                'Expense',
+                'ตรวจสอบรายการเบิก EX' . $id,
+                json_encode($logData)
+            );
+
             return response()->json([
                 'status' => 200,
                 'message' => 'ตรวจสอบข้อมูลเรียบร้อยแล้ว',
@@ -782,6 +794,19 @@ class HRController extends Controller
             //     'Expense Claim System EX' . $id,
             // );
             //End Sent Mail
+
+            $logData = [
+                'expense'  => $expense->toArray(),
+                'foods'    => $expense->foods->toArray(),
+                'approve'  => $approve->toArray(),
+            ];
+            logAction(
+                'update',
+                'Expense',
+                'ตรวจสอบเบิกค่าอาหาร พขร EX' . $expense->id,
+                json_encode($logData)
+            );
+
             return redirect()->route('HR.hrdriver')->with('success', 'ตรวจสอบการเบิกอาหารเรียบร้อย');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1018,6 +1043,18 @@ class HRController extends Controller
                 ],
                 'รายการขออนุมัติกลุ่ม EXGROUP-' . $exgroup->id . 'วันที่ ' . $nowDate
             );
+
+                $logData = [
+                    'exgroup'   => $exgroup->toArray(),
+                    'expense_ids' => $request->expense_id, // ID ที่อัปเดต exgroup
+                    'approves'  => Approve::where('exgroup', $exgroupId)->get()->toArray(),
+                ];
+                logAction(
+                    'add',
+                    'Exgroup',
+                    'สร้างกลุ่มการอนุมัติ EXGROUP-' . $exgroup->id,
+                    json_encode($logData)
+                );
 
             return response()->json([
                 'status' => 'success',

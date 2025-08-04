@@ -200,6 +200,23 @@ class AccountController extends Controller
 
             DB::commit();
 
+            $logData = [
+                'exgroup'      => $exgroup->toArray(),
+                'expense_ids'  => $expenseIds,
+                'approves'     => Approve::whereIn('exid', $expenseIds)->where('typeapprove', 6)->get()->toArray(),
+                'statuses'     => $statuses,
+                'reasons'      => $reasons,
+                'accountempid' => $accountempid,
+                'accountemail' => $accountemail,
+                'paymentdate'  => $paymentdate,
+            ];
+            logAction(
+                'update',
+                'Exgroup',
+                'บันทึกผลอนุมัติกลุ่ม EXGROUP-' . $exgroup->id,
+                json_encode($logData)
+            );
+
             return redirect()->route('Account.index')->with(['message' => 'บันทึกผลอนุมัติเรียบร้อย', 'class' => 'success']);
         } catch (\Exception $e) {
             DB::rollBack();
