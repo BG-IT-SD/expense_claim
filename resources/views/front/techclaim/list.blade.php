@@ -166,24 +166,5 @@
             });
         </script>
     @endif
-    {{-- <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script> --}}
-    <script>
-        $(document).ready(function() {
-            $('#ExpenseList').DataTable({
-                processing: true,
-                order: [
-                    [2, 'desc']
-                ],
-                lengthMenu: [5, 10, 25, 50, 75, 100],
-            });
-
-            $ ('#exdate').flatpickr ({
-                monthSelectorType: 'static',
-            });
-
-            $ ('#end_exdate').flatpickr ({
-                monthSelectorType: 'static',
-            });
-        });
-    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/tech/listexpense.js']) }}"></script>
 @endsection
