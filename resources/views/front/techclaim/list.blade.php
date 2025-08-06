@@ -89,6 +89,7 @@
                                 <tr>
                                     <th>Expense ID</th>
                                     <th>ID | NAME</th>
+                                    <th>BU</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
                                     <th>Location</th>
@@ -112,6 +113,7 @@
                                         <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ $empidToShow . ' | ' . ($fullnameFromUser ?? $fullnameFromGroup) }}</td>
+                                        <td>{{ BuEmp($empidToShow) }}</td>
                                         <td>{{ $booking->departure_date . ' - ' . $booking->return_date }}</td>
                                         <td>{{ $booking->id }}</td>
                                         <td>{{ $booking->location_name }}</td>
