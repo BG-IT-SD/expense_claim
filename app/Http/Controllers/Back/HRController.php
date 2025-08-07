@@ -131,18 +131,52 @@ class HRController extends Controller
             ->unique()
             ->values(); // BU ที่เจ้าของ login ดูแล
 
+            // dd($plantNames);
+
         $filterBu = $request->input('bu');
         $empids = null;
+        // dd($plantNames);
+
+        // if ($filterBu) {
+        //     // ดึง empid ที่ belong กับ BU ที่กรอก
+        //     $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+        //     $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+        //         ->where('STAEMP', '!=', 9)
+        //         ->pluck('CODEMPID');
+
+        //     $empids = $empidsFromUser->merge($empidsFromValldataemp)->unique()->values();
+        // }
 
         if ($filterBu) {
-            // ดึง empid ที่ belong กับ BU ที่กรอก
+            // User search/เลือก BU
             $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
-            $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
-                ->where('STAEMP', '!=', 9)
-                ->pluck('CODEMPID');
-
-            $empids = $empidsFromUser->merge($empidsFromValldataemp)->unique()->values();
+            // $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::where('bu', $filterBu)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else if ($plantNames->isNotEmpty()) {
+            // ไม่ได้เลือก BU → default ตาม BU ที่ login ดูแล
+            $empidsFromUser = User::whereIn('bu', $plantNames)->pluck('empid');
+            // $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::whereIn('bu', $plantNames)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else {
+            // เผื่อกรณี ไม่มี BU เลย
+            $empids = collect();
         }
+
+
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
             ->whereHas('latestApprove', function ($query) {
@@ -168,11 +202,15 @@ class HRController extends Controller
                 $q->where('created_at', '>=', now()->subMonth()->startOfDay());
             })
             // เฉพาะ BU ที่เจ้าของ login ดูแล (ถ้าไม่มี filterBu)
-            ->when(!$filterBu && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
-                $q->whereHas('user', function ($query) use ($plantNames) {
-                    $query->whereIn('bu', $plantNames);
-                });
+            // ->when(!$filterBu && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
+            //     $q->whereHas('user', function ($query) use ($plantNames) {
+            //         $query->whereIn('bu', $plantNames);
+            //     });
+            // })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
             })
+
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)
             ->get();
@@ -1089,6 +1127,7 @@ class HRController extends Controller
 
     public function export(Request $request)
     {
+        $empid = Auth::user()->empid;
         $bookids = [];
 
         // if ($request->filled('exdate') && $request->filled('end_exdate')) {
@@ -1098,20 +1137,62 @@ class HRController extends Controller
         //     ])->pluck('id');
         // }
 
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+        ->where('empid', $empid)
+        ->where('deleted',0)
+        ->where('step',9)
+        ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname')
+            ->filter()
+            ->unique()
+            ->values(); // BU ที่เจ้าของ login ดูแล
+
         $filterBu = $request->input('bu');
         $empids = null; // null = ไม่กรอง
 
-        // ถ้ามีการเลือก BU
-        if ($filterBu) {
-            // ค้นจาก users ก่อน
-            $empids = User::where('bu', $filterBu)->pluck('empid');
+        // // ถ้ามีการเลือก BU
+        // if ($filterBu) {
+        //     // ค้นจาก users ก่อน
+        //     $empids = User::where('bu', $filterBu)->pluck('empid');
 
-            // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
-            if ($empids->isEmpty()) {
-                $empids = Valldataemp::where('alias_name', $filterBu)
-                    ->where('STAEMP', '!=', 9)
-                    ->pluck('CODEMPID');
-            }
+        //     // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+        //     if ($empids->isEmpty()) {
+        //         $empids = Valldataemp::where('alias_name', $filterBu)
+        //             ->where('STAEMP', '!=', 9)
+        //             ->pluck('CODEMPID');
+        //     }
+        // }
+
+
+        if ($filterBu) {
+            // User search/เลือก BU
+            $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+            $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+                ->where('STAEMP', '!=', 9)
+                ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::where('bu', $filterBu)->pluck('empid');
+            $empids = $empidsFromUser
+                ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else if ($plantNames->isNotEmpty()) {
+            // ไม่ได้เลือก BU → default ตาม BU ที่ login ดูแล
+            $empidsFromUser = User::whereIn('bu', $plantNames)->pluck('empid');
+            $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
+                ->where('STAEMP', '!=', 9)
+                ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::whereIn('bu', $plantNames)->pluck('empid');
+            $empids = $empidsFromUser
+                ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else {
+            // เผื่อกรณี ไม่มี BU เลย
+            $empids = collect();
         }
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr', 'foods'])
@@ -1137,6 +1218,9 @@ class HRController extends Controller
             }, function ($q) {
                 // ถ้าไม่กรอกวันที่: ดึงย้อนหลัง 1 เดือน
                 $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+            })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
             })
             ->whereIn('extype', [1, 3])
             ->where('deleted', 0)

@@ -621,6 +621,7 @@ class ExpenseController extends Controller
 
         $empid = $expense->empid;
         $bu = BuEmp($empid);
+        // dd($bu);
         $level = 1;
         $empLevel = LevelEmp($empid);
         // dd($empLevel);
@@ -661,6 +662,7 @@ class ExpenseController extends Controller
                 $query->where('levelid', $level);
             })
             ->first();
+            // dd($groupplant);
         $passengertype = 0;
         if ($expense->vbooking->type_reserve == 4) {
             if ($empid == $expense->vbooking->passenger_empid) {

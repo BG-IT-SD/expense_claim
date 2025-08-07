@@ -10,8 +10,8 @@
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                                                                                                <h5>Default</h5>
-                                                                                            </div> -->
+                                                                                                    <h5>Default</h5>
+                                                                                                </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -92,7 +92,6 @@
 @endsection
 @section('csscustom')
     <style>
-
         .controls {
             margin-top: 10px;
             border: 1px solid transparent;
@@ -227,106 +226,17 @@
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step.js']) }}"></script>
 
     @if ($booking->type_reserve == 4)
-        <script>
-            let map, directionsService, directionsRenderer;
-            let autocompleteOrigin, autocompleteDestination;
-            let originPlace = null;
-            let destinationPlace = null;
-
-            function initMap() {
-                map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 13,
-                    center: {
-                        lat: 13.7563,
-                        lng: 100.5018
-                    }
-                });
-
-                directionsService = new google.maps.DirectionsService();
-                directionsRenderer = new google.maps.DirectionsRenderer({
-                    map: map
-                });
-
-                const originInput = document.getElementById("origin");
-                const destinationInput = document.getElementById("destination");
-
-                autocompleteOrigin = new google.maps.places.Autocomplete(originInput);
-                autocompleteDestination = new google.maps.places.Autocomplete(destinationInput);
-
-                autocompleteOrigin.setComponentRestrictions({
-                    country: ["th"]
-                });
-                autocompleteDestination.setComponentRestrictions({
-                    country: ["th"]
-                });
-
-                // ✅ เก็บชื่อสถานที่ (name) ลง input
-                autocompleteOrigin.addListener('place_changed', () => {
-                    originPlace = autocompleteOrigin.getPlace();
-                    document.getElementById("map_a_name").value = originPlace.name || originPlace.formatted_address;
-                });
-
-                autocompleteDestination.addListener('place_changed', () => {
-                    destinationPlace = autocompleteDestination.getPlace();
-                    document.getElementById("map_b_name").value = destinationPlace.name || destinationPlace
-                        .formatted_address;
-                });
-            }
-            // window.initMap = initMap;
+        <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/gmap.js']) }}"></script>
 
 
-            function calculateDistance() {
-                const originInput = document.querySelector('#origin input');
-                const destinationInput = document.querySelector('#destination input');
+        <!--Google Maps API -->
 
-                const originAddress = originPlace?.formatted_address || originInput?.value;
-                const destinationAddress = destinationPlace?.formatted_address || destinationInput?.value;
-
-                if (!originAddress || !destinationAddress) {
-                    alert("กรุณากรอกที่ตั้งต้นทางและปลายทางให้ครบ");
-                    return;
-                }
-
-
-                // document.getElementById("map_a_name").value = originAddress;
-                // document.getElementById("map_b_name").value = destinationAddress;
-
-
-                if (originPlace?.geometry?.location) {
-                    document.getElementById("latitude").value = originPlace.geometry.location.lat();
-                    document.getElementById("longitude").value = originPlace.geometry.location.lng();
-                }
-
-                if (destinationPlace?.geometry?.location) {
-                    document.getElementById("latitude_b").value = destinationPlace.geometry.location.lat();
-                    document.getElementById("longitude_b").value = destinationPlace.geometry.location.lng();
-                }
-
-                directionsService.route({
-                    origin: originAddress,
-                    destination: destinationAddress,
-                    travelMode: google.maps.TravelMode.DRIVING,
-                }, (result, status) => {
-                    if (status === "OK") {
-                        directionsRenderer.setDirections(result);
-
-                        const distanceValue = result.routes[0].legs[0].distance.value;
-                        const distanceText = result.routes[0].legs[0].distance.text;
-
-                        document.getElementById("distance").innerText = distanceText;
-                        const km = ((distanceValue / 1000) * 2).toFixed(2);
-                        document.getElementById("totaldistance_text").value = km;
-                        document.getElementById("totaldistance").value = km;
-                    } else {
-                        alert("ไม่สามารถคำนวณเส้นทางได้ กรุณาตรวจสอบชื่อสถานที่ให้ชัดเจน");
-                    }
-                });
-            }
-        </script>
-
-        <!-- โหลด Google Maps API -->
         <script async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABibhL6u-A5s_G40-9tKSBNqT5P6s_iKU&callback=initMap&libraries=places&v=weekly&language=th">
+            src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap&libraries=places&v=weekly&language=th">
         </script>
+        {{--
+<script async
+src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap&libraries=maps,marker,places&v=weekly&language=th&elements=1">
+</script> --}}
     @endif
 @endsection

@@ -20,11 +20,15 @@ class GroupSpecialImport implements ToModel, WithHeadingRow, WithValidation, Ski
     public function model(array $row)
     {
         try {
+            $empid = $row['empid'] ?? null;
+            $bu = BuEmp($empid) ?? '-';
+
             $user = GroupSpecial::create([
                 'typeid'   => $row['typeid'] ?? null,
-                'empid'    => $row['empid'] ?? null,
+                'empid'    => $empid,
                 'fullname' => $row['fullname'] ?? null,
                 'position' => $row['position'] ?? null,
+                'bu'       => $bu,
             ]);
 
             $this->importResults[] = [

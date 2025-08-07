@@ -89,6 +89,7 @@
                                 <tr>
                                     <th>Expense ID</th>
                                     <th>ID | NAME</th>
+                                    <th>BU</th>
                                     <th>Date Time</th>
                                     <th>Booking ID</th>
                                     <th>Location</th>
@@ -112,6 +113,7 @@
                                         <td>{{ $expense->prefix . $expense->id }}</td>
                                         <td class="text-wrap">
                                             {{ $empidToShow . ' | ' . ($fullnameFromUser ?? $fullnameFromGroup) }}</td>
+                                        <td>{{ BuEmp($empidToShow) }}</td>
                                         <td>{{ $booking->departure_date . ' - ' . $booking->return_date }}</td>
                                         <td>{{ $booking->id }}</td>
                                         <td>{{ $booking->location_name }}</td>
@@ -166,24 +168,5 @@
             });
         </script>
     @endif
-    {{-- <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/listexpense.js']) }}"></script> --}}
-    <script>
-        $(document).ready(function() {
-            $('#ExpenseList').DataTable({
-                processing: true,
-                order: [
-                    [2, 'desc']
-                ],
-                lengthMenu: [5, 10, 25, 50, 75, 100],
-            });
-
-            $ ('#exdate').flatpickr ({
-                monthSelectorType: 'static',
-            });
-
-            $ ('#end_exdate').flatpickr ({
-                monthSelectorType: 'static',
-            });
-        });
-    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/tech/listexpense.js']) }}"></script>
 @endsection
