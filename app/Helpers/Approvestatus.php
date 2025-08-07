@@ -132,8 +132,14 @@ if (!function_exists('BuEmp')) {
         $code9 = substr($user?->CODCOMP, 0, 9);
         if($bu == 'BGC')
         {
+        if(in_array($code9, ['011010170', '011010120','011010140','011010150','011010180'])){
+
             $company = Msbu::where('code', $code9)->first();
             $last_bu = $company?->company;
+        }else{
+            $last_bu = 'BGC';
+        }
+
         }else{
 
             $last_bu = $bu;
