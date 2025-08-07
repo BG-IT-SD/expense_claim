@@ -262,7 +262,7 @@ class ExpenseController extends Controller
 
         // $headempid = "66000510";
         // $headlevel = "10";
-        // $heademail = "kamolwan.b@bgiglass.com";
+        $heademail = "suthida.s@bgiglass.com";
         // $headname = "กมลวรรณ บรรชา";
 
         $loopCount = 0;
@@ -276,7 +276,7 @@ class ExpenseController extends Controller
                 // เจอหัวหน้าที่ level >= 10 — เก็บข้อมูลและหยุด loop
                 $headempid = $currentEmpId;
                 $headlevel = $currentLevel;
-                $heademail = $response['head_email'] ?? "";
+                // $heademail = $response['head_email'] ?? "";
                 $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
                 break;
             }

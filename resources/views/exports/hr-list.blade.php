@@ -86,6 +86,7 @@
                 } else {
                     $location = $booking->locationbu;
                 }
+                // dd(BuEmp($expense->empid));
             @endphp
             <tr>
                 {{-- <td align="center">{{ $i + 1 }}</td> --}}
@@ -98,7 +99,7 @@
                 <td>{{ $booking->title ?? '' }}</td>
                 <td>{{ $booking->bu ?? '' }}</td>
                 <td>{{ $location ?? '' }}</td>
-                <td>{{ BuEmp($expense->empid) }}</td>
+                <td>{{ BuEmp($expense->empid) }} </td>
                 <td>'{{ $expense->empid }}</td>
                 <td>{{ $fullName }}</td>
                 <td>{{ $expense->userhr->DEPT ?? '-' }}</td>

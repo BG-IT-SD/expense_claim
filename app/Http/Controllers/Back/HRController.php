@@ -1169,24 +1169,24 @@ class HRController extends Controller
         if ($filterBu) {
             // User search/เลือก BU
             $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
-            $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
-                ->where('STAEMP', '!=', 9)
-                ->pluck('CODEMPID');
+            // $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
             $empidsFromGroupspecial = GroupSpecial::where('bu', $filterBu)->pluck('empid');
             $empids = $empidsFromUser
-                ->merge($empidsFromValldataemp)
+                // ->merge($empidsFromValldataemp)
                 ->merge($empidsFromGroupspecial)
                 ->unique()
                 ->values();
         } else if ($plantNames->isNotEmpty()) {
             // ไม่ได้เลือก BU → default ตาม BU ที่ login ดูแล
             $empidsFromUser = User::whereIn('bu', $plantNames)->pluck('empid');
-            $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
-                ->where('STAEMP', '!=', 9)
-                ->pluck('CODEMPID');
+            // $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
             $empidsFromGroupspecial = GroupSpecial::whereIn('bu', $plantNames)->pluck('empid');
             $empids = $empidsFromUser
-                ->merge($empidsFromValldataemp)
+                // ->merge($empidsFromValldataemp)
                 ->merge($empidsFromGroupspecial)
                 ->unique()
                 ->values();
