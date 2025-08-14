@@ -18,6 +18,7 @@ class AccountController extends Controller
 {
     public function index(Request $request)
     {
+        $plantNames = '';
         $empid = Auth::user()->empid;
         // พนักงานที่ login และโรงงานที่เขาดูแล
         $staff = Accountstep::with(['plantSettingDetails.plant'])
@@ -33,6 +34,8 @@ class AccountController extends Controller
             return ['id' => $id, 'name' => $name];
         })
         ->values();
+
+        // dd($plantNames);
 
         // $plantIds = $plantNames->pluck('id')->toArray();
         $plantIds = ($plantNames ?? collect())->pluck('id')->toArray();
@@ -62,7 +65,7 @@ class AccountController extends Controller
 
             $plants = Plant::where('status', 1)->where('deleted', 0)->get();
 
-        return view('back.account.index', compact('exgroups','plants'));
+        return view('back.account.index', compact('exgroups','plants','plantNames'));
     }
 
     public function manage($id)
