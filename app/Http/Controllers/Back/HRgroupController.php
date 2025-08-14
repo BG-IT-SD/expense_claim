@@ -164,6 +164,7 @@ class HRgroupController extends Controller
                     $create->step = $step;
                     $create->group = $groupID;
                     $update->status = 0;
+                     $update->deleted = 1;
                     $create->save();
                 }else{
                     $update->status = 1;
