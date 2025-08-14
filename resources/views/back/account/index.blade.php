@@ -55,11 +55,12 @@
                                         <div class="col-sm-9">
                                             <select name="bu" id="bu" class="form-select">
                                                 <option value="" disabled selected>-- เลือกBU --</option>
-                                                @foreach ($plants as $key => $plant)
-                                                <option value="{{ $plant->plantname }}">
-                                                    {{ $plant->plantname }}
-                                                </option>
-                                            @endforeach
+                                                @foreach ($plantNames as $plant)
+                                                    <option value="{{ $plant['id'] }}"
+                                                        {{ (string) $plant['id'] === (string) old('bu', $selectedBu ?? '') ? 'selected' : '' }}>
+                                                        {{ $plant['name'] }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -74,7 +75,8 @@
                                             <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span></button>
-                                            <a href="{{ route('Account.index') }}" class="btn btn-outline-secondary">Reset</a>
+                                            <a href="{{ route('Account.index') }}"
+                                                class="btn btn-outline-secondary">Reset</a>
                                         </div>
                                     </div>
                                 </div>
@@ -114,10 +116,14 @@
                                         <td>{{ $exgroup->id }}</td>
                                         <td>{{ $exgroup->plantname }}</td>
                                         <td>{{ \Carbon\Carbon::parse($exgroup->groupdate)->format('d/m/Y') }}</td>
-                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}</td>
-                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfood, 2) : number_format($exgroup->totalfood, 2) }}</td>
-                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalfuel, 2) : number_format($exgroup->totalfuel, 2)}}</td>
-                                        <td>{{ isset($exgroup->nettotal)  ? number_format($exgroup->nettotalother, 2) : number_format($exgroup->totalother, 2) }}</td>
+                                        <td>{{ isset($exgroup->nettotal) ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}
+                                        </td>
+                                        <td>{{ isset($exgroup->nettotal) ? number_format($exgroup->nettotalfood, 2) : number_format($exgroup->totalfood, 2) }}
+                                        </td>
+                                        <td>{{ isset($exgroup->nettotal) ? number_format($exgroup->nettotalfuel, 2) : number_format($exgroup->totalfuel, 2) }}
+                                        </td>
+                                        <td>{{ isset($exgroup->nettotal) ? number_format($exgroup->nettotalother, 2) : number_format($exgroup->totalother, 2) }}
+                                        </td>
                                         <td>{{ $exgroup->finaluser->fullname }}</td>
                                         <td>
                                             @if (!is_null($exgroup->typeapprove))
@@ -130,16 +136,16 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if($exgroup->statusapprove == 0)
+                                            @if ($exgroup->statusapprove == 0)
                                                 <a href="{{ route('Account.manage', $exgroup->id) }}" target="_blank"
                                                     class="btn btn-sm btn-primary">
                                                     <span class="mdi mdi-file-document-edit"></span> จัดการข้อมูล
                                                 </a>
                                             @else
-                                            <a href="{{ route('Account.view', $exgroup->id) }}" target="_blank"
-                                                class="btn btn-sm btn-info">
-                                                <span class="mdi mdi-eye-arrow-right-outline"></span> View
-                                            </a>
+                                                <a href="{{ route('Account.view', $exgroup->id) }}" target="_blank"
+                                                    class="btn btn-sm btn-info">
+                                                    <span class="mdi mdi-eye-arrow-right-outline"></span> View
+                                                </a>
                                             @endif
 
                                         </td>
@@ -155,28 +161,28 @@
     </div>
 @endsection
 @section('jscustom')
-@if (session('message'))
-<script>
-    Swal.fire({
-        title: {!! json_encode(session('message')) !!}, // ป้องกัน Error ใน JavaScript
-        icon: {!! json_encode(session('class')) !!},
-        customClass: {
-            confirmButton: 'btn btn-primary waves-effect waves-light'
-        },
-        buttonsStyling: false
-    });
-</script>
-@endif
-<script>
-    $(document).ready(function() {
-        $ ('#exdate').flatpickr ({
-        monthSelectorType: 'static',
-      });
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!}, // ป้องกัน Error ใน JavaScript
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+    <script>
+        $(document).ready(function() {
+            $('#exdate').flatpickr({
+                monthSelectorType: 'static',
+            });
 
-      $ ('#end_exdate').flatpickr ({
-        monthSelectorType: 'static',
-      });
+            $('#end_exdate').flatpickr({
+                monthSelectorType: 'static',
+            });
 
-    });
-</script>
+        });
+    </script>
 @endsection
