@@ -153,12 +153,12 @@ class ApproveController extends Controller
             // ✅ หากอนุมัติสำเร็จ สร้าง approve ถัดไป
             if ($approve->statusapprove === 1) {
 
-                // $nextempid = $request->input('nextempid');
-                // $nextemail = $request->input('nextemail');
-                // $nextfullname = $request->input('nextfullname');
-                $nextempid = '66000510';
-                $nextemail = 'kamolwan.b@bgiglass.com';
-                $nextfullname = 'กมลวรรณ บรรชา';
+                $nextempid = $request->input('nextempid');
+                $nextemail = $request->input('nextemail');
+                $nextfullname = $request->input('nextfullname');
+                // $nextempid = '66000510';
+                // $nextemail = 'kamolwan.b@bgiglass.com';
+                // $nextfullname = 'กมลวรรณ บรรชา';
                 // ตั้งค่าข้อมูลผู้อนุมัติถัดไป (HR ผุู้จัดการฝ่าย)
                 if ($approve->typeapprove == 2) {
                     $nextType = 1;
@@ -269,8 +269,8 @@ class ApproveController extends Controller
         } else {
             $nextempid = $nextstaffgroup->empid ?? '';
             $nextfullname = $nextstaffgroup->fullname ?? '';
-            // $nextemail = $nextstaffgroup->email ?? '';
-            $nextemail = 'Kamolwan.b@bgiglass.com';
+            $nextemail = $nextstaffgroup->email ?? '';
+            // $nextemail = 'Kamolwan.b@bgiglass.com';
         }
 
         return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail'));

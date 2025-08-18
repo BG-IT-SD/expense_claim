@@ -77,8 +77,8 @@ class HeadApprovedController extends Controller
                 if ($action === 'approve' && isset($types[$index]) && $types[$index] == 2) {
 
                     $nextempid = $nextEmpIds[$index] ?? null;
-                    // $nextemail = $nextEmails[$index] ?? null;
-                    $nextemail = 'Kamolwan.b@bgiglass.com';
+                    $nextemail = $nextEmails[$index] ?? null;
+                    // $nextemail = 'Kamolwan.b@bgiglass.com';
                     $nextfullname = $nextFullnames[$index] ?? null;
                     $token = Str::random(64);
                     $nextApprove = Approve::create([
@@ -219,12 +219,12 @@ class HeadApprovedController extends Controller
         $bu = BuEmp($driver_empid);
         $nextStepApprove = Approvestep($bu, 1, 1);
 
-        // $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
+        $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
         $finalHNameNext = $nextStepApprove['fullname'] ?? '';
-        // $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
         // $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        // $finalIdNext = '66000510';
 
         $startDate = $Alldayfood->first();
         $endDate = $Alldayfood->last();

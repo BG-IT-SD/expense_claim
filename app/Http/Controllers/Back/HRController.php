@@ -433,12 +433,12 @@ class HRController extends Controller
         $bu = BuEmp($driver_empid);
         $nextStepApprove = Approvestep($bu, 1, 1);
 
-        // $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
+        $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
         $finalHNameNext = $nextStepApprove['fullname'] ?? '';
-        // $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
-        $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
         // $finalHNameNext = 'กมลวรรณ บรรชา';
-        $finalIdNext = '66000510';
+        // $finalIdNext = '66000510';
 
         $startDate = $Alldayfood->first();
         $endDate = $Alldayfood->last();
@@ -1033,8 +1033,8 @@ class HRController extends Controller
                     'exgroup' => $exgroupId
                 ]);
             }
-            // $nextmail = $request->nextemail;
-            $nextmail = 'Kamolwan.b@bgiglass.com';
+            $nextmail = $request->nextemail;
+            // $nextmail = 'Kamolwan.b@bgiglass.com';
             // 3. Insert approve (typeapprove = 4)
             $token = Str::random(64);
             foreach ($request->expense_id as $exid) {

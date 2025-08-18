@@ -45,6 +45,7 @@ class RoleController extends Controller
             $create->modulename = $request->modulename;
             $create->status = $request->status;
             $create->created_by = Auth::id();
+            $model_name = 'Module';
         } else {
             $request->validate([
                 'rolename' => 'required',
@@ -56,10 +57,23 @@ class RoleController extends Controller
             $create->rolename = $request->rolename;
             $create->status = $request->status;
             $create->created_by = Auth::id();
+            $model_name = 'Role';
         }
 
         try {
+
             $create->save();
+            $logData = [
+                'data'      => $create->toArray(),
+                'id'  => $create->id,
+            ];
+            logAction(
+                'add',
+                $model_name,
+                'บันทึกหน้าจอการทำงาน ' . $create->id,
+                json_encode($logData)
+            );
+
             return redirect()->route('Role.index')->with([
                 'message' => 'บันทึกข้อมูลสำเร็จ',
                 'class' => 'success',
@@ -112,6 +126,8 @@ class RoleController extends Controller
             $update->modulename = $request->modulename;
             $update->status = $request->status;
             $update->modified_by = Auth::id();
+
+             $model_name = 'Module';
         } else {
             $request->validate([
                 'rolename' => 'required',
@@ -123,10 +139,24 @@ class RoleController extends Controller
             $update->rolename = $request->rolename;
             $update->status = $request->status;
             $update->modified_by = Auth::id();
+
+             $model_name = 'Role';
         }
 
         try {
             $update->save();
+
+             $logData = [
+                'data'      => $update->toArray(),
+                'id'  => $id,
+            ];
+            logAction(
+                'update',
+                 $model_name,
+                'แก้ไขหน้าจอการทำงาน ' . $id,
+                json_encode($logData)
+            );
+
             return redirect()->route('Role.index')->with([
                 'message' => 'แก้ไขข้อมูลสำเร็จ',
                 'class' => 'success',
@@ -144,11 +174,14 @@ class RoleController extends Controller
      */
     public function destroy(string $id, $type)
     {
+        $model_name = '';
         // dd($type);
         if ($type == 1) {
             $delete = Module::findOrFail($id);
+            $model_name = 'Module';
         } else {
             $delete = Role::findOrFail($id);
+             $model_name = 'Role';
         }
         $delete->status = 0;
         $delete->deleted = 1;
@@ -158,6 +191,18 @@ class RoleController extends Controller
 
         try {
             $delete->save();
+
+            $logData = [
+                'data'      => $delete->toArray(),
+                'id'  => $delete->id,
+            ];
+            logAction(
+                'delete',
+                $model_name,
+                'ลบหน้าจอการทำงาน ' . $delete->id,
+                json_encode($logData)
+            );
+
             return response()->json(['message' => 'ลบข้อมูลเรียบร้อยแล้ว', 'class' => 'success'], 200);
         } catch (\Throwable $th) {
             // throw $th;
