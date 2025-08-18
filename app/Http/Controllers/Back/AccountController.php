@@ -177,7 +177,7 @@ class AccountController extends Controller
                             ];
                             // $Tomail
                             MailHelper::sendExternalMail(
-                                'Kamolwan.b@bgiglass.com', // ผู้รับ
+                                $Tomail, // ผู้รับ
                                 'แจ้งผลการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่จากบัญชี',
                                 'mails.accounthold', // ชื่อ blade view mail
                                 $data,
