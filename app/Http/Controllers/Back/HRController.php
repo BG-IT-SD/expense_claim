@@ -570,7 +570,12 @@ class HRController extends Controller
         $passengertype = 0;
         if ($expense->vbooking->type_reserve == 4) {
             if ($empid == $expense->vbooking->passenger_empid) {
-                $passengertype = 1;
+                // $passengertype = 1;
+                  if($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id){
+                    $passengertype = 0;
+                }else{
+                    $passengertype = 1;
+                }
             }
         }
 

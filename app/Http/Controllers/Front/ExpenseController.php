@@ -161,6 +161,8 @@ class ExpenseController extends Controller
         if (!$booking) {
             return redirect()->back()->with('error', 'ไม่พบข้อมูลการจอง');
         }
+
+        // dd($booking);
         // $empid = Auth::user()->empid;
         // $empemail = Auth::user()->email;
         // $empfullname = Auth::user()->fullname;
@@ -238,8 +240,11 @@ class ExpenseController extends Controller
         $startTime = Carbon::parse($booking->departure_time);
         $endTime = Carbon::parse($booking->return_time);
 
+
+
         // Loop by day (you can change the interval to '1 week', '1 month', etc.)
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+
 
         // // หัวหน้างานอนุมัติ
         // ดึง JSON จากลิงก์ API
@@ -306,7 +311,12 @@ class ExpenseController extends Controller
 
             // ตรวจสอบ ผู้ร่วมเดินทาง
             if ($empid == $booking->passenger_empid) {
-                $passengertype = 1;
+                if($booking->passenger_empid == $booking->booking_emp_id){
+                    $passengertype = 0;
+                }else{
+                    $passengertype = 1;
+                }
+
             }
 
             $travelDate = Carbon::parse($booking->departure_date)->startOfDay();
@@ -357,10 +367,8 @@ class ExpenseController extends Controller
             $bath_per_km = $rate->bathperkm;
             $oilid = $oilPriceID;
         }
-
-
-
-
+        // dd($booking);
+        // dd($passengertype);
 
         if ($empid != "") {
             if ($typegroup == 1) {
@@ -606,6 +614,7 @@ class ExpenseController extends Controller
     public function show(string $id)
     {
         // ส่งตัวแปรบอกว่าเป็นหน้า view
+        $bu = "";
         $isView = 0;
         $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
         // Plant
@@ -666,8 +675,14 @@ class ExpenseController extends Controller
         $passengertype = 0;
         if ($expense->vbooking->type_reserve == 4) {
             if ($empid == $expense->vbooking->passenger_empid) {
-                $passengertype = 1;
+                // $passengertype = 1;
+                if($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id){
+                    $passengertype = 0;
+                }else{
+                    $passengertype = 1;
+                }
             }
+
         }
 
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
