@@ -48,8 +48,8 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         $user = User::where('empid', $credentials['empid'])
-                ->where('status', 1) // Only allow active users
-                ->first();
+            ->where('status', 1) // Only allow active users
+            ->first();
 
         if (!$user) {
             return back()->withErrors(['empid' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อฝ่ายสนับสนุน']);
@@ -58,7 +58,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            $vAllemp = Valldataemp::where('CODEMPID',Auth::user()->empid)->first();
+            $vAllemp = Valldataemp::where('CODEMPID', Auth::user()->empid)->first();
             // Set user level to session
             session(['level' => $vAllemp->NUMLVL]);
             // Store user login cookie for 2 days (2880 minutes)
@@ -115,7 +115,7 @@ class AuthController extends Controller
                 'required',
                 Rule::unique('users')->where(function ($query) {
                     return $query->where('deleted', 0)
-                                 ->where('status', 1);
+                        ->where('status', 1);
                 }),
             ],
             'password' => 'required|min:6',
@@ -130,15 +130,21 @@ class AuthController extends Controller
             ->where('STAEMP', '!=', '9')
             ->first();
 
-            // Check BGC BY BG
-            $bu = $DetailEmp?->alias_name;
-            $code9 = substr($DetailEmp?->CODCOMP, 0, 9);
-            if($bu == 'BGC'){
+        // Check BGC BY BG
+        $bu = $DetailEmp?->alias_name;
+        $code9 = substr($DetailEmp?->CODCOMP, 0, 9);
+        if ($bu == 'BGC') {
+            if (in_array($code9, ['011010170', '011010120', '011010140', '011010150', '011010180'])) {
+
                 $company = Msbu::where('code', $code9)->first();
                 $last_bu = $company?->company;
-            }else{
-                $last_bu = $bu;
+            } else {
+                $last_bu = 'BGC';
             }
+        } else {
+
+            $last_bu = $bu;
+        }
 
         if ($DetailEmp) {
             User::create([
