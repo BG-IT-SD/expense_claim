@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\ExpenseFood;
 use App\Models\ExpenseLog;
 use App\Models\GroupSpecial;
+use App\Models\Tacking;
 use App\Models\Vbookingall;
 use App\Models\Vbookmanage;
 use Carbon\Carbon;
@@ -28,115 +29,254 @@ class DriverClaimController extends Controller
         return view('front.driver.list', compact('drivers'));
     }
 
-    public function history(Request $request){
+    public function history(Request $request)
+    {
 
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
 
-        $expenses = Expense::with(['latestApprove', 'vbooking','tech'])
-        ->whereHas('latestApprove', function ($query) use ($request) {
-            $query->whereIn('typeapprove', [1,3,4,5,6])
-                  ->when(
-                      $request->filled('status'),
-                      fn($q) => $q->where('statusapprove', $request->status)
-                  );
-        })
-        ->when(
-            $request->filled('exid'),
-            fn($q) =>
-            $q->where('id', $exid)
-        )
-        ->when(
-            $request->filled('drivers'),
-            fn($q) =>
-            $q->where('empid', $request->drivers)
-        )
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+            ->whereHas('latestApprove', function ($query) use ($request) {
+                $query->whereIn('typeapprove', [1, 3, 4, 5, 6])
+                    ->when(
+                        $request->filled('status'),
+                        fn($q) => $q->where('statusapprove', $request->status)
+                    );
+            })
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('drivers'),
+                fn($q) =>
+                $q->where('empid', $request->drivers)
+            )
 
-        ->whereIn('extype', [2])
-        ->get();
+            ->whereIn('extype', [2])
+            ->get();
 
         // Status
         $status = searchStatus();
         $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
 
         $page = 'DriverClaim.show';
-        return view('back.hr.historydv', compact('expenses','page','status','drivers'));
+        return view('back.hr.historydv', compact('expenses', 'page', 'status', 'drivers'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
+    // public function create(Request $request)
+    // {
+    //     $bookingIds = $request->input('booking_ids', []);
+    //     $bookings = Vbookmanage::whereIn('id', $bookingIds)->get();
+    //     $driver_empid = $bookings[0]->driver_empid ?? "";
+    //     $driver_name = $bookings[0]->driver_name ?? "";
+
+    //     // dd($driver_empid);
+
+    //     // เตรียมเวลาของแต่ละ booking แยกตามวันที่
+    //     $groupedTimeRanges = [];
+    //     $startdateData = "";
+    //     $enddateData = "";
+    //     foreach ($bookings as $booking) {
+
+    //         $bmIdForTrack = $booking->booking_manage_id ?? $booking->id;
+
+    //         $track = Tacking::where('booking_manage_id', $bmIdForTrack)
+    //             ->where('deleted', 0)
+    //             ->orderByDesc('id')
+    //             ->first();
+
+    //         $start = Carbon::parse($booking->departure_date . ' ' . $booking->departure_time);
+    //         $end = Carbon::parse($booking->return_date . ' ' . $booking->return_time);
+
+
+    //         for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+    //             $dayKey = $date->toDateString();
+
+
+    //             // เวลาเริ่มในวันนั้น
+    //             $startTime = $date->isSameDay($start) ? $start->copy() : $date->copy()->setTime(6, 0);
+    //             $endTime = $date->isSameDay($end) ? $end->copy() : $date->copy()->setTime(23, 59);
+
+    //             if (!isset($groupedTimeRanges[$dayKey])) {
+    //                 $groupedTimeRanges[$dayKey] = [
+    //                     'start' => $startTime,
+    //                     'end' => $endTime,
+    //                     'details' => [[
+    //                         'id' => $booking->id,
+    //                         'location_name' => $booking->location_name,
+    //                         'start' => $start,
+    //                         'end' => $end,
+    //                     ]],
+    //                 ];
+    //             } else {
+    //                 $groupedTimeRanges[$dayKey]['start'] = $startTime->lt($groupedTimeRanges[$dayKey]['start']) ? $startTime : $groupedTimeRanges[$dayKey]['start'];
+    //                 $groupedTimeRanges[$dayKey]['end'] = $endTime->gt($groupedTimeRanges[$dayKey]['end']) ? $endTime : $groupedTimeRanges[$dayKey]['end'];
+    //                 $groupedTimeRanges[$dayKey]['details'][] = [
+    //                     'id' => $booking->id,
+    //                     'location_name' => $booking->location_name,
+    //                 ];
+    //             }
+    //         }
+    //     }
+
+    //     // ✅ ดึงวันที่ที่มี booking จริง
+    //     $Alldayfood = collect();
+    //     if ($bookings->count()) {
+    //         $minDate = $bookings->min('departure_date');
+    //         $maxDate = $bookings->max('return_date');
+
+    //         for ($d = Carbon::parse($minDate); $d->lte(Carbon::parse($maxDate)); $d->addDay()) {
+    //             $Alldayfood->push($d->copy());
+    //         }
+    //     }
+
+    //     // ✅ ราคาต่อมื้อ
+    //     $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
+
+    //     // คนอนุมัติ
+    //     $bu = BuEmp($driver_empid);
+    //     $nextStepApprove = Approvestep($bu, 2, 1, 1);
+    //     $finalHEmailNext = $nextStepApprove["email"];
+    //     $finalHNameNext = $nextStepApprove["fullname"];
+    //     $finalIdNext = $nextStepApprove["empid"];
+    //     // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+    //     // $finalHNameNext = 'กมลวรรณ บรรชา';
+    //     // $finalIdNext = '66000510';
+
+    //     return view('front.driver.create', compact('bookings', 'driver_empid', 'driver_name', 'Alldayfood', 'groupedTimeRanges', 'prices', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext'));
+    // }
+
     public function create(Request $request)
     {
         $bookingIds = $request->input('booking_ids', []);
-        $bookings = Vbookmanage::whereIn('id', $bookingIds)->get();
-        $driver_empid = $bookings[0]->driver_empid ?? "";
-        $driver_name = $bookings[0]->driver_name ?? "";
+        $bookings   = Vbookmanage::whereIn('id', $bookingIds)->get();
 
-        // dd($driver_empid);
+        $first        = $bookings->first();
+        $driver_empid = $first->driver_empid ?? '';
+        $driver_name  = $first->driver_name ?? '';
 
-        // เตรียมเวลาของแต่ละ booking แยกตามวันที่
+        // สะสมช่วงเวลาไว้หา min/max ภายหลัง (รวม fallback แล้ว)
+        $allRanges         = collect();
         $groupedTimeRanges = [];
 
         foreach ($bookings as $booking) {
-            $start = Carbon::parse($booking->departure_date . ' ' . $booking->departure_time);
-            $end = Carbon::parse($booking->return_date . ' ' . $booking->return_time);
+            // --- หา record จากตาราง tacking เพื่อนำมา fallback ถ้าจำเป็น ---
+            $bmIdForTrack = $booking->booking_manage_id ?? $booking->id;
+            $track = Tacking::where('booking_manage_id', $bmIdForTrack)
+                ->where('deleted', 0)
+                ->orderByDesc('id')
+                ->first();
 
-            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            // --- สร้าง startDT / endDT แบบกันพัง ---
+            $hasBookStart = !empty($booking->departure_date) && !empty($booking->departure_time);
+            $hasBookEnd   = !empty($booking->return_date)    && !empty($booking->return_time);
+
+            $startDT = null;
+            $endDT   = null;
+
+            if ($hasBookStart) {
+                $startDT = Carbon::parse(trim($booking->departure_date . ' ' . $booking->departure_time));
+            } elseif ($track) {
+                if (!empty($track->departure_date) && !empty($track->departure_time)) {
+                    $startDT = Carbon::parse($track->departure_date . ' ' . $track->departure_time);
+                } elseif (!empty($track->departure_date)) {
+                    $startDT = Carbon::parse($track->departure_date);
+                }
+            }
+
+            if ($hasBookEnd) {
+                $endDT = Carbon::parse(trim($booking->return_date . ' ' . $booking->return_time));
+            } elseif ($track) {
+                if (!empty($track->return_date) && !empty($track->return_time)) {
+                    $endDT = Carbon::parse($track->return_date . ' ' . $track->return_time);
+                } elseif (!empty($track->return_date)) {
+                    $endDT = Carbon::parse($track->return_date);
+                }
+            }
+
+            // ถ้ายังไม่มี start/end ข้าม booking นี้ไป (ข้อมูลพิการ)
+            if (!$startDT || !$endDT) {
+                continue;
+            }
+
+            // เก็บช่วงเวลาเพื่อใช้คำนวณ Alldayfood ภายหลัง
+            $allRanges->push(['start' => $startDT->copy(), 'end' => $endDT->copy()]);
+
+            // --- แตกเป็นรายวันตาม logic ของมื้ออาหาร ---
+            for ($date = $startDT->copy()->startOfDay(); $date->lte($endDT->copy()->startOfDay()); $date->addDay()) {
                 $dayKey = $date->toDateString();
 
-                // เวลาเริ่มในวันนั้น
-                $startTime = $date->isSameDay($start) ? $start->copy() : $date->copy()->setTime(6, 0);
-                $endTime = $date->isSameDay($end) ? $end->copy() : $date->copy()->setTime(23, 59);
+                // เวลาเริ่ม/จบใน "วันนั้น"
+                $startTime = $date->isSameDay($startDT) ? $startDT->copy() : $date->copy()->setTime(6, 0);
+                $endTime   = $date->isSameDay($endDT)   ? $endDT->copy()   : $date->copy()->setTime(23, 59);
 
                 if (!isset($groupedTimeRanges[$dayKey])) {
                     $groupedTimeRanges[$dayKey] = [
-                        'start' => $startTime,
-                        'end' => $endTime,
+                        'start'   => $startTime,
+                        'end'     => $endTime,
                         'details' => [[
-                            'id' => $booking->id,
+                            'id'            => $booking->id,
                             'location_name' => $booking->location_name,
-                            'start' => $start,
-                            'end' => $end,
+                            'start'         => $startDT,
+                            'end'           => $endDT,
                         ]],
                     ];
                 } else {
-                    $groupedTimeRanges[$dayKey]['start'] = $startTime->lt($groupedTimeRanges[$dayKey]['start']) ? $startTime : $groupedTimeRanges[$dayKey]['start'];
-                    $groupedTimeRanges[$dayKey]['end'] = $endTime->gt($groupedTimeRanges[$dayKey]['end']) ? $endTime : $groupedTimeRanges[$dayKey]['end'];
+                    if ($startTime->lt($groupedTimeRanges[$dayKey]['start'])) {
+                        $groupedTimeRanges[$dayKey]['start'] = $startTime;
+                    }
+                    if ($endTime->gt($groupedTimeRanges[$dayKey]['end'])) {
+                        $groupedTimeRanges[$dayKey]['end'] = $endTime;
+                    }
                     $groupedTimeRanges[$dayKey]['details'][] = [
-                        'id' => $booking->id,
+                        'id'            => $booking->id,
                         'location_name' => $booking->location_name,
                     ];
                 }
             }
         }
 
-        // ✅ ดึงวันที่ที่มี booking จริง
+        // ✅ วันที่ที่มี booking จริง (คิดจากช่วงเวลาที่ซ่อมแล้ว รวม fallback)
         $Alldayfood = collect();
-        if ($bookings->count()) {
-            $minDate = $bookings->min('departure_date');
-            $maxDate = $bookings->max('return_date');
+        if ($allRanges->isNotEmpty()) {
+            $minDate = $allRanges->min(fn($r) => $r['start'])->copy()->startOfDay();
+            $maxDate = $allRanges->max(fn($r) => $r['end'])->copy()->startOfDay();
 
-            for ($d = Carbon::parse($minDate); $d->lte(Carbon::parse($maxDate)); $d->addDay()) {
+            for ($d = $minDate->copy(); $d->lte($maxDate); $d->addDay()) {
                 $Alldayfood->push($d->copy());
             }
         }
 
-        // ✅ ราคาต่อมื้อ
+        // ✅ ราคาต่อมื้อ (ปรับตามจริงของคุณ)
         $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
 
-        // คนอนุมัติ
-        $bu = BuEmp($driver_empid);
-        $nextStepApprove = Approvestep($bu, 2, 1, 1);
-        $finalHEmailNext = $nextStepApprove["email"];
-        $finalHNameNext = $nextStepApprove["fullname"];
-        $finalIdNext = $nextStepApprove["empid"];
-        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
-        // $finalHNameNext = 'กมลวรรณ บรรชา';
-        // $finalIdNext = '66000510';
+        // ✅ คนอนุมัติ (กันว่างด้วย null coalesce)
+        $bu               = BuEmp($driver_empid);
+        $nextStepApprove  = Approvestep($bu, 2, 1, 1);
+        $finalHEmailNext  = $nextStepApprove['email']    ?? '';
+        $finalHNameNext   = $nextStepApprove['fullname'] ?? '';
+        $finalIdNext      = $nextStepApprove['empid']    ?? '';
 
-        return view('front.driver.create', compact('bookings', 'driver_empid', 'driver_name', 'Alldayfood', 'groupedTimeRanges', 'prices', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext'));
+        return view(
+            'front.driver.create',
+            compact(
+                'bookings',
+                'driver_empid',
+                'driver_name',
+                'Alldayfood',
+                'groupedTimeRanges',
+                'prices',
+                'finalHEmailNext',
+                'finalHNameNext',
+                'finalIdNext'
+            )
+        );
     }
 
 
@@ -253,7 +393,7 @@ class DriverClaimController extends Controller
             }
 
             $token = Str::random(64);
-             Approve::create([
+            Approve::create([
                 'exid' => $expense->id,
                 'typeapprove' => 1, //ต้นสังกัด พขร อนุมัติ
                 'empid' => $request->head_id,
@@ -267,36 +407,36 @@ class DriverClaimController extends Controller
 
 
             DB::commit();
-             // Sent Mail
-             $allDates = collect($days)->pluck('date')->sort()->values();
-             $startDate = $allDates->first();
-             $endDate = $allDates->last();
+            // Sent Mail
+            $allDates = collect($days)->pluck('date')->sort()->values();
+            $startDate = $allDates->first();
+            $endDate = $allDates->last();
 
-             $startDateFormatted = Carbon::parse($startDate)->format('d/m/Y');
-             $endDateFormatted = Carbon::parse($endDate)->format('d/m/Y');
+            $startDateFormatted = Carbon::parse($startDate)->format('d/m/Y');
+            $endDateFormatted = Carbon::parse($endDate)->format('d/m/Y');
 
 
-             $link = route('approve.magic.login', ['token' => $token]);
-             $data = [
-                 'type' => 2,
-                 'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
-                 'name' => $request->head_name,
-                 'full_name' => $request->driver_name,
-                 'admintext' => 'Admin สำหรับเบิกเบี้ยเลี้ยงพนักงานขับรถบริษัท',
-                 'departuredate' => $startDateFormatted . ' - ' . $endDateFormatted,
-                 'link' => $link,
-             ];
+            $link = route('approve.magic.login', ['token' => $token]);
+            $data = [
+                'type' => 2,
+                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+                'name' => $request->head_name,
+                'full_name' => $request->driver_name,
+                'admintext' => 'Admin สำหรับเบิกเบี้ยเลี้ยงพนักงานขับรถบริษัท',
+                'departuredate' => $startDateFormatted . ' - ' . $endDateFormatted,
+                'link' => $link,
+            ];
 
-             MailHelper::sendExternalMail(
-                 $request->head_email,
-                 'อนุมัติการเบิกเบี้ยเลี้ยง',
-                 'mails.diverapprove', // ชื่อ blade view
-                 $data,
-                 'Expense Claim System EX' . $expense->id,
-             );
-             //End Sent Mail
+            MailHelper::sendExternalMail(
+                $request->head_email,
+                'อนุมัติการเบิกเบี้ยเลี้ยง',
+                'mails.diverapprove', // ชื่อ blade view
+                $data,
+                'Expense Claim System EX' . $expense->id,
+            );
+            //End Sent Mail
 
-             $logData = [
+            $logData = [
                 'expense'      => $expense->toArray(),
                 'foods'        => ExpenseFood::where('exid', $expense->id)->get()->toArray(),
                 'logs'         => ExpenseLog::where('exid', $expense->id)->get()->toArray(),
@@ -320,7 +460,7 @@ class DriverClaimController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id,$type = null)
+    public function show($id, $type = null)
     {
         $expense = Expense::with(['foods', 'logs', 'bookings'])->findOrFail($id);
 

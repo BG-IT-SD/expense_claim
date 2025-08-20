@@ -44,21 +44,21 @@
 
         {{-- Normal Approve --}}
         @if (isApprover())
-        <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons mdi mdi-file-check"></i>
-                <div data-i18n="การอนุมัติ">การอนุมัติ</div>
+            <li class="menu-item @if (Route::is('HeadApprove.index')) active open @endif ">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons mdi mdi-file-check"></i>
+                    <div data-i18n="การอนุมัติ">การอนุมัติ</div>
 
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @if (Route::is('HeadApprove.index')) active @endif">
-                    <a href="{{ route('HeadApprove.index') }}" class="menu-link">
-                        <div data-i18n="รายการขออนุมัติ">รายการขออนุมัติ</div>
-                        {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
-                    </a>
-                </li>
-            </ul>
-        </li>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @if (Route::is('HeadApprove.index')) active @endif">
+                        <a href="{{ route('HeadApprove.index') }}" class="menu-link">
+                            <div data-i18n="รายการขออนุมัติ">รายการขออนุมัติ</div>
+                            {{-- <div class="badge bg-danger rounded-pill ms-auto">5</div> --}}
+                        </a>
+                    </li>
+                </ul>
+            </li>
         @endif
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['Driver']) &&
@@ -251,7 +251,11 @@
                 <span class="menu-header-text" data-i18n="บัญชี">บัญชี</span>
             </li>
             <!-- Account -->
-            <li class="menu-item @if (Route::is('Account.index') || Route::is('Account.manage') || Route::is('Account.view') || Route::is('Account.listhold') || Route::is('Account.listapproved')) open @endif">
+            <li class="menu-item @if (Route::is('Account.index') ||
+                    Route::is('Account.manage') ||
+                    Route::is('Account.view') ||
+                    Route::is('Account.listhold') ||
+                    Route::is('Account.listapproved')) open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-currency-usd"></i>
                     <div data-i18n="บัญชี">บัญชี</div>
@@ -328,12 +332,10 @@
                     Route::is('HRgroup.edit') ||
                     Route::is('HRgroup.addlist') ||
                     Route::is('HRgroup.addplant') ||
-
-                     Route::is('ACgroup.index') ||
+                    Route::is('ACgroup.index') ||
                     Route::is('ACgroup.edit') ||
                     Route::is('ACgroup.addlist') ||
-                    Route::is('ACgroup.addplant')
-                    ) active open @endif">
+                    Route::is('ACgroup.addplant')) active open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-cog"></i>
                     <div data-i18n="Setting">Setting</div>
@@ -366,13 +368,19 @@
                         </a>
                     </li>
 
-                    <li class="menu-item @if (Route::is('HRgroup.index') || Route::is('HRgroup.edit') || Route::is('HRgroup.addlist')  || Route::is('HRgroup.addplant')) active @endif">
+                    <li class="menu-item @if (Route::is('HRgroup.index') ||
+                            Route::is('HRgroup.edit') ||
+                            Route::is('HRgroup.addlist') ||
+                            Route::is('HRgroup.addplant')) active @endif">
                         <a href="{{ route('HRgroup.index') }}" class="menu-link">
                             <div data-i18n="กลุ่มอนุมัติ HR">กลุ่มอนุมัติ HR</div>
                         </a>
                     </li>
 
-                    <li class="menu-item @if (Route::is('ACgroup.index') || Route::is('ACgroup.edit') || Route::is('ACgroup.addlist')  || Route::is('ACgroup.addplant')) active @endif">
+                    <li class="menu-item @if (Route::is('ACgroup.index') ||
+                            Route::is('ACgroup.edit') ||
+                            Route::is('ACgroup.addlist') ||
+                            Route::is('ACgroup.addplant')) active @endif">
                         <a href="{{ route('ACgroup.index') }}" class="menu-link">
                             <div data-i18n="กลุ่มอนุมัติ บัญชี">กลุ่มอนุมัติ บัญชี</div>
                         </a>
@@ -382,5 +390,40 @@
                 </ul>
             </li>
         @endif
+
+        <li class="menu-header fw-medium mt-4">
+            <span class="menu-header-text" data-i18n="User Manual">User Manual</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons mdi mdi-list-box-outline"></i>
+                <div data-i18n="คู่มือการใช้งาน">คู่มือการใช้งาน</div>
+
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                     <a href="{{ asset('storage/manuals/Expense_Claims_MU_BG_V0.2.pdf') }}"
+                        class="menu-link"
+                        target="_blank" rel="noopener">
+                        <div data-i18n="พนักงานทั่วไป">พนักงานทั่วไป</div>
+                    </a>
+                    <a href="{{ asset('storage/manuals/Expense_Claims_MU_HR_V0.2.pdf') }}"
+                        class="menu-link"
+                        target="_blank" rel="noopener">
+                        <div data-i18n="HR">HR</div>
+                    </a>
+                     <a href="{{ asset('storage/manuals/Expense_Claims_MU_AC_V0.2.pdf') }}"
+                        class="menu-link"
+                        target="_blank" rel="noopener">
+                        <div data-i18n="Account">Account</div>
+                    </a>
+                      <a href="{{ asset('storage/manuals/Expense_Claims_MU_Setting_V0.2.pdf') }}"
+                        class="menu-link"
+                        target="_blank" rel="noopener">
+                        <div data-i18n="Setting">Setting</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 </aside>
