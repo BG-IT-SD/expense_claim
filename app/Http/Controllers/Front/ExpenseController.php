@@ -270,26 +270,87 @@ class ExpenseController extends Controller
         // $heademail = "suthida.s@bgiglass.com";
         // $headname = "กมลวรรณ บรรชา";
 
-        $loopCount = 0;
-        $maxLoop = 5;
+        // $loopCount = 0;
+        // $maxLoop = 5;
 
-        while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
-            $currentEmpId = $response['head_emp_id'] ?? "";
-            $currentLevel = LevelEmp($currentEmpId);
+        // while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
+        //     $currentEmpId = $response['head_emp_id'] ?? "";
+        //     $currentLevel = LevelEmp($currentEmpId);
 
-            if ($currentLevel >= 10) {
-                // เจอหัวหน้าที่ level >= 10 — เก็บข้อมูลและหยุด loop
-                $headempid = $currentEmpId;
-                $headlevel = $currentLevel;
-                $heademail = $response['head_email'] ?? "";
-                $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        //     if ($currentLevel <= 10) {
+        //         // เจอหัวหน้าที่ level <= 10 — เก็บข้อมูลและหยุด loop
+        //         $headempid = $currentEmpId;
+        //         $headlevel = $currentLevel;
+        //         $heademail = $response['head_email'] ?? "";
+        //         $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        //         break;
+        //     }
+
+        //     // หาหัวหน้าคนถัดไป
+        //     $response = $this->getHeadEmp($currentEmpId);
+        //     $loopCount++;
+        // }
+        // เกณฑ์
+        $minLevel = 8;
+        $maxLevel = 10;
+
+        // ค่าเริ่มต้น
+        $headempid = $headlevel = $heademail = $headname = '';
+
+        // เริ่มจากหัวหน้าของพนักงานคนนี้
+        $response = $this->getHeadEmp($empid);
+
+        $maxLoop = 10;        // กันลูปยาว
+        $visited = [];        // กัน cycle
+        $best    = null;      // เก็บตัวเลือกที่อยู่ในช่วง [8..10] และใกล้ 10 ที่สุด
+
+        while (is_array($response) && ($response['code'] ?? null) === 200 && $maxLoop-- > 0) {
+            $id = $response['head_emp_id'] ?? null;
+            if (!$id || in_array($id, $visited, true)) {
+                break; // ไม่มี/ซ้ำ -> หยุด
+            }
+            $visited[] = $id;
+
+            $level = (int) (LevelEmp($id) ?? 0);
+
+            // ถ้าได้ 10 พอดี ใช้เลยและหยุด
+            if ($level === $maxLevel) {
+                $headempid = $id;
+                $headlevel = $level;
+                $heademail = $response['head_email'] ?? '';
+                $headname  = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
                 break;
             }
 
-            // หาหัวหน้าคนถัดไป
-            $response = $this->getHeadEmp($currentEmpId);
-            $loopCount++;
+            // ถ้าอยู่ในช่วง [8..10] เก็บเป็นตัวเลือกที่ใกล้ 10 ที่สุด
+            if ($level >= $minLevel && $level <= $maxLevel) {
+                if (!$best || $level > $best['level']) {
+                    $best = [
+                        'empid' => $id,
+                        'level' => $level,
+                        'email' => $response['head_email'] ?? '',
+                        'name'  => trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? '')),
+                    ];
+                }
+            }
+
+            // ถ้าเกิน 10 ไม่เอา และหยุด (ไล่ต่อไปก็ยิ่งสูง)
+            if ($level > $maxLevel) {
+                break;
+            }
+
+            // ไปหัวหน้าถัดไป
+            $response = $this->getHeadEmp($id);
         }
+
+        // ถ้าไม่เจอ 10 แต่มีตัวเลือกในช่วง [8..10] ให้ใช้ตัวที่ใกล้ 10 ที่สุด
+        if (empty($headempid) && $best) {
+            $headempid = $best['empid'];
+            $headlevel = $best['level'];
+            $heademail = $best['email'];
+            $headname  = $best['name'];
+        }
+
 
         // New Head
         //  dd($headempid);
@@ -311,12 +372,11 @@ class ExpenseController extends Controller
 
             // ตรวจสอบ ผู้ร่วมเดินทาง
             if ($empid == $booking->passenger_empid) {
-                if($booking->passenger_empid == $booking->booking_emp_id){
+                if ($booking->passenger_empid == $booking->booking_emp_id) {
                     $passengertype = 0;
-                }else{
+                } else {
                     $passengertype = 1;
                 }
-
             }
 
             $travelDate = Carbon::parse($booking->departure_date)->startOfDay();
@@ -671,18 +731,17 @@ class ExpenseController extends Controller
                 $query->where('levelid', $level);
             })
             ->first();
-            // dd($groupplant);
+        // dd($groupplant);
         $passengertype = 0;
         if ($expense->vbooking->type_reserve == 4) {
             if ($empid == $expense->vbooking->passenger_empid) {
                 // $passengertype = 1;
-                if($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id){
+                if ($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id) {
                     $passengertype = 0;
-                }else{
+                } else {
                     $passengertype = 1;
                 }
             }
-
         }
 
         $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
