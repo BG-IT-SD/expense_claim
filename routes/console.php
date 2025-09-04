@@ -9,4 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-Schedule::command('fuel:update')->dailyAt('05:30');
+// Schedule::command('fuel:update')->dailyAt('05:30');
+Schedule::command('fuel:update')->everyMinute();
