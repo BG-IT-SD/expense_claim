@@ -14,6 +14,7 @@ use App\Http\Controllers\Back\GroupspecialController;
 use App\Http\Controllers\Back\HRController;
 use App\Http\Controllers\Back\HRgroupController;
 use App\Http\Controllers\Back\ImportlistController;
+use App\Http\Controllers\Back\MessageController;
 use App\Http\Controllers\Back\PricepermealController;
 use App\Http\Controllers\Back\RoleController;
 use App\Http\Controllers\Back\TypegroupController;
@@ -266,6 +267,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             // Typegroup
             Route::resource('Typegroup', TypegroupController::class);
+
+            // Message
+            Route::resource('MessageAlert',MessageController::class);
 
             // Import
             Route::prefix('ImportList')->name('importlist.')->group(function () {

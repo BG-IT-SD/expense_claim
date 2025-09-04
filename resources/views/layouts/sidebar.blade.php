@@ -335,7 +335,7 @@
                     Route::is('ACgroup.index') ||
                     Route::is('ACgroup.edit') ||
                     Route::is('ACgroup.addlist') ||
-                    Route::is('ACgroup.addplant')) active open @endif">
+                    Route::is('ACgroup.addplant') || Route::is('MessageAlert.index')) active open @endif">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-cog"></i>
                     <div data-i18n="Setting">Setting</div>
@@ -386,6 +386,11 @@
                         </a>
                     </li>
 
+                    <li class="menu-item @if (Route::is('MessageAlert.index')) active  @endif">
+                        <a href="{{ route('MessageAlert.index') }}" class="menu-link">
+                            <div data-i18n="ข้อความแจ้งเตือน">ข้อความแจ้งเตือน</div>
+                        </a>
+                    </li>
 
                 </ul>
             </li>

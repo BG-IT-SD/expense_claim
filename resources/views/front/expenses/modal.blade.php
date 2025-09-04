@@ -5,13 +5,23 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           <div class="text-center mb-4">
             <h3 class="mb-3 block-title">แจ้งเตือน</h3>
-            {{-- <p class="block-description h4">***กรุณานำส่งเอกสารใบเสร็จ ค่าเดินทาง ค่าทางด่วน ฯลฯ
-              ฉบับจริงที่แผนกบัญชีภายใน 3 วันหลังจากทำการเบิก***</p> --}}
-                <p class="block-description h4">!!! กรุณานำส่งเอกสารใบเสร็จ ค่าเดินทาง </p>
-                <p class="block-description h4">ค่าทางด่วน ฯลฯ ฉบับจริง </p>
-                <p class="block-description h4">ที่แผนกบุคคล ภายใน 3 วัน</p>
-                <p class="block-description h4">หลังจากทำการเบิกในระบบ</p>
+
+              <div class="h4">
+                {!! $messageAlert->message !!}
+             </div>
+
           </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- <p class="block-description h4">***กรุณานำส่งเอกสารใบเสร็จ ค่าเดินทาง ค่าทางด่วน ฯลฯ
+              ฉบับจริงที่แผนกบัญชีภายใน 3 วันหลังจากทำการเบิก***</p> --}}
+                {{-- <p class="block-description h4">!!! กรุณานำส่งเอกสารใบเสร็จ ค่าเดินทาง <br>ค่าทางด่วน ฯลฯ ฉบับจริง <br> ที่แผนกบุคคล ภายใน 3 วัน <br>หลังจากทำการเบิกในระบบ</p> --}}
+
 
           {{-- <div class="block-item d-flex flex-wrap justify-content-between align-items-center mb-3 ps-4 py-3 px-3">
             <div class="block-plant me-3">
@@ -65,8 +75,3 @@
               </div>
             </div>
           </div> --}}
-
-        </div>
-      </div>
-    </div>
-  </div>

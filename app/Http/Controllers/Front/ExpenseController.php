@@ -29,6 +29,7 @@ use App\Models\Vbookingall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use App\Models\MessageAlert;
 
 class ExpenseController extends Controller
 {
@@ -430,9 +431,11 @@ class ExpenseController extends Controller
         // dd($booking);
         // dd($passengertype);
 
+        $messageAlert = MessageAlert::where('status',1)->where('deleted',0)->first();
+
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','messageAlert']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
