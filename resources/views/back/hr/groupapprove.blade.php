@@ -78,7 +78,7 @@
 
                                             </td>
                                             <td> {{ 'EX'.$expense->id }}</td>
-                                            <td>{{ $expense->vbooking->locationbu }}</td>
+                                            <td>{{ $expense->vbooking->display_location }}</td>
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>

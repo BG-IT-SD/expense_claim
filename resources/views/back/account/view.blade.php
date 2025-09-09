@@ -123,7 +123,7 @@
                                                 <td> {{ 'EX' . $expense->id }}
                                                     <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
                                                 </td>
-                                                <td>{{ $expense->vbooking->locationbu }}</td>
+                                                <td>{{ $expense->vbooking->display_location }}</td>
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}

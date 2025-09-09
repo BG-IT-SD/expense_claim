@@ -22,4 +22,11 @@ class Vbookingall extends Model
     //         })
     //         ->latestOfMany();
     // }
+
+    public function getDisplayLocationAttribute()
+    {
+        return $this->locationid == 12
+            ? $this->location_name
+            : $this->locationbu;
+    }
 }
