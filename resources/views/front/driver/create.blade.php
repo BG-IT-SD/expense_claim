@@ -45,16 +45,16 @@
                                             ->setTimeFromTimeString($groupedTimeRanges[$dayKey]['end']->format('H:i'));
                                     }
 
-                                    if ($from->hour < 8 || ($to->hour > 6 && $from->hour <= 8)) {
+                                    if ($from->hour < 8 || ($to->hour > 6 && $from->hour < 8)) {
                                         $mealchecked_1 = 'checked';
                                     }
-                                    if ($from->hour < 17 && $to->hour >= 8) {
+                                    if ($from->hour < 17 && $to->hour > 8) {
                                         $mealchecked_2 = 'checked';
                                     }
-                                    if ($from->hour < 23 && $to->hour >= 17) {
+                                    if ($from->hour < 23 && $to->hour > 17) {
                                         $mealchecked_3 = 'checked';
                                     }
-                                    if ($to->hour >= 21) {
+                                    if ($to->hour > 21) {
                                         $mealchecked_4 = 'checked';
                                     }
                                 @endphp

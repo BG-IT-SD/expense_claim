@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Helpers\MailHelper;
 use App\Models\FuelPrice91;
+use App\Models\MessageAlert;
 use App\Models\Vbookingall;
 
 class TechClaimController extends Controller
@@ -386,11 +387,13 @@ class TechClaimController extends Controller
         ->orderByDesc('startrate')
         ->get();
 
+        $messageAlert = MessageAlert::where('status',1)->where('deleted',0)->first();
+
     return view('front.techclaim.create', compact(
         'booking','empid','empemail','empfullname','typegroup','plants','ratefuels',
         'departure_date','return_date','reasons','totalDistance','groupplant','Alldayfood',
         'startDate','startTime','endDate','endTime','empLevel','headempid','headlevel',
-        'heademail','headname','approve_g','pageTech','passengertype','rate_id','data_oil_price','oilid','bath_per_km'
+        'heademail','headname','approve_g','pageTech','passengertype','rate_id','data_oil_price','oilid','bath_per_km','messageAlert'
     ));
 }
 
