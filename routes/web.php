@@ -5,6 +5,7 @@ use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Back\AccountController;
 use App\Http\Controllers\Back\ACGroupController;
+use App\Http\Controllers\Back\ApporveDriverController;
 use App\Http\Controllers\Back\DistanceRateController;
 use App\Http\Controllers\Back\ExportController;
 use App\Http\Controllers\Back\FuelPrice91Controller;
@@ -313,6 +314,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
                 Route::delete('delplant/{id}',[ACGroupController::class,'delPlant'])->name('delplant');
 
             });
+
+            Route::resource('DriverApprove',ApporveDriverController::class);
         });
 
     Route::get('/download-sample', function () {

@@ -38,7 +38,7 @@ class DriverClaimController extends Controller
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
             ->whereHas('latestApprove', function ($query) use ($request) {
-                $query->whereIn('typeapprove', [1, 3, 4, 5, 6])
+                $query->whereIn('typeapprove', [1,2, 3, 4, 5, 6])
                     ->when(
                         $request->filled('status'),
                         fn($q) => $q->where('statusapprove', $request->status)
@@ -395,7 +395,7 @@ class DriverClaimController extends Controller
             $token = Str::random(64);
             Approve::create([
                 'exid' => $expense->id,
-                'typeapprove' => 1, //ต้นสังกัด พขร อนุมัติ
+                'typeapprove' => 2, //หัวหน้าธุรการ
                 'empid' => $request->head_id,
                 'email' => $request->head_email ?? '',
                 'approvename' => $request->head_name ?? '',

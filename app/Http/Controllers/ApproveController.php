@@ -50,7 +50,8 @@ class ApproveController extends Controller
         $groupData = $groupapprove->groupapprove ?? 1;
         $extype = $expense->extype ?? 1;
 
-        if ($extype == 3) {
+        if ($extype == 2 || $extype == 3) {
+            // new extype 2
             if ($approve->typeapprove == 2) {
 
                 $nextStepApprove = Approvestep($bu, $extype, 2, $groupData);
