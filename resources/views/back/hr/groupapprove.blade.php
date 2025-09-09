@@ -118,7 +118,7 @@
                                             <input type="hidden" name="otherexpenses" value="{{ $sum_other ?? 0 }}">
                                         </td>
                                         <td>
-                                            {{ round($sum_total) }}
+                                            {{ number_format(round($sum_total), 2) }}
                                             <input type="hidden" name="total" value="{{ round($sum_total) ?? 0 }}">
                                             <input type="hidden" name="totalother" value="{{ $sumtotalother ?? 0 }}">
                                         </td>

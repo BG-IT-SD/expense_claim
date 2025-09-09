@@ -91,7 +91,7 @@
             <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_express, 2) }}"</strong></td>
             <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_publictransport, 2) }}"</strong></td>
             <td style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_other, 2) }}"</strong></td>
-            <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ round($sum_total) }}"</strong></td>
+            <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format(round($sum_total), 2) }}"</strong></td>
         </tr>
         <tr>
             <td colspan="18"></td>

@@ -137,7 +137,7 @@
                     <b>{{ number_format($sum_other, 2) }}</b></td>
                 <td
                     style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;">
-                    <b>{{ round($sum_total) }}</b></td>
+                    <b>{{ number_format(round($sum_total), 2) }}</b></td>
             </tr>
             {{-- <tr>
             <td colspan="18"></td>
