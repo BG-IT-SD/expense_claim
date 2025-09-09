@@ -134,7 +134,7 @@
             <td align="right">{{ number_format($sum_express, 2) }}</td>
             <td align="right">{{ number_format($sum_public, 2) }}</td>
             <td align="right">{{ number_format($sum_other, 2) }}</td>
-            <td align="right">{{ round($sum_total) }}</td>
+            <td align="right">{{ number_format(round($sum_total), 2) }}</td>
         </tr>
     </tbody>
 </table>

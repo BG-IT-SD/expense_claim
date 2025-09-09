@@ -78,7 +78,7 @@
 
                                             </td>
                                             <td> {{ 'EX'.$expense->id }}</td>
-                                            <td>{{ $expense->vbooking->locationbu }}</td>
+                                            <td>{{ $expense->vbooking->display_location }}</td>
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>
@@ -118,7 +118,7 @@
                                             <input type="hidden" name="otherexpenses" value="{{ $sum_other ?? 0 }}">
                                         </td>
                                         <td>
-                                            {{ round($sum_total) }}
+                                            {{ number_format(round($sum_total), 2) }}
                                             <input type="hidden" name="total" value="{{ round($sum_total) ?? 0 }}">
                                             <input type="hidden" name="totalother" value="{{ $sumtotalother ?? 0 }}">
                                         </td>

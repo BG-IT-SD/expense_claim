@@ -66,7 +66,7 @@
             @endphp
             <tr style="border: 1px solid #000">
                 <td style="text-align: center;border: 1px solid #000">{{ $i + 1 }}</td>
-                <td style="text-align: center;border: 1px solid #000">{{ $expense->vbooking->locationbu }}</td>
+                <td style="text-align: center;border: 1px solid #000">{{ $expense->vbooking->display_location }}</td>
                 <td style="text-align: center;border: 1px solid #000">{{ BuEmp($expense->empid) }}</td>
                 <td style="text-align: center;border: 1px solid #000">{{ $expense->empid }}</td>
                 <td style="text-align: center;border: 1px solid #000">{{ $fullname }}</td>
@@ -91,7 +91,7 @@
             <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_express, 2) }}"</strong></td>
             <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_publictransport, 2) }}"</strong></td>
             <td style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format($sum_other, 2) }}"</strong></td>
-            <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ round($sum_total) }}"</strong></td>
+            <td  style="text-align: right; vertical-align: middle;  text-decoration: underline;border: 1px solid #000;"><strong>="{{ number_format(round($sum_total), 2) }}"</strong></td>
         </tr>
         <tr>
             <td colspan="18"></td>

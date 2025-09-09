@@ -138,7 +138,7 @@
                                                 <td> {{ 'EX' . $expense->id }}
                                                     <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
                                                 </td>
-                                                <td>{{ $expense->vbooking->locationbu }}</td>
+                                                <td>{{ $expense->vbooking->display_location }}</td>
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}
@@ -196,7 +196,7 @@
 
                                             </td>
                                             <td>
-                                                {{ round($sum_total) }}
+                                                {{ number_format(round($sum_total),2) }}
 
                                             </td>
 
@@ -276,7 +276,7 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpenseNet">
-                                                    {{ round($exgroup->total) }}</span>
+                                                    {{ number_format(round($exgroup->total),2) }}</span>
                                                 <input type="hidden" name="nettotal" class="row-totalexNet"
                                                     data-id="{{ $expense->id }}"
                                                     value="{{ round($exgroup->total) }}">
