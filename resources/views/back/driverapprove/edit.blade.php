@@ -16,8 +16,9 @@
                     </div>
 
                     <div class="card-body pt-0">
-                        <form action="#" id="editListHR" method="POST">
+                        <form action="{{ route('DriverApprove.update',$id) }}" id="editListHR" method="POST">
                             @csrf
+                            @method('PUT')
                             <div class="row" id="content-check">
                                 <div class="col-md-12 mb-3">
                                     <div class="form-floating form-floating-outline">
@@ -36,7 +37,7 @@
                                 <div class="mt-3 text-center">
                                     <button type="submit"  class="btn btn-primary"><span
                                             class="mdi mdi-check-circle"></span> บันทึกข้อมูล</button>
-                                            <a href="{{ route('HRgroup.edit',$approveStaff->group) }}" class="btn btn-danger">กลับ</a>
+                                            <a href="{{ route('DriverApprove.index') }}" class="btn btn-danger">กลับ</a>
                                 </div>
                             </div>
                         </form>
