@@ -177,7 +177,7 @@ class HRgroupController extends Controller
 
                     $update->empid = $empid;
                     $update->email = $email;
-                    $update->fullname = $empname; // แก้จาก fuulname เป็น fullname
+                    $update->fullname = $empname;
                 }
 
                 if ($status != "") {
