@@ -54,8 +54,8 @@
                                             <th>รหัสพนักงาน</th>
                                             <th>ชื่อ – นามสกุล</th>
                                             {{-- <th>หน่วยงาน</th> --}}
-                                            {{-- <th>ระดับ</th>
-                                        <th>เลขบัญชี</th> --}}
+                                             <th>ระดับ</th>
+                                        {{--<th>เลขบัญชี</th> --}}
                                             <th>จากวันที่</th>
                                             <th>ถึงวันที่</th>
                                             <th>จำนวนวัน</th>
@@ -145,8 +145,8 @@
                                                     <input type="hidden" name="fullname[]" value="{{ $fullname }}">
                                                 </td>
                                                 {{-- <td>{{ $expense->userhr->DEPT ?? '-' }}</td> --}}
-                                                {{-- <td>{{ $expense->userhr->NUMLVL ?? '-' }}</td>
-                                            <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td> --}}
+                                                <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
+                                            {{-- <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td> --}}
                                                 <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
@@ -172,7 +172,7 @@
                                         @endforeach
 
                                         <tr class="table-warning fw-bold">
-                                            <td colspan="9">รวม</td>
+                                            <td colspan="10">รวม</td>
                                             <td>{{ number_format($sum_food, 2) }}
 
                                             </td>

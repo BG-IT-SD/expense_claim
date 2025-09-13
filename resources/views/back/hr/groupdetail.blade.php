@@ -99,7 +99,7 @@
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>
                                             <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
-                                            <td>{{ $expense->userhr->NUMLVL ?? '-' }}</td>
+                                            <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                             <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                                             <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
                                             </td>
@@ -217,16 +217,6 @@
                         <div class="row text-center mt-5">
                             <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
 
-                                <h5 class="card-header">ผู้จัดทำ</h5>
-                                <div class="card-body">
-                                    <h5><span class="badge rounded-pill bg-primary"> {{ $create_by }}</span></h5>
-                                    <hr>
-                                    HR
-                                </div>
-
-                            </div>
-                            <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
-
                                 <h5 class="card-header">ผู้ตรวจสอบ</h5>
                                 <div class="card-body">
                                     <h5><span class="badge rounded-pill bg-primary">{{ $checked_by }}</span></h5>
@@ -235,9 +225,20 @@
                                 </div>
 
                             </div>
+                             <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
+
+                                <h5 class="card-header">ผู้อนุมัติ 1</h5>
+                                <div class="card-body">
+                                    <h5><span class="badge rounded-pill bg-primary">{{ $nextuser }}</span>
+                                    </h5>
+                                    <hr>
+                                    HR
+                                </div>
+
+                            </div>
                             <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
 
-                                <h5 class="card-header">ผู้อนุมัติ</h5>
+                                <h5 class="card-header">ผู้อนุมัติ 2</h5>
                                 <div class="card-body">
                                     <h5><span class="badge rounded-pill bg-primary">{{ $finaluser }}</span>
                                     </h5>

@@ -90,13 +90,17 @@
                                                     <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
 
                                                 </td>
-                                                <td> {{ 'EX' . $expense->id }}</td>
+                                                <td> {{ 'EX' . $expense->id }}
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                </td>
                                                 <td>{{ $expense->vbooking->locationbu }}</td>
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}</td>
                                                 <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
-                                                <td>{{ $expense->userhr->NUMLVL ?? '-' }}</td>
+                                                <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                                 <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
                                                 </td>
