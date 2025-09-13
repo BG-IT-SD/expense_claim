@@ -168,21 +168,21 @@
         <tbody>
             <tr>
                 <td colspan="6"></td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;"><b>ผู้จัดทำ</b></td>
                 <td colspan="2" style="border: 1px solid #000; text-align: center;"><b>ผู้ตรวจสอบ</b></td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;"><b>ผู้อนุมัติ</b></td>
                 <td colspan="2" style="border: 1px solid #000; text-align: center;"><b>ผู้อนุมัติ</b></td>
                 <td colspan="6"></td>
             </tr>
             <tr style="height: 40px;">
                 <td colspan="6"></td>
                 <td colspan="2" style="border: 1px solid #000; height: 40px; text-align: center;">
-                    @if (!empty($signatures['created']) && file_exists(public_path("storage/{$signatures['created']}")))
-                        <img src="{{ public_path("storage/{$signatures['created']}") }}" style="height: 40px;">
+                    @if (!empty($signatures['checked']) && file_exists(public_path("storage/{$signatures['checked']}")))
+                        <img src="{{ public_path("storage/{$signatures['checked']}") }}" style="height: 40px;">
                     @endif
                 </td>
                 <td colspan="2" style="border: 1px solid #000; text-align: center;">
-                    @if (!empty($signatures['checked']) && file_exists(public_path("storage/{$signatures['checked']}")))
-                        <img src="{{ public_path("storage/{$signatures['checked']}") }}" style="height: 40px;">
+                    @if (!empty($signatures['nextapproved']) && file_exists(public_path("storage/{$signatures['nextapproved']}")))
+                        <img src="{{ public_path("storage/{$signatures['nextapproved']}") }}" style="height: 40px;">
                     @endif
                 </td>
                 <td colspan="2" style="border: 1px solid #000; text-align: center;">
@@ -194,9 +194,9 @@
             </tr>
             <tr>
                 <td colspan="6"></td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->checkempid) }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->nextmpid) }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->finalempid) }}</td>
                 <td colspan="6"></td>
             </tr>
         </tbody>

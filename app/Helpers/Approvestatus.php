@@ -338,3 +338,15 @@ if (!function_exists('searchStatus')) {
         return $statusList;
     }
 }
+
+if (!function_exists('HRPosition')) {
+    function HRPosition($empid)
+    {
+        $user = Valldataemp::where('CODEMPID', $empid)
+            ->where('STAEMP', '!=', '9')
+            ->first();
+        $position = $user?->POSITIONNAME ?? "";
+
+        return  $position;
+    }
+}
