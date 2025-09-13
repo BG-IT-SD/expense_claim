@@ -29,6 +29,7 @@ class ExportController extends Controller
                 'created' => Sigfile::where('empid', $exgroup->CreatedBy->empid)->value('path'),
                 'checked' => Sigfile::where('empid', $exgroup->checkempid)->value('path'),
                 'approved' => Sigfile::where('empid', $exgroup->finalempid)->value('path'),
+                'nextapproved' => Sigfile::where('empid', $exgroup->nextmpid)->value('path'),
             ];
 
             $exdate = $exgroup->groupdate;

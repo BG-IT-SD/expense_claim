@@ -76,13 +76,13 @@ class GroupExport implements FromView, WithStyles, WithDrawings
     //     return $drawings;
     // }
 
-     /** นับแถวตาม filter เดียวกับ view() */
+    /** นับแถวตาม filter เดียวกับ view() */
     private function expensesCount(): int
     {
         return Expense::where('exgroup', $this->id)
             ->whereHas('latestApprove', function ($q) {
                 $q->where('typeapprove', 6)
-                  ->whereIn('statusapprove', [0, 1]); // ให้ตรงกับ view()
+                    ->whereIn('statusapprove', [0, 1]); // ให้ตรงกับ view()
             })
             ->count();
     }
@@ -104,42 +104,77 @@ class GroupExport implements FromView, WithStyles, WithDrawings
     {
         $exgroup = Exgroup::with('CreatedBy')->findOrFail($this->id);
 
-        // ความสูงของแถวลายเซ็น (หน่วย point) – ปรับตามขนาดกรอบใน template
-        $signRowHeightPt = 100;     // เช่น 100pt (ค่อนข้างสูง)
-        $signRowHeightPx = (int) round($signRowHeightPt * 96 / 72); // แปลง pt -> px
-        $imgHeightPx     = max(10, $signRowHeightPx - 8); // ลบ margin 8px กันชนเส้นกรอบ
+        // ความสูงรูปอิงแถวลายเซ็น (ต้องเท่ากับ styles())
+        $signRowHeightPt = 60;
+        $signRowHeightPx = (int) round($signRowHeightPt * 96 / 72);
+        $imgHeightPx     = max(10, $signRowHeightPx - 10);
 
-        $row = $this->signRow(); // วางรูปที่แถวลายเซ็น (แถวกลาง)
+        $row = $this->signRow();
 
-        $drawings = [];
-        $signatures = [
-            ['empid' => optional($exgroup->CreatedBy)->empid, 'col' => 'G'],
-            ['empid' => $exgroup->checkempid,                 'col' => 'I'],
-            ['empid' => $exgroup->finalempid,                 'col' => 'L'],
+        // ใช้ 2 คอลัมน์ต่อช่อง เท่ากันทุกช่อง
+        $boxes = [
+            ['empid' => $exgroup->checkempid, 'anchorCol' => 'G', 'mergeCols' => ['G', 'H']],
+            ['empid' => $exgroup->nextmpid,   'anchorCol' => 'I', 'mergeCols' => ['I', 'J']],
+            ['empid' => $exgroup->finalempid, 'anchorCol' => 'K', 'mergeCols' => ['K', 'L']],
         ];
 
-        foreach ($signatures as $sig) {
-            if (!$sig['empid']) continue;
+        // กำหนดความกว้างคอลัมน์ (Excel width units) ให้ตรงกับ styles()
+        $colWidthMap = [
+            'G' => 12,
+            'H' => 12,
+            'I' => 12,
+            'J' => 12,
+            'K' => 12,
+            'L' => 12,
+        ];
 
-            $file = Sigfile::where('empid', $sig['empid'])->value('path');
-            $full = $file ? storage_path("app/public/{$file}") : null;
+        $drawings = [];
+        foreach ($boxes as $box) {
+            if (!$box['empid']) continue;
 
-            if ($full && file_exists($full)) {
-                $d = new Drawing();
-                $d->setName('Signature');
-                $d->setPath($full);
-                $d->setResizeProportional(true);
-                $d->setHeight($imgHeightPx);                // สูงตามแถว (เผื่อ margin แล้ว)
-                $d->setCoordinates($sig['col'] . $row);     // วางที่ "แถวลายเซ็น"
-                $d->setOffsetY(4);                          // ดันลงเล็กน้อยให้อยู่กลางช่อง
-                // หากต้องการจัดกึ่งกลางแนวนอน ลองเพิ่ม OffsetX ตามความกว้างช่อง merge
-                // $d->setOffsetX(15);
-                $drawings[] = $d;
+            $rel  = \App\Models\Sigfile::where('empid', $box['empid'])->value('path');
+            $full = $rel ? storage_path("app/public/{$rel}") : null;
+            if (!$full || !file_exists($full)) continue;
+
+            [$origW, $origH] = @getimagesize($full) ?: [0, 0];
+            if ($origW <= 0 || $origH <= 0) continue;
+
+            // กว้างกล่อง = ผลรวมความกว้าง 2 คอลัมน์ (approx: 7px ต่อ 1 หน่วย + 5px padding)
+            $boxWpx = 0;
+            foreach ($box['mergeCols'] as $col) {
+                $w = $colWidthMap[$col] ?? 8.43;
+                $boxWpx += (int) round($w * 7 + 5);
             }
+            $boxWpx = max(10, $boxWpx - 8);
+
+            // สเกลรูปตามความสูง และถ้ากว้างเกินกล่องให้หดตามความกว้าง
+            $tH = $imgHeightPx;
+            $tW = (int) floor(($origW / $origH) * $tH);
+            if ($tW > $boxWpx) {
+                $tW = $boxWpx;
+                $tH = (int) floor(($origH / $origW) * $tW);
+            }
+
+            // จัดกึ่งกลาง
+            $offsetX = max(0, (int) floor(($boxWpx - $tW) / 2));
+            $offsetY = max(0, (int) floor(($signRowHeightPx - $tH) / 2));
+
+            $d = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $d->setName('Signature');
+            $d->setPath($full);
+            $d->setResizeProportional(false);
+            $d->setWidth($tW);
+            $d->setHeight($tH);
+            $d->setCoordinates($box['anchorCol'] . $row);
+            $d->setOffsetX($offsetX);
+            $d->setOffsetY($offsetY);
+
+            $drawings[] = $d;
         }
 
         return $drawings;
     }
+
 
     public function styles(Worksheet $sheet)
     {
@@ -164,25 +199,39 @@ class GroupExport implements FromView, WithStyles, WithDrawings
             ],
         ];
 
-        // ตั้งความสูงแถวของ "แถวลายเซ็น" ให้สัมพันธ์กับรูป
-        $signRow        = $this->signRow();  // แถวกลาง (สำหรับวางรูป)
-        $signRowHeightPt = 100;              // ต้องเท่ากับที่ใช้คำนวณรูปด้านบน
-        $sheet->getRowDimension($signRow)->setRowHeight($signRowHeightPt);
+        // ให้ความสูงแถวลายเซ็นตรงกับ drawings()
+        $signRow = $this->signRow();
+        $sheet->getRowDimension($signRow)->setRowHeight(60); // pt
 
-        // ถ้าบล็อกลายเซ็นมี 3 แถว: baseRow (หัว), signRow (ลายเซ็น), baseRow+2 (footer)
-        // อาจตั้งความสูงหัว/ท้ายให้เล็กลงเพื่อเน้นช่องกลาง
-        $sheet->getRowDimension($this->baseRow())->setRowHeight(18);       // header ของกรอบ
-        $sheet->getRowDimension($this->baseRow() + 2)->setRowHeight(18);   // footer (เช่น "HR")
+        // (ถ้าต้อง) ตั้งความกว้างคอลัมน์ให้ตรงกับที่ใช้คำนวณ
+        foreach (['G', 'H', 'I', 'J', 'K', 'L'] as $col) {
+            $sheet->getColumnDimension($col)->setWidth(12);
+        }
 
-        // จัดแนวกลางในบล็อคลายเซ็น (ถ้าต้อง)
-        foreach (['G','H','I','J','K','L','M'] as $col) {
+        // (ถ้า template ยังไม่ merge) ให้ merge 2 คอลัมน์ต่อกล่อง ทั้ง 3 แถว (หัว/ลายเซ็น/ฟุตเตอร์)
+        $base = $this->baseRow();      // แถวหัวของกรอบลายเซ็น
+        $sheet->mergeCells("G{$base}:H{$base}");
+        $sheet->mergeCells("I{$base}:J{$base}");
+        $sheet->mergeCells("K{$base}:L{$base}");
+
+        $sheet->mergeCells("G{$signRow}:H{$signRow}");
+        $sheet->mergeCells("I{$signRow}:J{$signRow}");
+        $sheet->mergeCells("K{$signRow}:L{$signRow}");
+
+        $footer = $base + 2;
+        $sheet->mergeCells("G{$footer}:H{$footer}");
+        $sheet->mergeCells("I{$footer}:J{$footer}");
+        $sheet->mergeCells("K{$footer}:L{$footer}");
+
+        // จัดกลางข้อความในแถวลายเซ็น
+        foreach (['G', 'H', 'I', 'J', 'K', 'L'] as $col) {
             $sheet->getStyle("{$col}{$signRow}")
                 ->getAlignment()
                 ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
                 ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         }
 
+
         return $styles;
     }
 }
-

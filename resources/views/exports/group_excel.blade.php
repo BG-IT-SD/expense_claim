@@ -111,8 +111,8 @@
 
         <tr>
             <td colspan="6"></td>
-            <td colspan="2" style="border: 1px solid #000; text-align: center;"><strong>ผู้จัดทำ</strong></td>
             <td colspan="2" style="border: 1px solid #000; text-align: center;"><strong>ผู้ตรวจสอบ</strong></td>
+            <td colspan="2" style="border: 1px solid #000; text-align: center;"><strong>ผู้อนุมัติ</strong></td>
             <td colspan="2" style="border: 1px solid #000; text-align: center;"><strong>ผู้อนุมัติ</strong></td>
             <td colspan="6"></td>
         </tr>
@@ -125,9 +125,9 @@
         </tr>
         <tr>
             <td colspan="6"></td>
-            <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
-            <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
-            <td colspan="2" style="border: 1px solid #000; text-align: center;">HR</td>
+            <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->checkempid) }}</td>
+            <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->nextmpid) }}</td>
+            <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->finalempid) }}</td>
             <td colspan="6"></td>
         </tr>
 

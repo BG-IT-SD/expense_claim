@@ -164,7 +164,7 @@
                                         <td>รวม</td>
                                         <td>
                                             <span
-                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ round($sum_total) }}</span>
+                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ number_format(round($sum_total),2) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>

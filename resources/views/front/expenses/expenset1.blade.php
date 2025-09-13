@@ -86,7 +86,7 @@
         {{-- Map --}}
         @if ($booking->type_reserve == 4 && $passengertype == 0)
             <!-- เฉพาะเมื่อ type_reserve == 4 -->
-            <div class="container mt-3 mb-3">
+            <div class="container mt-3 mb-3 mapsearch">
                 <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
                 <div class="mb-3">
                     <label for="origin">ต้นทาง</label>
@@ -237,9 +237,9 @@
                 <div class="form-floating form-floating-outline">
                     <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
                         value="0" disabled>
-                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                    <input type="text" id="totaldistance" name="totaldistance" class="form-control"
                         value="0">
-                    <input type="hidden" id="totaldistancemax" name="totaldistancemax" class="form-control"
+                    <input type="text" id="totaldistancemax" name="totaldistancemax" class="form-control"
                         value="{{ $totalDistance }}">
                     <label for="totaldistance_text">ระยะทางไป-กลับ</label>
                 </div>
