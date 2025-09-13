@@ -100,7 +100,7 @@
                     <td style="text-align: center;border: 1px solid #000">{{ $fullname }}</td>
                     <td style="text-align: center;word-break: break-word;border: 1px solid #000">
                         {{ $expense->userhr->DEPT ?? '-' }}</td>
-                    <td style="text-align: center;border: 1px solid #000">{{ $expense->userhr->NUMLVL ?? '-' }}</td>
+                    <td style="text-align: center;border: 1px solid #000">{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                     <td style="text-align: center;border: 1px solid #000">
                         {{ Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}</td>

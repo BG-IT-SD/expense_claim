@@ -83,7 +83,7 @@
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>
                                             <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
-                                            <td>{{ $expense->userhr->NUMLVL ?? '-' }}</td>
+                                            <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                             <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                                             <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
                                             </td>
