@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="col-md-6 mt-3 mb-3">
                             <input type="hidden" id="selectedPlantName" name="plant_name" value="">
-                            <input type="hidden" id="plantID"  name="plant_id" value="">
+                            <input type="hidden" id="plantID" name="plant_id" value="">
                         </div>
                         <div class="col-md-6 mt-3 mb-3 text-end"> <button type="button" class="btn btn-primary"
                                 id="sendSelected">
@@ -27,9 +27,9 @@
                                         <li class="nav-item" role="presentation">
                                             <button type="button"
                                                 class="nav-link  {{ $loop->first ? 'active' : '' }} waves-effect"
-                                                role="tab" data-bs-toggle="tab" data-bs-target="#plant_{{ $plant['id'] }}"
-                                                aria-controls="{{ $plant['id'] }}"
-                                                data-plantname="{{ $plant['name'] }}"
+                                                role="tab" data-bs-toggle="tab"
+                                                data-bs-target="#plant_{{ $plant['id'] }}"
+                                                aria-controls="{{ $plant['id'] }}" data-plantname="{{ $plant['name'] }}"
                                                 data-plantid="{{ $plant['id'] }}"
                                                 aria-selected="{{ $loop->first ? 'true' : 'false' }}">
                                                 {{ $plant['name'] }}
@@ -57,7 +57,8 @@
                                             <table class="table appex" id="appex-{{ $plant['id'] }}">
                                                 <thead class="table-dark">
                                                     <tr>
-                                                        <th><input type="checkbox" class="selectAll" data-plant="plant_{{ $plant['id'] }}" /></th>
+                                                        <th><input type="checkbox" class="selectAll"
+                                                                data-plant="plant_{{ $plant['id'] }}" /></th>
                                                         <th>Expense ID</th>
                                                         <th>Date Time</th>
                                                         <th>Booking ID</th>
@@ -149,6 +150,10 @@
                                                                                 class="btn btn-sm btn-info"><span
                                                                                     class="mdi mdi-eye-arrow-right-outline"></span>
                                                                                 View</a>
+                                                                            <a href="{{ route('HR.aftedit', $expense->id) }}"
+
+                                                                                class="btn btn-sm btn-warning"><span
+                                                                                    class="mdi mdi-edit"></span> Edit</a>
                                                                         @endif
                                                                     @endif
 
