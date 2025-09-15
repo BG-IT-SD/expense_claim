@@ -583,6 +583,121 @@ class HRController extends Controller
         return view('back.hr.frmapprovegrp', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
 
+     public function editapprove($id, $type = null)
+    {
+        // ส่งตัวแปรบอกว่าเป็นหน้า edit
+        $isView = 3;
+        if ($type != null) {
+            $isView = 0;
+        } else {
+            $isView = 3;
+        }
+
+        $finalHEmail = '';
+        $finalHName = '';
+        $finalId = '';
+
+        $finalHEmailNext = '';
+        $finalHNameNext = '';
+        $finalIdNext = '';
+
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            ->get();
+        $departure_date = $expense->vbooking->departure_date
+            ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
+            : null;
+
+        $return_date = $expense->vbooking->return_date
+            ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $empid = $expense->empid;
+        $bu = BuEmp($empid);
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // dd($empLevel);
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+
+        $startDate = Carbon::parse($expense->vbooking->departure_date);
+        $endDate = Carbon::parse($expense->vbooking->return_date);
+        $startTime = Carbon::parse($expense->vbooking->departure_time);
+        $endTime = Carbon::parse($expense->vbooking->return_time);
+
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
+        $approvals = Approve::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
+
+        $files = ExpenseFile::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->get();
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
+
+        $extype = $expense->extype;
+
+        // คนตรวจสอบ
+        $finalHEmail = Auth::user()->email;
+        $finalHName = Auth::user()->fullname;
+        $finalId = Auth::user()->empid;
+        // ลำดับถัดไป
+        $nextStepApprove = Approvestep($bu, 1, 1);
+        // dd($nextStepApprove);
+        $finalHEmailNext = $nextStepApprove["email"];
+        $finalHNameNext = $nextStepApprove["fullname"];
+        $finalIdNext = $nextStepApprove["empid"];
+
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
+
+        // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
+        // $finalHNameNext = 'เสาวภา เข็มเหลือง';
+        // $finalIdNext = '63000455';
+
+        $passengertype = 0;
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
+                // $passengertype = 1;
+                  if($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id){
+                    $passengertype = 0;
+                }else{
+                    $passengertype = 1;
+                }
+            }
+        }
+
+
+        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -600,6 +715,9 @@ class HRController extends Controller
 
         try {
             DB::beginTransaction();
+
+           $page_mode = $request->input('page_mode', 99);
+        //    dd($page_mode);
 
             $update = Expense::find($id);
             if ($update) {
@@ -647,20 +765,25 @@ class HRController extends Controller
             }
 
             //  End มื้ออาหาร
-            // บันทึก Approve
-            $token = Str::random(64);
-            $token2 = Str::random(64);
-            $approve = Approve::create([
-                'exid' => $id,
-                'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
-                'empid' => $request->head_id,
-                'email' => $request->head_email ?? '',
-                'approvename' => $request->head_name ?? '',
-                'emailstatus' => 1,
-                'statusapprove' => 1,
-                'login_token' => $token,
-                'token_expires_at' => now()->addDays(10),
-            ]);
+            $approve = null;
+                if($page_mode == 1){
+                // ถ้ามาจากการตรวจสอบให้เพิ่มข้อมูล approve
+                // บันทึก Approve
+                $token = Str::random(64);
+                // $token2 = Str::random(64);
+                $approve = Approve::create([
+                    'exid' => $id,
+                    'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
+                    'empid' => $request->head_id,
+                    'email' => $request->head_email ?? '',
+                    'approvename' => $request->head_name ?? '',
+                    'emailstatus' => 1,
+                    'statusapprove' => 1,
+                    'login_token' => $token,
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+                }
+
 
             // $approve_nextstep = Approve::create([
             //     'exid' => $id,
@@ -700,7 +823,7 @@ class HRController extends Controller
             $logData = [
                 'expense'  => $update ? $update->toArray() : null,
                 'foods'    => ExpenseFood::where('exid', $id)->get()->toArray(),
-                'approve'  => $approve->toArray(),
+                'approve'  => $approve ? $approve->toArray() : null,
             ];
             logAction(
                 'update',

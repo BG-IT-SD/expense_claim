@@ -94,6 +94,12 @@
                                                     <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
                                                         target="_blank" class="btn btn-sm btn-info"><span
                                                             class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+
+                                                            {{-- @if ($exgroup->typeapprove == 4)
+                                                            <a href="{{ route('HR.aftedit', $expense->id) }}"
+                                                            class="btn btn-sm btn-warning"><span
+                                                                class="mdi mdi-edit"></span> Edit</a>
+                                                            @endif --}}
                                                 </td>
                                                 <td>{{ $expense->vbooking->locationbu }}</td>
                                                 <td>{{ BuEmp($expense->empid) }}</td>

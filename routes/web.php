@@ -189,6 +189,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
 
             Route::get('export', [HRController::class, 'export'])->name('export');
+            Route::get('aftedit/{id}', [HRController::class, 'editapprove'])->name('aftedit');
+
         });
 
     // Account

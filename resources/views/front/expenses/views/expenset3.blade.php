@@ -428,7 +428,14 @@
                     <button class="btn btn-primary btn-submit waves-effect waves-light"><span
                             class="mdi mdi-content-save-check"></span> ยืนยันตรวจสอบข้อมูล</button>
                 </div>
+            @elseif ($isView == 3)
+             <div class="demo-inline-spacing">
+
+                    <button class="btn btn-primary btn-submit waves-effect waves-light"><span
+                            class="mdi mdi-content-save-check"></span> ยืนยันแก้ไขข้อมูล</button>
+                </div>
             @endif
+
         </div>
     </div>
 </div>
