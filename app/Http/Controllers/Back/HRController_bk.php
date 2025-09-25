@@ -520,8 +520,7 @@ class HRController extends Controller
         $startDate = Carbon::parse($expense->vbooking->departure_date);
         $endDate = Carbon::parse($expense->vbooking->return_date);
         $startTime = Carbon::parse($expense->vbooking->departure_time);
-        // $endTime = Carbon::parse($expense->vbooking->return_time);
-        $endTime = Carbon::parse($expense->returntime);
+        $endTime = Carbon::parse($expense->vbooking->return_time);
 
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
         $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
@@ -708,7 +707,7 @@ class HRController extends Controller
         }
 
 
-        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons', 'approve', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons','approve','departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
 
     /**
@@ -730,7 +729,6 @@ class HRController extends Controller
             DB::beginTransaction();
 
             $page_mode = $request->input('page_mode', 99);
-            $checkstep = $request->input('checkstep', 99);
             //    dd($page_mode);
 
             $update = Expense::find($id);
@@ -797,52 +795,42 @@ class HRController extends Controller
                     'token_expires_at' => now()->addDays(10),
                 ]);
             }
+
+
+            // $approve_nextstep = Approve::create([
+            //     'exid' => $id,
+            //     'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
+            //     'empid' => $request->nexthead_id,
+            //     'email' => $request->nexthead_email ?? '',
+            //     'approvename' => $request->nexthead_name ?? '',
+            //     'emailstatus' => 1,
+            //     'statusapprove' => 0,
+            //     'login_token' => $token2,
+            //     'token_expires_at' => now()->addDays(10),
+            // ]);
+
             // End บันทึก Approve
-
-            // ถ้าstep 1 ให้คำนวณยอดเงินใน ex group ใหม่
-            if ($checkstep == 1) {
-                // หา groupid ของ expense นี้
-                $groupId = $update->exgroup ?? null;
-
-                if ($groupId) {
-                    // ดึงทุกรายการใน group
-                    $groupExpenses = Expense::where('exgroup', $groupId)
-                        ->where('deleted', 0)
-                        ->get();
-
-                    // set ค่าเริ่มต้น
-                    $sumFood = 0;
-                    $sumTravel = 0;
-                    $sumGas = 0;
-                    $sumOther = 0;
-                    $sumTotal = 0;
-
-                    foreach ($groupExpenses as $exp) {
-                        $sumFood   += $exp->costoffood ?? 0;
-                        $sumTravel += $exp->travelexpenses ?? 0;
-                        $sumGas    += $exp->gasolinecost ?? 0;
-                        $sumOther  += ($exp->publictransportfare ?? 0)
-                            + ($exp->expresswaytoll ?? 0)
-                            + ($exp->otherexpenses ?? 0);
-
-                        $sumTotal  += $exp->totalprice ?? 0;
-                    }
-
-                    // update ตาราง exgroups ด้วยยอดรวมใหม่
-                    Exgroup::where('id', $groupId)->update([
-                        'totalfood'        => $sumFood,
-                        'totalfuel'        => $sumGas,
-                        'totalother'       => $sumOther + $sumTravel,
-                        'total'            => $sumTotal,
-                        'nettotalfood'     => $sumFood,
-                        'nettotalfuel'     => $sumGas,
-                        'nettotalother'    => $sumOther + $sumTravel,
-                        'nettotal'         => $sumTotal,
-                    ]);
-                }
-            }
             DB::commit();
+            // Sent Mail
+            // $link = route('approve.magic.login', ['token' => $token2]);
+            // $data = [
+            //     'type' => 1,
+            //     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'name' => $request->nexthead_name,
+            //     'full_name' => $request->empfullname,
+            //     'check_hr' => $request->head_name,
+            //     'departuredate' => $request->departuredatemail ?? '',
+            //     'link' => $link,
+            // ];
 
+            // MailHelper::sendExternalMail(
+            //     $request->nexthead_email,
+            //     'อนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'mails.hrapprove', // ชื่อ blade view
+            //     $data,
+            //     'Expense Claim System EX' . $id,
+            // );
+            //End Sent Mail
 
             $logData = [
                 'expense'  => $update ? $update->toArray() : null,

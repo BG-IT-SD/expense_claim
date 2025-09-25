@@ -705,7 +705,9 @@ class ExpenseController extends Controller
         $startDate = Carbon::parse($expense->vbooking->departure_date);
         $endDate = Carbon::parse($expense->vbooking->return_date);
         $startTime = Carbon::parse($expense->vbooking->departure_time);
-        $endTime = Carbon::parse($expense->vbooking->return_time);
+        // $endTime = Carbon::parse($expense->vbooking->return_time);
+        $endTime = Carbon::parse($expense->returntime);
+
 
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
         $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');

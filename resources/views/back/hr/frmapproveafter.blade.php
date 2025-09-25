@@ -65,6 +65,7 @@
                             @endif
                             {{-- hidden --}}
                             <input type="hidden" name="page_mode" id="page_mode" value="{{ $isView ?? 99 }}">
+                            <input type="hidden" name="checkstep" id="checkstep" value="{{ $approve ?? null }}">
                             {{-- <input type="hidden" name="extype" value="{{ $typegroup }}">
                             <input type="hidden" name="bookid" value="{{ $booking->id }}"> --}}
                             <input type="hidden" name="empid" value="{{ $empid }}">

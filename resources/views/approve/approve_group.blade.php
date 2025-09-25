@@ -18,7 +18,8 @@
                     <div class="card mb-4">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span> รายการขออนุมัติกลุ่ม:
-                                {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }} [ {{ $exgroup->plantname }} ]</h3>
+                                {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }} [
+                                {{ $exgroup->plantname }} ]</h3>
                         </div>
                         <div class="card-body row">
                             <div class="table-responsive text-nowrap">
@@ -95,13 +96,17 @@
                                                         target="_blank" class="btn btn-sm btn-info"><span
                                                             class="mdi mdi-eye-arrow-right-outline"></span> View</a>
 
-                                                            {{-- @if ($exgroup->typeapprove == 4)
-                                                            <a href="{{ route('HR.aftedit', $expense->id) }}"
+                                                    @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
+                                                        {{-- <a href="{{ route('HR.aftedit', $expense->id) }}"
                                                             class="btn btn-sm btn-warning"><span
-                                                                class="mdi mdi-edit"></span> Edit</a>
-                                                            @endif --}}
+                                                                class="mdi mdi-edit"></span> Edit</a> --}}
+                                                        <a href="{{ route('HR.aftedit', [$expense->id, 1, 1]) }}"
+                                                            class="btn btn-sm btn-warning">
+                                                            <span class="mdi mdi-edit"></span> Edit
+                                                        </a>
+                                                    @endif
                                                 </td>
-                                                <td>{{ $expense->vbooking->locationbu }}</td>
+                                                <td>{{ $expense->vbooking->display_location }}</td>
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}</td>
@@ -135,7 +140,7 @@
                                             <td>{{ number_format($sum_other, 2) }}
                                             </td>
                                             <td>
-                                                {{ number_format(round($sum_total),2) }}
+                                                {{ number_format(round($sum_total), 2) }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -180,7 +185,7 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ number_format(round($exgroup->total),2) }}</span>
+                                                    {{ number_format(round($exgroup->total), 2) }}</span>
                                             </td>
                                         </tr>
 
