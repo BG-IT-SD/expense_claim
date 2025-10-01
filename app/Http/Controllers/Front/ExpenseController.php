@@ -292,8 +292,8 @@ class ExpenseController extends Controller
         //     $loopCount++;
         // }
         // เกณฑ์
-        $minLevel = 8;
-        $maxLevel = 10;
+        $minLevel = 10;
+        $maxLevel = 11;
 
         // ค่าเริ่มต้น
         $headempid = $headlevel = $heademail = $headname = '';
@@ -867,7 +867,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 8)
+            ->where('numlvl', '>=', 10)
             ->first();
 
         // ถ้าไม่เจอข้อมูลเลย

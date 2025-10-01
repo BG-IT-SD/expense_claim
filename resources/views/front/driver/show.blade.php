@@ -9,7 +9,8 @@
                         <h4>
                             รายการเบิกมื้ออาหารของ {{ $driver_empid . ' | ' . $driver_name }}
                         </h4>
-                        <h5><span class="badge rounded-pill bg-primary"><span class="mdi mdi-file-multiple"></span> {{ $expense->prefix.$expense->id }}</span></h5>
+                        <h5><span class="badge rounded-pill bg-primary"><span class="mdi mdi-file-multiple"></span>
+                                {{ $expense->prefix . $expense->id }}</span></h5>
                     </div>
                     @php
                         $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50]; // ราคาแต่ละมื้อ
@@ -76,7 +77,8 @@
                                                             <td>
                                                                 <i class="mdi mdi-food-outline text-danger me-2"></i>
                                                                 เบิกมื้ออาหาร
-                                                                <input type="hidden" name="days[{{ $index }}][date]"
+                                                                <input type="hidden"
+                                                                    name="days[{{ $index }}][date]"
                                                                     value="{{ $dayKey }}">
                                                             </td>
 
@@ -91,18 +93,20 @@
                                                                     $checked = $meal > 0 ? 'checked' : '';
                                                                     $total += $meal;
                                                                 @endphp
-                                                            <td>
-                                                                {{-- ซ่อนค่า 0 ถ้าไม่ได้ติ๊ก --}}
-                                                                <input type="hidden" name="days[{{ $index }}][meal{{ $i }}][]" value="0">
+                                                                <td>
+                                                                    {{-- ซ่อนค่า 0 ถ้าไม่ได้ติ๊ก --}}
+                                                                    <input type="hidden"
+                                                                        name="days[{{ $index }}][meal{{ $i }}][]"
+                                                                        value="0">
 
-                                                                <input type="checkbox"
-                                                                    class="form-check-input meal-checkbox"
-                                                                    data-price="{{ $prices[$i] }}"
-                                                                    value="{{ $prices[$i] }}"
-                                                                    name="days[{{ $index }}][meal{{ $i }}][]"
-                                                                    {{ $checked }}
-                                                                    @if ($type == 0) onclick="return false;" @endif>
-                                                            </td>
+                                                                    <input type="checkbox"
+                                                                        class="form-check-input meal-checkbox"
+                                                                        data-price="{{ $prices[$i] }}"
+                                                                        value="{{ $prices[$i] }}"
+                                                                        name="days[{{ $index }}][meal{{ $i }}][]"
+                                                                        {{ $checked }}
+                                                                        @if ($type == 0) onclick="return false;" @endif>
+                                                                </td>
                                                             @endfor
 
                                                             <td>
@@ -220,23 +224,29 @@
                                 <input type="hidden" name="nexthead_id" id="finalIdNext" value="{{ $finalIdNext }}"
                                     class="form-control form-control-input">
                                 <input type="hidden" name="driver_name" value="{{ $driver_name }}">
-                                <input type="hidden" name="departuredatemail" value="{{ $startDate->format('Y-m-d') }} - {{ $endDate->format('Y-m-d') }}">
+                                <input type="hidden" name="departuredatemail"
+                                    value="{{ $startDate->format('Y-m-d') }} - {{ $endDate->format('Y-m-d') }}">
                                 <input type="hidden" name="empfullname" value="{{ $driver_name }}">
+                                <input type="hidden" name="reject_reason" id="reject_reason" value="">
+                                <input type="hidden" name="action_type" id="action_type" value="">
+
 
 
 
 
                                 <div class="row mb-5 mt-3">
-                                    <div class="col-md-4"></div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-9 ">
                                         <button type="button" class="btn btn-primary" id="btnConfirmClaim"><span
                                                 class="mdi mdi-content-save-check"></span> ตรวจสอบข้อมูลการเบิก</button>
+                                        <button type="button" class="btn btn-danger" id="btnRejectClaim"><span
+                                                class="mdi mdi-close-box"></span> ไม่ผ่านการตรวจสอบ</button>
                                         <a href="{{ route('HR.hrdriver') }}" class="btn btn-danger">
                                             <span class="mdi mdi-close-outline"></span> ยกเลิก
                                         </a>
                                     </div>
-                                    <div class="col-md-4">
-                                    </div>
+                                    {{-- <div class="col-md-2">
+                                    </div> --}}
                                 </div>
                                 {{--  --}}
                             @else
@@ -272,6 +282,8 @@
         $(document).ready(function() {
             updateMealTotal();
             $('#btnConfirmClaim').on('click', function() {
+                $('#action_type').val('approve');
+                // Swal เดิม
                 Swal.fire({
                     title: 'ตรวจสอบข้อมูลการเบิก?',
                     text: 'คุณแน่ใจว่าต้องการตรวจสอบข้อมูลการเบิกรายการอาหาร?',
@@ -287,6 +299,32 @@
                     }
                 });
             });
+
+            $('#btnRejectClaim').on('click', function() {
+                $('#action_type').val('reject');
+                Swal.fire({
+                    title: 'ไม่ผ่านการตรวจสอบ',
+                    text: 'กรุณากรอกเหตุผล',
+                    input: 'textarea',
+                    inputPlaceholder: 'ใส่เหตุผลที่ไม่ผ่าน...',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยันข้อมูล',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'กรุณากรอกเหตุผลก่อนส่ง';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#reject_reason').val(result.value);
+                        $('form').submit();
+                    }
+                });
+            });
+
         });
 
         // bind event
