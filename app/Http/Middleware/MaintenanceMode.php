@@ -12,7 +12,7 @@ class MaintenanceMode
     {
         // dd($request->ip(), $request->header('x-forwarded-for'));
         // กำหนด IP ที่อนุญาตเข้าระบบ
-        $allowedIp = '10.255.4.2520'; // เปลี่ยนเป็น IP ของคุณ
+        $allowedIp = '10.255.4.2520'; // IP เครื่องที่จะใช้
 
         // Route name ที่อนุญาตให้เข้าได้แม้จะ maintenance อยู่
         $allowedRoutes = [
