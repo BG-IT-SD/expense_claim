@@ -287,6 +287,8 @@
                                             <option value="{{ $headempid }}">
                                                 {{ $heademail . ' | ' . $headname }}
                                             </option>
+                                            <option value="51000169">Nopthanin.A@bgc.co.th</option>
+                                            <option value="65000214">Yodsaphon.P@bgc.co.th</option>
                                             {{-- Old --}}
                                                 {{-- เงื่อนไขที่ 4 มีหัวหน้า --}}
                                                 {{-- @if ($headlevel >= 10) --}}
