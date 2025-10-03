@@ -102,6 +102,11 @@ class Expense extends Model
         return $this->hasOne(Vbookingall::class, 'id', 'bookid');
     }
 
+        public function vbookingdrv()
+    {
+        return $this->hasOne(Vbookingalldrv::class, 'id', 'bookid');
+    }
+
     public function approval()
     {
         return $this->hasOne(Approve::class, 'exid', 'id');

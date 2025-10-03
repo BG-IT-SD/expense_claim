@@ -40,8 +40,20 @@ class ApproveController extends Controller
         $user = User::where('empid', $expense->empid)->first(); // กรณีมี user
         $booking = Vbookingall::where('id', $expense->bookid)->first();
         // dd($expense);
-        $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
-        $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
+        // $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
+        // $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
+        $departure_date = null;
+        $return_date    = null;
+
+        if ($booking) {
+            $departure_date = $booking->departure_date
+                ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i')
+                : null;
+
+            $return_date = $booking->return_date
+                ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i')
+                : null;
+        }
 
         $bu = BuEmp($expense->empid);
         // เช็คกลุ่ม

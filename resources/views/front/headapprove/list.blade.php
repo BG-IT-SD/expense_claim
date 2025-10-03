@@ -121,7 +121,7 @@
                                                         class="badge rounded-pill bg-primary">{{ number_format($expense->totalprice, 2) }}</span>
                                                 </h6>
                                             </td>
-                                            <td class="text-nowrap">
+                                            {{-- <td class="text-nowrap">
                                                 {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                     'd/m/Y H:i',
                                                 ) .
@@ -129,7 +129,36 @@
                                                     \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
                                                 <input type="hidden" name="departuredate[]"
                                                     value="{{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') . ' - ' . \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}">
+                                            </td> --}}
+                                            @php
+                                                $booking =
+                                                    $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
+
+                                                $dep =
+                                                    optional($booking)->departure_date &&
+                                                    optional($booking)->departure_time
+                                                        ? \Carbon\Carbon::parse(
+                                                            optional($booking)->departure_date .
+                                                                ' ' .
+                                                                optional($booking)->departure_time,
+                                                        )->format('d/m/Y H:i')
+                                                        : null;
+                                                $ret =
+                                                    optional($booking)->return_date && optional($booking)->return_time
+                                                        ? \Carbon\Carbon::parse(
+                                                            optional($booking)->return_date .
+                                                                ' ' .
+                                                                optional($booking)->return_time,
+                                                        )->format('d/m/Y H:i')
+                                                        : null;
+                                            @endphp
+
+                                            <td class="text-nowrap">
+                                                {{ $dep && $ret ? $dep . ' - ' . $ret : $dep ?? '-' }}
                                             </td>
+
+
+
                                             <td>{{ $expense->bookid }}</td>
                                             <td class="text-nowrap">
                                                 @if ($expense->extype == 2 || $expense->extype == 3)
@@ -142,7 +171,13 @@
                                                         value="{{ $expense->user->fullname }}">
                                                 @endif
                                             </td>
-                                            <td>{{ $expense->vbooking->location_name }}</td>
+                                            <td>
+                                                @if ($expense->extype == 2)
+                                                    {{ optional($expense->vbookingdrv)->location_name ?? '-' }}
+                                                @else
+                                                    {{ optional($expense->vbooking)->location_name ?? '-' }}
+                                                @endif
+                                            </td>
                                             <td>
                                                 @if (!is_null($expense->latestApprove->typeapprove))
                                                     {!! type_approve_text($expense->latestApprove->typeapprove, $expense->latestApprove->typeapprove) !!}
@@ -218,7 +253,7 @@
     </div>
 @endsection
 @section('jscustom')
-@if (session('message'))
+    @if (session('message'))
         <script>
             Swal.fire({
                 title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript

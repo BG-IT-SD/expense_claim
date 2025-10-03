@@ -22,6 +22,7 @@ use App\Http\Controllers\Back\TypegroupController;
 use App\Http\Controllers\Back\UserController;
 use App\Http\Controllers\Back\UserroleController;
 use App\Http\Controllers\DistanceController;
+use App\Http\Controllers\ForgotByEmployeeController;
 use App\Http\Controllers\Front\DriverClaimController;
 use App\Http\Controllers\Front\ExpenseController;
 use App\Http\Controllers\Front\HeadApprovedController;
@@ -45,6 +46,15 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/CheckEmpID', [AuthController::class, 'CheckEmpID'])->name('CheckEmpID');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/forgot-password/employee',[ForgotByEmployeeController::class, 'index'])
+     ->name('password.forgot-by-employee');
+
+Route::post('/forgot-password/employee/verify',[ForgotByEmployeeController::class, 'verify'])
+     ->name('password.verify-employee');
+
+Route::post('/forgot-password/employee/reset', [ForgotByEmployeeController::class, 'reset'])
+     ->name('password.reset-employee');
 // End Atuh
 
 Route::group(['middleware' => ['auth', 'remember.login']], function () {
@@ -189,7 +199,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
 
             Route::get('export', [HRController::class, 'export'])->name('export');
-            Route::get('aftedit/{id}', [HRController::class, 'editapprove'])->name('aftedit');
+            Route::get('aftedit/{id}/{type?}/{approve?}', [HRController::class, 'editapprove'])->name('aftedit');
 
         });
 

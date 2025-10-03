@@ -21,7 +21,7 @@ class HeadApprovedController extends Controller
     {
         $currentEmpid = Auth::user()->empid;
 
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+        $expenses = Expense::with(['latestApprove','vbooking', 'vbookingdrv', 'user'])
             ->whereHas('latestApprove', function ($query) use ($currentEmpid) {
                 $query->whereIn('typeapprove', [1, 2])
                     ->where('empid', $currentEmpid)
@@ -30,6 +30,8 @@ class HeadApprovedController extends Controller
             ->where('deleted', 0)
             ->get();
         $page =  'HeadApprove.show';
+
+        // dd($expenses);
 
         return view('front.headapprove.list', compact('expenses', 'page'));
     }

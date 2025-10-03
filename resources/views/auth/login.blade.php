@@ -7,18 +7,18 @@
                 <h4 class="mb-3 text-center">Expense Claim</h4>
                 {{-- <p class="mb-4"></p> --}}
                 @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
                 @if (session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
                 @endif
                 <form id="formAuthentication" class="mb-3" action="{{ url('/login') }}" method="POST">
                     @csrf
@@ -42,6 +42,10 @@
                     </div>
                     <div class="mb-3">
                         <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                        <a href="{{ route('password.forgot-by-employee') }}"
+                            class="btn btn-label-warning waves-effect d-grid w-100 mt-3">
+                            Forgot Password
+                        </a>
                     </div>
                     <div class="divider my-4">
                         <div class="divider-text">กรณีเข้าระบบครั้งแรก</div>
@@ -57,3 +61,4 @@
     </div>
     <!-- /Login -->
 @endsection
+

@@ -54,9 +54,8 @@
                                             class="form-control" />
                                         <label for="multiStepsIDCard">เลขที่บัตรประชาชน</label>
                                     </div>
+
                                 </div>
-
-
 
                                 <div class="col-12 d-flex justify-content-between">
                                     <button class="btn btn-secondary btn-prev" disabled>
@@ -77,34 +76,44 @@
                                 <small>สร้างรหัสผ่าน</small>
                             </div>
                             <div class="row g-3">
+                                {{-- Password --}}
                                 <div class="col-sm-12 form-password-toggle">
                                     <div class="input-group input-group-merge">
-                                        <div class="form-floating form-floating-outline">
+                                        <div class="form-floating form-floating-outline flex-grow-1">
                                             <input type="password" id="multiStepsPass" name="multiStepsPass"
-                                                class="form-control"
-                                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                aria-describedby="multiStepsPass2" />
+                                                class="form-control" placeholder="••••••••"
+                                                aria-describedby="multiStepsPass2" minlength="8"
+                                                pattern="(?=.*[A-Z])(?=.*\d).{8,}" {{-- ≥1 ตัวใหญ่ และ ≥1 ตัวเลข --}}
+                                                autocomplete="new-password" required />
                                             <label for="multiStepsPass">Password</label>
                                         </div>
-                                        <span class="input-group-text cursor-pointer" id="multiStepsPass2"><i
-                                                class="mdi mdi-eye-off-outline"></i></span>
+                                        <span class="input-group-text cursor-pointer" id="multiStepsPass2">
+                                            <i class="mdi mdi-eye-off-outline"></i>
+                                        </span>
                                     </div>
+                                    <div class="form-text mt-1">
+                                        อย่างน้อย 8 ตัวอักษร และต้องมี <strong>ตัวพิมพ์ใหญ่</strong> และ <strong>ตัวเลข</strong>
+                                    </div>
+                                    <div id="pass-error" class="invalid-feedback d-block d-none"></div>
                                 </div>
+
+                                {{-- Confirm Password --}}
                                 <div class="col-sm-12 form-password-toggle">
                                     <div class="input-group input-group-merge">
-                                        <div class="form-floating form-floating-outline">
+                                        <div class="form-floating form-floating-outline flex-grow-1">
                                             <input type="password" id="multiStepsConfirmPass" name="multiStepsConfirmPass"
-                                                class="form-control"
-                                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                                aria-describedby="multiStepsConfirmPass2" />
+                                                class="form-control" placeholder="••••••••"
+                                                aria-describedby="multiStepsConfirmPass2" required />
                                             <label for="multiStepsConfirmPass">Confirm Password</label>
-                                            <input type="hidden" name="checkEmpid" id="checkEmpid"
-                                                class="form-control" />
+                                            <input type="hidden" name="checkEmpid" id="checkEmpid" />
                                         </div>
-                                        <span class="input-group-text cursor-pointer" id="multiStepsConfirmPass2"><i
-                                                class="mdi mdi-eye-off-outline"></i></span>
+                                        <span class="input-group-text cursor-pointer" id="multiStepsConfirmPass2">
+                                            <i class="mdi mdi-eye-off-outline"></i>
+                                        </span>
                                     </div>
+                                    <div id="confirm-error" class="invalid-feedback d-block d-none"></div>
                                 </div>
+
 
                                 <div class="col-12 d-flex justify-content-between">
                                     <button class="btn btn-secondary btn-prev">
@@ -134,6 +143,8 @@
     <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js') }}"></script>
     <!-- Page -->
     <script src="{{ asset('template/assets/js/pages-auth-multisteps.js') }}"></script>
+    <script src="{{ asset('template/assets/js/pages-auth-create.js') }}"></script>
+
 @endsection
 
 

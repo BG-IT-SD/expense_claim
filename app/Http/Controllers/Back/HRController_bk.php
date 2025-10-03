@@ -520,8 +520,7 @@ class HRController extends Controller
         $startDate = Carbon::parse($expense->vbooking->departure_date);
         $endDate = Carbon::parse($expense->vbooking->return_date);
         $startTime = Carbon::parse($expense->vbooking->departure_time);
-        // $endTime = Carbon::parse($expense->vbooking->return_time);
-        $endTime = Carbon::parse($expense->returntime);
+        $endTime = Carbon::parse($expense->vbooking->return_time);
 
         $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
         $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
@@ -708,7 +707,7 @@ class HRController extends Controller
         }
 
 
-        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons', 'approve', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons','approve','departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }
 
     /**
@@ -730,7 +729,6 @@ class HRController extends Controller
             DB::beginTransaction();
 
             $page_mode = $request->input('page_mode', 99);
-            $checkstep = $request->input('checkstep', 99);
             //    dd($page_mode);
 
             $update = Expense::find($id);
@@ -797,52 +795,42 @@ class HRController extends Controller
                     'token_expires_at' => now()->addDays(10),
                 ]);
             }
+
+
+            // $approve_nextstep = Approve::create([
+            //     'exid' => $id,
+            //     'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
+            //     'empid' => $request->nexthead_id,
+            //     'email' => $request->nexthead_email ?? '',
+            //     'approvename' => $request->nexthead_name ?? '',
+            //     'emailstatus' => 1,
+            //     'statusapprove' => 0,
+            //     'login_token' => $token2,
+            //     'token_expires_at' => now()->addDays(10),
+            // ]);
+
             // End บันทึก Approve
-
-            // ถ้าstep 1 ให้คำนวณยอดเงินใน ex group ใหม่
-            if ($checkstep == 1) {
-                // หา groupid ของ expense นี้
-                $groupId = $update->exgroup ?? null;
-
-                if ($groupId) {
-                    // ดึงทุกรายการใน group
-                    $groupExpenses = Expense::where('exgroup', $groupId)
-                        ->where('deleted', 0)
-                        ->get();
-
-                    // set ค่าเริ่มต้น
-                    $sumFood = 0;
-                    $sumTravel = 0;
-                    $sumGas = 0;
-                    $sumOther = 0;
-                    $sumTotal = 0;
-
-                    foreach ($groupExpenses as $exp) {
-                        $sumFood   += $exp->costoffood ?? 0;
-                        $sumTravel += $exp->travelexpenses ?? 0;
-                        $sumGas    += $exp->gasolinecost ?? 0;
-                        $sumOther  += ($exp->publictransportfare ?? 0)
-                            + ($exp->expresswaytoll ?? 0)
-                            + ($exp->otherexpenses ?? 0);
-
-                        $sumTotal  += $exp->totalprice ?? 0;
-                    }
-
-                    // update ตาราง exgroups ด้วยยอดรวมใหม่
-                    Exgroup::where('id', $groupId)->update([
-                        'totalfood'        => $sumFood,
-                        'totalfuel'        => $sumGas,
-                        'totalother'       => $sumOther + $sumTravel,
-                        'total'            => $sumTotal,
-                        'nettotalfood'     => $sumFood,
-                        'nettotalfuel'     => $sumGas,
-                        'nettotalother'    => $sumOther + $sumTravel,
-                        'nettotal'         => $sumTotal,
-                    ]);
-                }
-            }
             DB::commit();
+            // Sent Mail
+            // $link = route('approve.magic.login', ['token' => $token2]);
+            // $data = [
+            //     'type' => 1,
+            //     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'name' => $request->nexthead_name,
+            //     'full_name' => $request->empfullname,
+            //     'check_hr' => $request->head_name,
+            //     'departuredate' => $request->departuredatemail ?? '',
+            //     'link' => $link,
+            // ];
 
+            // MailHelper::sendExternalMail(
+            //     $request->nexthead_email,
+            //     'อนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'mails.hrapprove', // ชื่อ blade view
+            //     $data,
+            //     'Expense Claim System EX' . $id,
+            // );
+            //End Sent Mail
 
             $logData = [
                 'expense'  => $update ? $update->toArray() : null,
@@ -874,170 +862,135 @@ class HRController extends Controller
         }
     }
 
-    // public function updateClaimDriver(Request $request, $id)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         $expense = Expense::with('foods')->findOrFail($id);
-    //         $days = $request->input('days', []);
-    //         $costoffood = $request->input('costoffood', 0);
-    //         $empid = $request->input('empid');
-
-    //         // ลบ log เดิมก่อน
-    //         // ExpenseLog::where('exid', $expense->id)->delete();
-
-    //         foreach ($days as $index => $day) {
-    //             $usedDate = $day['date'];
-
-    //             // คำนวณมื้อ
-    //             $meal1 = isset($day['meal1']) ? array_sum($day['meal1']) : 0;
-    //             $meal2 = isset($day['meal2']) ? array_sum($day['meal2']) : 0;
-    //             $meal3 = isset($day['meal3']) ? array_sum($day['meal3']) : 0;
-    //             $meal4 = isset($day['meal4']) ? array_sum($day['meal4']) : 0;
-    //             $total = $meal1 + $meal2 + $meal3 + $meal4;
-
-    //             // อัปเดต/สร้าง expense_food
-    //             $food = $expense->foods->firstWhere('used_date', $usedDate);
-
-    //             if ($food) {
-    //                 $food->update([
-    //                     'meal1' => $meal1,
-    //                     'meal2' => $meal2,
-    //                     'meal3' => $meal3,
-    //                     'meal4' => $meal4,
-    //                     'totalpricebf' => $total,
-    //                     'totalprice' => $total,
-    //                 ]);
-    //             }
-    //         }
-
-    //         // อัปเดตยอดรวม
-    //         $expense->update([
-    //             'costoffood' => $costoffood,
-    //             'totalprice' => $costoffood,
-    //         ]);
-
-    //         // บันทึก Approve
-    //         $token = Str::random(64);
-    //         $approve = Approve::create([
-    //             'exid' => $id,
-    //             'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
-    //             'empid' => $request->head_id,
-    //             'email' => $request->head_email ?? '',
-    //             'approvename' => $request->head_name ?? '',
-    //             'emailstatus' => 1,
-    //             'statusapprove' => 1,
-    //             'login_token' => $token,
-    //             'token_expires_at' => now()->addDays(10),
-    //         ]);
-    //         // End บันทึก Approve
-    //         DB::commit();
-
-
-    //         $logData = [
-    //             'expense'  => $expense->toArray(),
-    //             'foods'    => $expense->foods->toArray(),
-    //             'approve'  => $approve->toArray(),
-    //         ];
-    //         logAction(
-    //             'update',
-    //             'Expense',
-    //             'ตรวจสอบเบิกค่าอาหาร พขร EX' . $expense->id,
-    //             json_encode($logData)
-    //         );
-
-    //         return redirect()->route('HR.hrdriver')->with('success', 'ตรวจสอบการเบิกอาหารเรียบร้อย');
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return redirect()->route('HR.hrdriver')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
-    //     }
-    // }
     public function updateClaimDriver(Request $request, $id)
     {
         DB::beginTransaction();
+
         try {
             $expense = Expense::with('foods')->findOrFail($id);
+            $days = $request->input('days', []);
+            $costoffood = $request->input('costoffood', 0);
+            $empid = $request->input('empid');
 
-            $action = $request->input('action_type');
+            // ลบ log เดิมก่อน
+            // ExpenseLog::where('exid', $expense->id)->delete();
 
-            if ($action === 'approve') {
-                // ✅ กรณีผ่าน
-                $days = $request->input('days', []);
-                $costoffood = $request->input('costoffood', 0);
+            foreach ($days as $index => $day) {
+                $usedDate = $day['date'];
 
-                foreach ($days as $day) {
-                    $usedDate = $day['date'];
-                    $meal1 = isset($day['meal1']) ? array_sum($day['meal1']) : 0;
-                    $meal2 = isset($day['meal2']) ? array_sum($day['meal2']) : 0;
-                    $meal3 = isset($day['meal3']) ? array_sum($day['meal3']) : 0;
-                    $meal4 = isset($day['meal4']) ? array_sum($day['meal4']) : 0;
-                    $total = $meal1 + $meal2 + $meal3 + $meal4;
+                // คำนวณมื้อ
+                $meal1 = isset($day['meal1']) ? array_sum($day['meal1']) : 0;
+                $meal2 = isset($day['meal2']) ? array_sum($day['meal2']) : 0;
+                $meal3 = isset($day['meal3']) ? array_sum($day['meal3']) : 0;
+                $meal4 = isset($day['meal4']) ? array_sum($day['meal4']) : 0;
+                $total = $meal1 + $meal2 + $meal3 + $meal4;
 
-                    $food = $expense->foods->firstWhere('used_date', $usedDate);
-                    if ($food) {
-                        $food->update([
-                            'meal1' => $meal1,
-                            'meal2' => $meal2,
-                            'meal3' => $meal3,
-                            'meal4' => $meal4,
-                            'totalpricebf' => $total,
-                            'totalprice'   => $total,
-                        ]);
-                    }
+                // อัปเดต/สร้าง expense_food
+                $food = $expense->foods->firstWhere('used_date', $usedDate);
+
+                if ($food) {
+                    $food->update([
+                        'meal1' => $meal1,
+                        'meal2' => $meal2,
+                        'meal3' => $meal3,
+                        'meal4' => $meal4,
+                        'totalpricebf' => $total,
+                        'totalprice' => $total,
+                    ]);
                 }
 
-                $expense->update([
-                    'costoffood' => $costoffood,
-                    'totalprice' => $costoffood,
-                ]);
+                // เพิ่ม log ใหม่ตาม bookid ที่เคยใช้
+                // $relatedLogs = $expense->logs->where('used_date', $usedDate);
+                // $bookings = $relatedLogs->pluck('bookid')->unique();
 
-                $approve = Approve::create([
-                    'exid' => $id,
-                    'typeapprove' => 3,
-                    'empid' => $request->head_id,
-                    'email' => $request->head_email ?? '',
-                    'approvename' => $request->head_name ?? '',
-                    'emailstatus' => 1,
-                    'statusapprove' => 1,
-                    'login_token' => Str::random(64),
-                    'token_expires_at' => now()->addDays(10),
-                ]);
-
-                $message = 'ตรวจสอบการเบิกอาหารเรียบร้อย';
-            } else {
-                // ❌ กรณีไม่ผ่าน
-                $reason = $request->input('reject_reason');
-
-                // ลบ logs ที่เกี่ยวข้อง
-                ExpenseLog::where('exid', $expense->id)->delete();
-
-                // เพิ่ม record reject ใน approve
-                $approve = Approve::create([
-                    'exid' => $id,
-                    'typeapprove' => 3,
-                    'empid' => $request->head_id,
-                    'email' => $request->head_email ?? '',
-                    'approvename' => $request->head_name ?? '',
-                    'emailstatus' => 1,
-                    'statusapprove' => 2, // ไม่อนุมัติ
-                    'remark' => $reason,
-                    'login_token' => Str::random(64),
-                    'token_expires_at' => now()->addDays(10),
-                ]);
-
-                $message = 'ไม่ผ่านการตรวจสอบ และลบ Expense Logs แล้ว';
+                // foreach ($bookings as $bookid) {
+                //     ExpenseLog::create([
+                //         'exid' => $expense->id,
+                //         'bookid' => $bookid,
+                //         'empid' => $empid,
+                //         'foodid' => $food->id ?? null,
+                //         'type' => 2,
+                //         'remark' => 'แก้ไขข้อมูลมื้ออาหาร วันที่ ' . $usedDate,
+                //         'created_at' => now(),
+                //         'updated_at' => now(),
+                //     ]);
+                // }
             }
 
-            DB::commit();
+            // อัปเดตยอดรวม
+            $expense->update([
+                'costoffood' => $costoffood,
+                'totalprice' => $costoffood,
+            ]);
 
-            return redirect()->route('HR.hrdriver')->with('success', $message);
+            // บันทึก Approve
+            $token = Str::random(64);
+            $token2 = Str::random(64);
+            $approve = Approve::create([
+                'exid' => $id,
+                'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
+                'empid' => $request->head_id,
+                'email' => $request->head_email ?? '',
+                'approvename' => $request->head_name ?? '',
+                'emailstatus' => 1,
+                'statusapprove' => 1,
+                'login_token' => $token,
+                'token_expires_at' => now()->addDays(10),
+            ]);
+
+            // $approve_nextstep = Approve::create([
+            //     'exid' => $id,
+            //     'typeapprove' => 4, //ประเภทที่ 4 Hr อนุมัติจากผู้จัดการส่วนHR
+            //     'empid' => $request->nexthead_id,
+            //     'email' => $request->nexthead_email ?? '',
+            //     'approvename' => $request->nexthead_name ?? '',
+            //     'emailstatus' => 1,
+            //     'statusapprove' => 0,
+            //     'login_token' => $token2,
+            //     'token_expires_at' => now()->addDays(10),
+            // ]);
+
+            // End บันทึก Approve
+            DB::commit();
+            // Sent Mail
+            // $link = route('approve.magic.login', ['token' => $token2]);
+            // $data = [
+            //     'type' => 1,
+            //     'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'name' => $request->nexthead_name,
+            //     'full_name' => $request->empfullname,
+            //     'check_hr' => $request->head_name,
+            //     'departuredate' => $request->departuredatemail ?? '',
+            //     'link' => $link,
+            // ];
+
+            // MailHelper::sendExternalMail(
+            //     $request->nexthead_email,
+            //     'อนุมัติการเบิกเบี้ยเลี้ยง',
+            //     'mails.hrapprove', // ชื่อ blade view
+            //     $data,
+            //     'Expense Claim System EX' . $id,
+            // );
+            //End Sent Mail
+
+            $logData = [
+                'expense'  => $expense->toArray(),
+                'foods'    => $expense->foods->toArray(),
+                'approve'  => $approve->toArray(),
+            ];
+            logAction(
+                'update',
+                'Expense',
+                'ตรวจสอบเบิกค่าอาหาร พขร EX' . $expense->id,
+                json_encode($logData)
+            );
+
+            return redirect()->route('HR.hrdriver')->with('success', 'ตรวจสอบการเบิกอาหารเรียบร้อย');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('HR.hrdriver')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
         }
     }
-
 
 
     public function reject(Request $request)

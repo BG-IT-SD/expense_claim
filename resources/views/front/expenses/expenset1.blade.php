@@ -237,9 +237,9 @@
                 <div class="form-floating form-floating-outline">
                     <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
                         value="0" disabled>
-                    <input type="text" id="totaldistance" name="totaldistance" class="form-control"
+                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
                         value="0">
-                    <input type="text" id="totaldistancemax" name="totaldistancemax" class="form-control"
+                    <input type="hidden" id="totaldistancemax" name="totaldistancemax" class="form-control"
                         value="{{ $totalDistance }}">
                     <label for="totaldistance_text">ระยะทางไป-กลับ</label>
                 </div>

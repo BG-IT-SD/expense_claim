@@ -213,6 +213,7 @@
     <script src="{{ asset('template/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js') }}"></script>
     <script src="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.js') }}"></script>
     <script src="{{ asset('template/assets/vendor/libs/dropzone/dropzone.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/moment/moment.js') }}"></script>
 @endsection
 
 @section('jscustom')
