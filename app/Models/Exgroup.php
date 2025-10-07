@@ -66,6 +66,11 @@ class Exgroup extends Model
         return $this->belongsTo(User::class, 'checkempid', 'empid');
     }
 
+    public function approve()
+    {
+        return $this->hasMany(Approve::class, 'exgroup', 'id');
+    }
+
     public function CreatedBy()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');

@@ -832,11 +832,11 @@ class HRController extends Controller
                     Exgroup::where('id', $groupId)->update([
                         'totalfood'        => $sumFood,
                         'totalfuel'        => $sumGas,
-                        'totalother'       => $sumOther + $sumTravel,
+                        'totalother'       => $sumOther,
                         'total'            => $sumTotal,
                         'nettotalfood'     => $sumFood,
                         'nettotalfuel'     => $sumGas,
-                        'nettotalother'    => $sumOther + $sumTravel,
+                        'nettotalother'    => $sumOther,
                         'nettotal'         => $sumTotal,
                     ]);
                 }

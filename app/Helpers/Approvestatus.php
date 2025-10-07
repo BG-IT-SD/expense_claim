@@ -314,6 +314,15 @@ if (!function_exists('isApprover')) {
     }
 }
 
+if (!function_exists('isApproverHR')) {
+    function isApproverHR(): bool
+    {
+        return Approve::whereIn('typeapprove', [4, 5])
+            ->where('empid', Auth::user()->empid)
+            ->exists();
+    }
+}
+
 
 if (!function_exists('hasReclaimedExpense')) {
     function hasReclaimedExpense($bookid, $empid, $currentExpenseId)
