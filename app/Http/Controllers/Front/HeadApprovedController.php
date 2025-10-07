@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Approve;
+use App\Models\Exgroup;
 use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -275,4 +276,41 @@ class HeadApprovedController extends Controller
     {
         //
     }
+
+public function indexhr()
+{
+    $currentEmpid = Auth::user()->empid;
+
+    $exgroups = Exgroup::with([
+            'nextuser',
+            'finaluser',
+            'accountuser',
+            'user',
+            'approve' => function ($q) {
+                $q->select('id', 'exgroup', 'login_token', 'token_expires_at');
+                $q->whereNotNull('login_token');
+                $q->orderByDesc('id');
+            },
+        ])
+        ->whereIn('typeapprove', [4, 5])
+        ->where(function ($query) use ($currentEmpid) {
+            $query->where(function ($q) use ($currentEmpid) {
+                $q->where('typeapprove', 4)
+                  ->where('nextmpid', $currentEmpid);
+            })
+            ->orWhere(function ($q) use ($currentEmpid) {
+                $q->where('typeapprove', 5)
+                  ->where('finalempid', $currentEmpid);
+            });
+        })
+        ->where('statusapprove', 0)
+        ->where('deleted', 0)
+        ->get();
+
+    $page = 'HeadHRApprove.show';
+
+    return view('front.headapprove.listhr', compact('exgroups', 'page'));
+}
+
+
 }

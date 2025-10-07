@@ -53,6 +53,22 @@
       </li>
     @endif
 
+        @if (isApproverHR())
+      <li class="menu-item {{ request()->routeIs('HeadHRApprove.index') ? 'active open' : '' }}">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <i class="menu-icon tf-icons mdi mdi-file-check"></i>
+          <div data-i18n="การอนุมัติ [HR]">การอนุมัติ [HR]</div>
+        </a>
+        <ul class="menu-sub">
+          <li class="menu-item {{ request()->routeIs('HeadHRApprove.index') ? 'active' : '' }}">
+            <a href="{{ route('HeadHRApprove.index') }}" class="menu-link">
+              <div data-i18n="รายการขออนุมัติ [HR]">รายการขออนุมัติ [HR]</div>
+            </a>
+          </li>
+        </ul>
+      </li>
+    @endif
+
     @if (isset($userModuleRoles['AllSystems']) ||
         (isset($userModuleRoles['Driver']) && collect($userModuleRoles['Driver'])->flatten()->intersect(['Staff','Admin','SuperAdmin'])->isNotEmpty()))
       <li class="menu-header fw-medium mt-4">
