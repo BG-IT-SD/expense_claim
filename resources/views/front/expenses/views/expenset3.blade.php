@@ -65,21 +65,21 @@
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="publictransportfare" name="publictransportfare" min="0"
-                    class="form-control" value="{{ $expense->publictransportfare }}">
+                    class="form-control" value="{{ $expense->publictransportfare }}" @if ($isView == 0) disabled @endif>
                 <label for="publictransportfare">รถโดยสารสาธารณะทั่วไป / บาท</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="expresswaytoll" name="expresswaytoll" min="0" class="form-control"
-                    value="{{ $expense->expresswaytoll }}">
+                    value="{{ $expense->expresswaytoll }}" @if ($isView == 0) disabled @endif>
                 <label for="expresswaytoll">ค่าทางด่วน / บาท</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="number" id="otherexpenses" name="otherexpenses" min="0" class="form-control"
-                    value="{{ $expense->otherexpenses }}">
+                    value="{{ $expense->otherexpenses }}" @if ($isView == 0) disabled @endif>
                 <label for="otherexpenses">ค่าใช้จ่ายอื่นๆ / บาท</label>
             </div>
         </div>
@@ -134,14 +134,14 @@
         <div class="row g-4">
             <div class="col-sm-12 text-center">
                 <div class="form-check form-check-inline mt-3">
-                    <input class="form-check-input" type="radio" name="checktoil" id="checktoil_1"
+                    <input class="form-check-input" type="radio" name="checktoil" id="checktoil_1" @if ($isView == 0) onclick="return false;" @endif
                         value="1" @if ($expense->checktoil == 1)
                             checked="checked"
                         @endif>
                     <label class="form-check-label" for="checktoil_1">ประสงค์เบิกน้ำมัน</label>
                 </div>
                 <div class="form-check form-check-inline mt-3">
-                    <input class="form-check-input" type="radio" name="checktoil" id="checktoil_2"
+                    <input class="form-check-input" type="radio" name="checktoil" id="checktoil_2" @if ($isView == 0) onclick="return false;" @endif
                         value="2" @if ($expense->checktoil == 2)
                         checked="checked"
                     @endif>
@@ -245,7 +245,7 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <div class="form-floating form-floating-outline">
-                        <input type="number" id="distancemore" name="distancemore" min="0"   @if ($isView == 1) onclick="return false;" @endif
+                        <input type="number" id="distancemore" name="distancemore" min="0"   @if ($isView == 0) disabled @endif
                             class="form-control" value="{{ $expense->distancemore }}">
                         <label for="distancemore">ระยะทางเพิ่มเติม / กิโลเมตร</label>
                     </div>
@@ -253,7 +253,7 @@
                 <div class="col-md-8 mb-3"></div>
                 <div class="col-md-12 mb-3">
                     <div class="form-floating form-floating-outline mb-4">
-                        <textarea class="form-control h-px-100" id="distancenote" name="distancenote" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง">{{ $expense->distancenote }}</textarea>
+                        <textarea class="form-control h-px-100" id="distancenote" name="distancenote" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง" @if ($isView == 0) disabled @endif>{{ $expense->distancenote }}</textarea>
                         <label for="distancenote">ข้อมูลเพิ่มเติมเกี่ยวกับการเดินทาง</label>
                     </div>
                 </div>

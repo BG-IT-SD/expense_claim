@@ -270,7 +270,9 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ round($exgroup->total) }}</span>
+                                                    {{-- {{ round($exgroup->total) }} --}}
+                                                    {{ number_format(round($exgroup->total),2) }}
+                                                </span>
 
                                             </td>
                                             <td>

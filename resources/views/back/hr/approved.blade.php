@@ -83,12 +83,42 @@
                                                                         value="{{ $expense->id }}">
                                                                 </td>
                                                                 <td>{{ $expense->prefix . $expense->id }}</td>
-                                                                <td class="text-wrap">
+                                                                {{-- <td class="text-wrap">
                                                                     {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                                         'd/m/Y H:i',
                                                                     ) .
                                                                         ' - ' .
                                                                         \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                                </td> --}}
+                                                                {{-- <td class="text-wrap">
+                                                                    @if ($expense->vbooking?->departure_date)
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
+                                                                        -
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                                    @else
+                                                                        <span class="text-muted">-</span>
+                                                                    @endif
+                                                                </td> --}}
+                                                                <td class="text-wrap">
+                                                                    @if ($expense->extype == 2)
+                                                                        @if ($expense->vbookingdrv)
+                                                                            {{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date . ' ' . $expense->vbookingdrv->departure_time)->format('d/m/Y H:i') }}
+                                                                            -
+                                                                            {{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date . ' ' . $expense->vbookingdrv->return_time)->format('d/m/Y H:i') }}
+                                                                        @else
+                                                                            <span class="text-muted">
+                                                                                -</span>
+                                                                        @endif
+                                                                    @else
+                                                                        @if ($expense->vbooking)
+                                                                            {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
+                                                                            -
+                                                                            {{ \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                                        @else
+                                                                            <span class="text-muted">
+                                                                                -</span>
+                                                                        @endif
+                                                                    @endif
                                                                 </td>
                                                                 <td>{{ $expense->bookid }}</td>
                                                                 <td class="text-wrap">
@@ -102,7 +132,14 @@
                                                                 <td class="text-wrap">
                                                                     {{ BuEmp($expense->empid) }}
                                                                 </td>
-                                                                <td>{{ $expense->vbooking->locationbu }}</td>
+                                                                {{-- <td>{{ $expense->vbooking->locationbu }}</td> --}}
+                                                                <td>
+                                                                    @if ($expense->extype == 2)
+                                                                        {{ $expense->vbookingdrv?->locationbu ?? '-' }}
+                                                                    @else
+                                                                        {{ $expense->vbooking?->locationbu ?? '-' }}
+                                                                    @endif
+                                                                </td>
                                                                 <td>{{ $expense->totalprice ?? 0 }}</td>
                                                                 <td>
                                                                     @if (!is_null($expense->latestApprove->typeapprove))
@@ -151,7 +188,6 @@
                                                                                     class="mdi mdi-eye-arrow-right-outline"></span>
                                                                                 View</a>
                                                                             <a href="{{ route('HR.aftedit', $expense->id) }}"
-
                                                                                 class="btn btn-sm btn-warning"><span
                                                                                     class="mdi mdi-edit"></span> Edit</a>
                                                                         @endif
