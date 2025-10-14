@@ -459,7 +459,8 @@ class ExpenseController extends Controller
             'gasolinecost' => 'required',
             'totalExpense' => 'required',
             // ถ้ามีใช้จ่ายอื่นๆให้บังคับกรอกไฟล์
-            'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            // 'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'files.*' => 'sometimes|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
 
