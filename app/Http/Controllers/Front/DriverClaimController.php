@@ -542,10 +542,13 @@ class DriverClaimController extends Controller
 
         $usedBookIds = ExpenseLog::where('type', 2)->pluck('bookid');
 
+
         $bookings = Vbookmanage::where('driver_empid', $empid)
             ->whereNotIn('id', $usedBookIds)
+            ->whereDate('departure_date', '>=', Carbon::now()->subDays(7)) // ⬅ ดึงย้อนหลัง 7 วัน
             ->orderByDesc('departure_date')
             ->get();
+
 
         return view('front.driver.booking-list', compact('bookings'));
     }
