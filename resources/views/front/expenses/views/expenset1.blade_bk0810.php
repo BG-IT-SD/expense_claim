@@ -22,7 +22,7 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     <select id="departurefrom" name="departurefrom" class="form-control w-100 text-dark"
-                        data-style="btn-default" tabindex="null" @if ($isView == 0) disabled @endif>
+                        data-style="btn-default" tabindex="null">
                         <!-- <option>เลือกสถานที่</option> -->
                         {{-- ถ้าเดินทางแบบรถส่วนตัวให้เลือกทั้งสองรายการ แต่ถ้าเดินทางจากรถบริษัทมีแค่บริษัทอย่างเดียว --}}
                         @if ($expense->vbooking->type_reserve == 4)
@@ -88,26 +88,24 @@
         </div>
         {{-- Map --}}
         @if ($expense->vbooking->type_reserve == 4 && $passengertype == 0)
-            <div class="col-sm-3">
-                <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่
-                    จาก google map</span>
+        <div class="col-sm-3">
+            <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่ จาก google map</span>
+        </div>
+        <div class="col-sm-9">
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t7" class="form-control" value="{{ $expense->map_a_name ?? "" }}"
+                    disabled>
+                <label for="expense_t7">สถานที่ต้นทาง</label>
             </div>
-            <div class="col-sm-9">
+        </div>
+        <div class="col-sm-6">
+            <div class="form-floating form-floating-outline">
+                <input type="text" id="expense_t8" class="form-control" value="{{ $expense->map_b_name ?? "" }}" disabled>
+                <label for="expense_t8">สถานที่ปลายทาง</label>
             </div>
-            <div class="col-sm-6">
-                <div class="form-floating form-floating-outline">
-                    <input type="text" id="expense_t7" class="form-control" value="{{ $expense->map_a_name ?? '' }}"
-                        disabled>
-                    <label for="expense_t7">สถานที่ต้นทาง</label>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="form-floating form-floating-outline">
-                    <input type="text" id="expense_t8" class="form-control" value="{{ $expense->map_b_name ?? '' }}"
-                        disabled>
-                    <label for="expense_t8">สถานที่ปลายทาง</label>
-                </div>
-            </div>
+        </div>
         @endif
         {{-- Map --}}
     </div>
@@ -129,7 +127,7 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     <select id="returnfrom" name="returnfrom" class="form-control w-100 text-dark"
-                        data-style="btn-default" tabindex="null" @if ($isView == 0) disabled @endif>
+                        data-style="btn-default" tabindex="null">
                         @if ($expense->vbooking->type_reserve == 4 && $expense->vbooking->locationid == 12)
                             <option value="2" {{ $expense->returnfrom == 2 ? 'selected' : '' }}>สถานที่อื่นๆ
                             </option>
@@ -153,10 +151,7 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     @if ($expense->vbooking->locationid == 12)
-                        @if (
-                            $expense->vbooking->type_reserve == 1 ||
-                                $expense->vbooking->type_reserve == 3 ||
-                                $expense->vbooking->type_reserve == 4)
+                        @if ($expense->vbooking->type_reserve == 1 || $expense->vbooking->type_reserve == 3 || $expense->vbooking->type_reserve == 4)
                             <input type="text" class="form-control" name="returnfromtext2"
                                 value="{{ $expense->vbooking->location_name }}" disabled>
                             <input type="hidden" class="form-control" name="returnfromtext"
@@ -191,30 +186,19 @@
             </div> --}}
             <div class="form-floating form-floating-outline">
                 <input type="text" id="returntime" name="returntime" class="form-control"
-                    value="{{ $expense->returntime }}" required  @if ($isView == 0) disabled @endif />
+                    value="{{ $expense->returntime }}" required />
                 <label for="returntime">ถึงเวลา</label>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
                 <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
-                    value="{{ $expense->totaldistance }}"
-                    @if ($isView == 1) {{-- HR / ผู้แก้ไข: พิมพ์ได้ --}}
-           @else
-             disabled {{-- อย่าใส่ disabled --}} @endif>
-                <input type="hidden" id="totaldistance" name="totaldistance"
+                    value="{{ $expense->totaldistance }}" disabled>
+                <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
                     value="{{ $expense->totaldistance }}">
-                <label for="totaldistance_text">ระยะทางไป-กลับ</label>
-
-                @if ($isView == 1)
-                    <small class="text-muted" id="hr-distance-hint">
-                        💡 สามารถแก้ไขระยะทางได้ (ระบบจะคำนวณค่าน้ำมันใหม่อัตโนมัติ)
-                    </small>
-                @endif
+                <label for="totaldistance">ระยะทางไป-กลับ</label>
             </div>
         </div>
-
-
     </div>
     <div class="alert alert-primary mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 1</h6>

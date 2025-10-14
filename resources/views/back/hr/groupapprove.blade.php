@@ -50,11 +50,21 @@
                                                 $expense->extype == 2 || $expense->extype == 3
                                                     ? $expense->tech->fullname
                                                     : $expense->user->fullname;
-
-                                            $days =
-                                                \Carbon\Carbon::parse($expense->vbooking->departure_date)->diffInDays(
-                                                    \Carbon\Carbon::parse($expense->vbooking->return_date),
-                                                ) + 1;
+                                            if ($expense->extype == 2) {
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbookingdrv->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbookingdrv->return_date),
+                                                    ) + 1;
+                                            } else {
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
+                                            }
 
                                             $food = $expense->costoffood ?? 0; //ค่าอาหาร
                                             $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
@@ -69,7 +79,7 @@
                                             $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
                                             $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
                                             $sum_total += $total;
-                                            $sumtotalother = ($sum_express + $sum_publictransport) + $sum_other;
+                                            $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
                                         @endphp
                                         <tr>
                                             <td>
@@ -77,18 +87,30 @@
                                                 <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
 
                                             </td>
-                                            <td> {{ 'EX'.$expense->id }}</td>
-                                            <td>{{ $expense->vbooking->display_location }}</td>
+                                            <td> {{ 'EX' . $expense->id }}</td>
+                                            @if ($expense->extype == 2)
+                                                <td>{{ $expense->vbookingdrv->display_location }}</td>
+                                            @else
+                                                <td>{{ $expense->vbooking->display_location }}</td>
+                                            @endif
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>
                                             <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
                                             <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                             <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
-                                            </td>
-                                            <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
-                                            </td>
+                                            @if ($expense->extype == 2)
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date)->format('d/m/Y') }}
+                                                </td>
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date)->format('d/m/Y') }}
+                                                </td>
+                                            @else
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
+                                                </td>
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
+                                                </td>
+                                            @endif
+
                                             <td>{{ $days }}</td>
                                             <td>{{ number_format($food, 2) }}</td>
                                             <td>{{ number_format($gas, 2) }}</td>
@@ -142,8 +164,8 @@
                                     <tr>
                                         <td>ค่าอาหาร</td>
                                         <td>
-                                            <span
-                                                class="btn rounded-pill btn-primary waves-effect waves-light"> {{ number_format($sum_food, 2) }}</span>
+                                            <span class="btn rounded-pill btn-primary waves-effect waves-light">
+                                                {{ number_format($sum_food, 2) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -164,7 +186,8 @@
                                         <td>รวม</td>
                                         <td>
                                             <span
-                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense"> {{ number_format(round($sum_total),2) }}</span>
+                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
+                                                {{ number_format(round($sum_total), 2) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>

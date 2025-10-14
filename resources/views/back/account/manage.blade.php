@@ -157,7 +157,7 @@
                                                 <td>{{ number_format($express, 2) }}</td>
                                                 <td>{{ number_format($publictransport, 2) }}</td>
                                                 <td>{{ number_format($other, 2) }}</td>
-                                                <td>{{ number_format($total, 2) }}</td>
+                                                <td>{{ number_format(round($total), 2) }}</td>
                                             </tr>
                                             <input type="hidden" class="row-food" data-id="{{ $expense->id }}"
                                                 value="{{ $food }}">
@@ -270,7 +270,9 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ round($exgroup->total) }}</span>
+                                                    {{-- {{ round($exgroup->total) }} --}}
+                                                    {{ number_format(round($exgroup->total),2) }}
+                                                </span>
 
                                             </td>
                                             <td>

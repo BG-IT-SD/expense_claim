@@ -113,7 +113,7 @@
                     <td style="text-align: center;border: 1px solid #000">{{ number_format($public, 2) }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ number_format($other, 2) }}</td>
                     <td style="text-align: right;border: 1px solid #000;">
-                        <b>{{ number_format($total, 2) }}</b></td>
+                        <b>{{ number_format(round($total), 2) }}</b></td>
                 </tr>
             @endforeach
             <tr class="border: 1px solid #000;">

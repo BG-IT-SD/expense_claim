@@ -6,8 +6,7 @@
     <div class="row g-4">
         <div class="col-sm-6">
             <div class="form-floating form-floating-outline">
-                <input type="text" id="expense_t1" class="form-control" value="{{ $expense->vbooking->location_name }}"
-                    disabled>
+                <input type="text" id="expense_t1" class="form-control" value="{{ $booking->location_name }}" disabled>
                 <label for="expense_t1">สถานที่ปฏิบัติงาน</label>
             </div>
         </div>
@@ -22,15 +21,14 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     <select id="departurefrom" name="departurefrom" class="form-control w-100 text-dark"
-                        data-style="btn-default" tabindex="null" @if ($isView == 0) disabled @endif>
+                        data-style="btn-default" tabindex="null">
                         <!-- <option>เลือกสถานที่</option> -->
                         {{-- ถ้าเดินทางแบบรถส่วนตัวให้เลือกทั้งสองรายการ แต่ถ้าเดินทางจากรถบริษัทมีแค่บริษัทอย่างเดียว --}}
-                        @if ($expense->vbooking->type_reserve == 4)
-                            <option value="1" {{ $expense->departurefrom == 1 ? 'selected' : '' }}>บริษัท</option>
-                            <option value="2" {{ $expense->departurefrom == 2 ? 'selected' : '' }}>สถานที่พัก
-                            </option>
+                        @if ($booking->type_reserve == 4)
+                            <option value="1">บริษัท</option>
+                            <option value="2">สถานที่พัก</option>
                         @else
-                            <option value="1" {{ $expense->departurefrom == 1 ? 'selected' : '' }}>บริษัท</option>
+                            <option value="1">บริษัท</option>
                         @endif
 
                     </select>
@@ -44,19 +42,19 @@
         <div class="col-sm-6 form-password-toggle">
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
-                    {{-- <input type="text" id="confirm-password" class="form-control" value="{{ $expense->vbooking->bu }}"
-                        aria-describedby="confirm-password2"> --}}
-
-                    @if ($expense->vbooking->locationid == 12)
-                        @if ($expense->vbooking->type_reserve == 1 || $expense->vbooking->type_reserve == 3)
+                    {{-- <input type="text" id="confirm-password" class="form-control" value="{{ $booking->bu }}"
+                        aria-describedby="confirm-password2">
+                    --}}
+                    @if ($booking->locationid == 12)
+                        @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
                             @php
-                                $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
+                                $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
                             @endphp
                             <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                                 data-style="btn-default" tabindex="null" disabled>
                                 @foreach ($plants as $plant)
                                     <option value="{{ $plant->id }}"
-                                        {{ $plant->plantname == $expense->vbooking->bu ? 'selected' : '' }}>
+                                        {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>
                                         {{ $plant->plantname }}
                                     </option>
                                 @endforeach
@@ -67,14 +65,13 @@
                         @endif
                     @else
                         @php
-                            $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
+                            $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
                         @endphp
                         <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
-                                    {{ $plant->plantname == $expense->vbooking->bu ? 'selected' : '' }}>
-                                    {{ $plant->plantname }}
+                                    {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>{{ $plant->plantname }}
                                 </option>
                             @endforeach
                         </select>
@@ -87,30 +84,66 @@
             </div>
         </div>
         {{-- Map --}}
-        @if ($expense->vbooking->type_reserve == 4 && $passengertype == 0)
-            <div class="col-sm-3">
-                <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่
-                    จาก google map</span>
-            </div>
-            <div class="col-sm-9">
-            </div>
-            <div class="col-sm-6">
-                <div class="form-floating form-floating-outline">
-                    <input type="text" id="expense_t7" class="form-control" value="{{ $expense->map_a_name ?? '' }}"
-                        disabled>
-                    <label for="expense_t7">สถานที่ต้นทาง</label>
+        @if ($booking->type_reserve == 4 && $passengertype == 0)
+            <!-- เฉพาะเมื่อ type_reserve == 4 -->
+            <div class="container mt-3 mb-3 mapsearch">
+                <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
+                <div class="mb-3">
+                    <label for="origin">ต้นทาง</label>
+                    <input id="origin" class="form-control" type="text" placeholder="เช่น บางกอกกล๊าส">
                 </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="form-floating form-floating-outline">
-                    <input type="text" id="expense_t8" class="form-control" value="{{ $expense->map_b_name ?? '' }}"
-                        disabled>
-                    <label for="expense_t8">สถานที่ปลายทาง</label>
+                <div class="mb-3">
+                    <label for="destination">ปลายทาง</label>
+                    <input id="destination" class="form-control" type="text" placeholder="เช่น ฟิวเจอร์พาร์ค">
                 </div>
+                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
+
+                <div class="mt-3">
+                    <strong>ระยะทาง:</strong> <span id="distance"></span>
+                </div>
+
+                <div id="map" style="height: 400px;" class="mt-4"></div>
+                {{-- เก็บ ละติจูด ลองติจูด และชื้อปลายทางและต้นทาง --}}
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="latitude_b" id="latitude_b">
+                <input type="hidden" name="longitude_b" id="longitude_b">
+                <input type="hidden" name="map_a_name" id="map_a_name">
+                <input type="hidden" name="map_b_name" id="map_b_name">
             </div>
+            {{-- <div class="container mt-3 mb-3">
+                <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
+
+                <div class="mb-3">
+                    <label for="origin">ต้นทาง</label>
+                    <gmp-place-autocomplete id="origin"></gmp-place-autocomplete>
+                    <input type="hidden" name="origin_value" id="origin_value">
+                </div>
+
+                <div class="mb-3">
+                    <label for="destination">ปลายทาง</label>
+                    <gmp-place-autocomplete id="destination"></gmp-place-autocomplete>
+                    <input type="hidden" name="destination_value" id="destination_value">
+                </div>
+
+                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
+
+                <div class="mt-3">
+                    <strong>ระยะทาง:</strong> <span id="distance"></span>
+                </div>
+
+                <div id="map" style="height: 400px;" class="mt-4"></div>
+
+            </div> --}}
         @endif
+
+
         {{-- Map --}}
     </div>
+    {{--
+            <script
+                src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap&libraries=places&v=weekly"
+                defer></script> --}}
 
     <div class="alert alert-primary mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 1</h6>
@@ -129,17 +162,16 @@
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
                     <select id="returnfrom" name="returnfrom" class="form-control w-100 text-dark"
-                        data-style="btn-default" tabindex="null" @if ($isView == 0) disabled @endif>
-                        @if ($expense->vbooking->type_reserve == 4 && $expense->vbooking->locationid == 12)
-                            <option value="2" {{ $expense->returnfrom == 2 ? 'selected' : '' }}>สถานที่อื่นๆ
-                            </option>
-                        @elseif($expense->vbooking->type_reserve == 4 && $expense->locationid != 12)
-                            <option value="1" {{ $expense->returnfrom == 1 ? 'selected' : '' }}>บริษัท</option>
-                        @elseif($expense->vbooking->type_reserve == 1 && $expense->vbooking->locationid == 12)
-                            <option value="2" {{ $expense->returnfrom == 2 ? 'selected' : '' }}>สถานที่อื่นๆ
-                            </option>
+                        data-style="btn-default" tabindex="null">
+                        @if ($booking->type_reserve == 4 && $booking->locationid == 12)
+                            {{-- รถส่วนตัวและนอกสถานที่ --}}
+                            <option value="2">สถานที่อื่นๆ</option>
+                        @elseif($booking->type_reserve == 4 && $booking->locationid != 12)
+                            <option value="1">บริษัท</option>
+                        @elseif(($booking->type_reserve == 1 || $booking->type_reserve == 3) && $booking->locationid == 12)
+                            <option value="2">สถานที่อื่นๆ</option>
                         @else
-                            <option value="1" {{ $expense->returnfrom == 1 ? 'selected' : '' }}>บริษัท</option>
+                            <option value="1">บริษัท</option>
                         @endif
 
                     </select>
@@ -152,27 +184,24 @@
         <div class="col-sm-6 form-password-toggle">
             <div class="input-group input-group-merge">
                 <div class="form-floating form-floating-outline">
-                    @if ($expense->vbooking->locationid == 12)
-                        @if (
-                            $expense->vbooking->type_reserve == 1 ||
-                                $expense->vbooking->type_reserve == 3 ||
-                                $expense->vbooking->type_reserve == 4)
+                    @if ($booking->locationid == 12)
+                        @if ($booking->type_reserve == 1 || $booking->type_reserve == 3 || $booking->type_reserve == 4)
                             <input type="text" class="form-control" name="returnfromtext2"
-                                value="{{ $expense->vbooking->location_name }}" disabled>
+                                value="{{ $booking->location_name }}" disabled>
                             <input type="hidden" class="form-control" name="returnfromtext"
-                                value="{{ $expense->vbooking->location_name }}">
+                                value="{{ $booking->location_name }}">
                             <label for="returnfromtext2">รายละเอียดสถานที่</label>
                         @else
                         @endif
                     @else
                         @php
-                            $selectedReturnPlant = $plants->firstWhere('plantname', $expense->vbooking->locationbu);
+                            $selectedReturnPlant = $plants->firstWhere('plantname', $booking->locationbu);
                         @endphp
                         <select id="returnplant2" name="returnplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
-                                    {{ $plant->plantname == $expense->vbooking->locationbu ? 'selected' : '' }}>
+                                    {{ $plant->plantname == $booking->locationbu ? 'selected' : '' }}>
                                     {{ $plant->plantname }}
                                 </option>
                             @endforeach
@@ -190,31 +219,32 @@
                 <label for="returntime">ถึงเวลา</label>
             </div> --}}
             <div class="form-floating form-floating-outline">
-                <input type="text" id="returntime" name="returntime" class="form-control"
-                    value="{{ $expense->returntime }}" required  @if ($isView == 0) disabled @endif />
+                <input type="text" id="returntime" name="returntime" placeholder="20:00:00" class="form-control"
+                    required />
                 <label for="returntime">ถึงเวลา</label>
             </div>
         </div>
         <div class="col-sm-6">
-            <div class="form-floating form-floating-outline">
-                <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
-                    value="{{ $expense->totaldistance }}"
-                    @if ($isView == 1) {{-- HR / ผู้แก้ไข: พิมพ์ได้ --}}
-           @else
-             disabled {{-- อย่าใส่ disabled --}} @endif>
-                <input type="hidden" id="totaldistance" name="totaldistance"
-                    value="{{ $expense->totaldistance }}">
-                <label for="totaldistance_text">ระยะทางไป-กลับ</label>
-
-                @if ($isView == 1)
-                    <small class="text-muted" id="hr-distance-hint">
-                        💡 สามารถแก้ไขระยะทางได้ (ระบบจะคำนวณค่าน้ำมันใหม่อัตโนมัติ)
-                    </small>
-                @endif
-            </div>
+            @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
+                <div class="form-floating form-floating-outline">
+                    <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
+                        value="{{ $totalDistance }}" disabled>
+                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                        value="{{ $totalDistance }}">
+                    <label for="totaldistance_text">ระยะทางไป-กลับ</label>
+                </div>
+            @else
+                <div class="form-floating form-floating-outline">
+                    <input type="text" id="totaldistance_text" name="totaldistance_text" class="form-control"
+                        value="0" disabled>
+                    <input type="hidden" id="totaldistance" name="totaldistance" class="form-control"
+                        value="0">
+                    <input type="hidden" id="totaldistancemax" name="totaldistancemax" class="form-control"
+                        value="{{ $totalDistance }}">
+                    <label for="totaldistance_text">ระยะทางไป-กลับ</label>
+                </div>
+            @endif
         </div>
-
-
     </div>
     <div class="alert alert-primary mb-3 mt-3">
         <h6 class="mb-0">ส่วนที่ 1</h6>
@@ -225,27 +255,27 @@
             @foreach ($reasons as $key => $label)
                 <label class="form-check-inline me-3">
                     <input class="form-check-input" type="radio" name="purpose" value="{{ $label }}"
-                        {{ $expense->vbooking->objname == $label ? 'checked disabled' : 'disabled' }}>
+                        {{ $booking->objname == $label ? 'checked disabled' : 'disabled' }}>
                     {{ $label }}
                 </label>
             @endforeach
 
 
         </div>
-        @if ($expense->vbooking->objid == 7)
+        @if ($booking->objid == 7)
             <div class="col-sm-12">
                 <div class="form-floating form-floating-outline mb-4">
-                    <textarea class="form-control h-px-100" id="exampleFormControlTextarea1" disabled>{{ $expense->vbooking->remark }}</textarea>
+                    <textarea class="form-control h-px-100" id="exampleFormControlTextarea1" disabled>{{ $booking->remark }}</textarea>
                     <label for="exampleFormControlTextarea1">อื่่นๆ</label>
                 </div>
             </div>
         @endif
         <div class="col-12 d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
+            <button class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
                 <span class="align-middle d-sm-inline-block d-none">Previous</span>
             </button>
-            <button type="button" class="btn btn-primary btn-next waves-effect waves-light">
+            <button class="btn btn-primary btn-next waves-effect waves-light">
                 <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
                 <i class="mdi mdi-arrow-right"></i>
             </button>

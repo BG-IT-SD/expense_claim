@@ -120,7 +120,7 @@
                 <td align="right">{{ number_format($express, 2) }}</td>
                 <td align="right">{{ number_format($public, 2) }}</td>
                 <td align="right">{{ number_format($other, 2) }}</td>
-                <td align="right"><strong>{{ number_format($total, 2) }}</strong></td>
+                <td align="right"><strong>{{ number_format(round($total), 2) }}</strong></td>
             </tr>
         @endforeach
         <tr style="font-weight: bold;">

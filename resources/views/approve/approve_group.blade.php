@@ -113,17 +113,24 @@
                                                 <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
                                                 <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                                 <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
+                                                <td>
+                                                    {{ $expense->vbooking && $expense->vbooking->departure_date
+                                                        ? \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y')
+                                                        : '-' }}
                                                 </td>
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
+                                                <td>
+                                                    {{ $expense->vbooking && $expense->vbooking->return_date
+                                                        ? \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y')
+                                                        : '-' }}
                                                 </td>
+
                                                 <td>{{ $days }}</td>
                                                 <td>{{ number_format($food, 2) }}</td>
                                                 <td>{{ number_format($gas, 2) }}</td>
                                                 <td>{{ number_format($express, 2) }}</td>
                                                 <td>{{ number_format($publictransport, 2) }}</td>
                                                 <td>{{ number_format($other, 2) }}</td>
-                                                <td>{{ number_format($total, 2) }}</td>
+                                                <td>{{ number_format(round($total), 2) }}</td>
                                             </tr>
                                         @endforeach
 

@@ -256,7 +256,7 @@ class HRController extends Controller
         //     })
         //     ->whereIn('extype', [1, 2, 3])
         //     ->get();
-        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+        $expenses = Expense::with(['latestApprove', 'vbooking','vbookingdrv', 'user', 'tech'])
             ->whereHas('latestApprove', function ($q) use ($usercheck) {
                 $q->where('typeapprove', 3)
                     ->where('statusapprove', 1)
@@ -725,6 +725,7 @@ class HRController extends Controller
             // 'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
+        // dd($request->all());
 
         try {
             DB::beginTransaction();
@@ -749,6 +750,7 @@ class HRController extends Controller
                     'basedistance' => $request->basedistance ?? 0,
                     'distancemore' => $request->distancemore ?? 0,
                     'distancenote' => $request->distancenote ?? '',
+                    'totaldistance' => $request->totaldistance ?? 0,
                     // New
                 ]);
             }
@@ -1179,7 +1181,7 @@ class HRController extends Controller
             ->first();
         // dd($nextstaffgroup);
 
-        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
+        $expenses = Expense::with(['vbooking','vbookingdrv', 'user', 'tech', 'userhr'])
             ->whereIn('id', $ids)
             ->get();
 

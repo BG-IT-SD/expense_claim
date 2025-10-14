@@ -459,7 +459,8 @@ class ExpenseController extends Controller
             'gasolinecost' => 'required',
             'totalExpense' => 'required',
             // ถ้ามีใช้จ่ายอื่นๆให้บังคับกรอกไฟล์
-            'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            // 'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'files.*' => 'sometimes|file|max:5120|mimes:jpg,jpeg,png,pdf',
 
         ]);
 
@@ -838,7 +839,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 7);
+            ->where('numlvl', '>=', 10);
 
         $total = $query->count();
 

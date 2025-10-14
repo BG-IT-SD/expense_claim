@@ -111,7 +111,7 @@
                                             <td>{{ number_format($express, 2) }}</td>
                                             <td>{{ number_format($publictransport, 2) }}</td>
                                             <td>{{ number_format($other, 2) }}</td>
-                                            <td>{{ number_format($total, 2) }}</td>
+                                            <td>{{ number_format(round($total), 2) }}</td>
                                         </tr>
                                     @endforeach
 
