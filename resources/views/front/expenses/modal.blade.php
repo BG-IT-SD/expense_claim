@@ -7,7 +7,7 @@
             <h3 class="mb-3 block-title">แจ้งเตือน</h3>
 
               <div class="h4">
-                {!! $messageAlert->message !!}
+                {!! $message_decode !!}
              </div>
 
           </div>

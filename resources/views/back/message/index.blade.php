@@ -112,21 +112,70 @@
                 }
             });
 
-            // โหลดค่าที่บันทึกไว้
-            const saved = @json($message->message ?? '');
-            if (saved) {
-                // วิธีที่ง่ายสุดและตรงจุด
-                quill.clipboard.dangerouslyPasteHTML(saved);
+            // ✅ โหลดค่าที่บันทึกไว้จาก Laravel (Base64 หรือ HTML เดิม)
+            const savedData = @json($message->message ?? '');
 
-                // หรือทางเลือกที่ปลอดภัยกว่า (แปลงเป็น Delta ก่อน)
-                // quill.setContents(quill.clipboard.convert(saved));
+            // ✅ ฟังก์ชันตรวจว่า string เป็น Base64 จริงหรือไม่
+            function isBase64(str) {
+                if (!str || str.trim() === '') return false;
+                // ถ้ามีอักขระที่ไม่ควรอยู่ใน Base64 ก็ return false
+                const notBase64 = /[^A-Z0-9+\/=]/i;
+                if (notBase64.test(str)) return false;
+
+                try {
+                    // ถอดกลับแล้วเข้ารหัสใหม่ต้องได้ค่าเท่ากัน
+                    return btoa(atob(str)) === str;
+                } catch {
+                    return false;
+                }
             }
 
-            // ก่อน submit: ดึง HTML จาก Quill ลง hidden input
-            document.getElementById('frmUpdateMessage').addEventListener('submit', function() {
-                // ถ้าใช้ Quill v2 มี getSemanticHTML() จะสวยกว่า
-                // document.getElementById('message').value = quill.getSemanticHTML();
-                document.getElementById('message').value = quill.root.innerHTML;
+            // ✅ ถ้าเป็น Base64 → decode แล้วใส่ Quill
+            if (isBase64(savedData)) {
+                try {
+                    const decoded = atob(savedData);
+                    quill.clipboard.dangerouslyPasteHTML(decoded);
+                } catch (err) {
+                    console.error('❌ Decode Base64 error:', err);
+                }
+            } else {
+                // ✅ ถ้าไม่ใช่ Base64 → ถือว่าเป็น HTML เดิม
+                quill.clipboard.dangerouslyPasteHTML(savedData);
+            }
+
+            const form = document.getElementById('frmUpdateMessage');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                let html = quill.root.innerHTML.trim();
+                const textOnly = quill.getText().trim();
+
+                // ✅ ถ้าไม่มีข้อความเลย
+                if (!textOnly) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณากรอกข้อความก่อนบันทึก',
+                        confirmButtonText: 'ตกลง'
+                    });
+                    return;
+                }
+
+                // ✅ Preview ให้ผู้ใช้ตรวจสอบก่อนบันทึก
+                Swal.fire({
+                    title: 'ตรวจสอบข้อความก่อนบันทึก',
+                    html: `<div style="text-align:left;max-height:400px;overflow:auto;">${html}</div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึก',
+                    cancelButtonText: 'ยกเลิก',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ✅ เข้ารหัส Base64 ก่อนส่งกลับ
+                        const encoded = btoa(unescape(encodeURIComponent(html)));
+                        document.getElementById('message').value = encoded;
+                        form.submit();
+                    }
+                });
             });
         });
     </script>

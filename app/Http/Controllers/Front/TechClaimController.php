@@ -42,13 +42,13 @@ class TechClaimController extends Controller
         $groupEmpIds = GroupSpecial::where('typeid', 3)->pluck('fullname', 'empid')->toArray();
 
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
 
         $bookings = Vbooking::where(function ($q) use ($groupEmpIds) {
-                $q->whereIn('booking_emp_id', array_keys($groupEmpIds))
-                  ->orWhereIn('passenger_empid', array_keys($groupEmpIds));
-            })
+            $q->whereIn('booking_emp_id', array_keys($groupEmpIds))
+                ->orWhereIn('passenger_empid', array_keys($groupEmpIds));
+        })
             ->when(
                 $request->filled('bookid'),
                 fn($q) =>
@@ -84,40 +84,41 @@ class TechClaimController extends Controller
         return view('front.techclaim.list', compact('bookings', 'groupEmpIds'));
     }
 
-    public function history(Request $request){
+    public function history(Request $request)
+    {
 
         $exid = $request->filled('exid')
-        ? ltrim($request->exid, 'EX')
-        : null;
+            ? ltrim($request->exid, 'EX')
+            : null;
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
-        ->when(
-            $request->filled('exid'),
-            fn($q) =>
-            $q->where('id', $exid)
-        )
-        ->when(
-            $request->filled('bookid'),
-            fn($q) =>
-            $q->where('bookid', $request->bookid)
-        )
-        ->where('extype', 3)
-        ->whereHas('latestApprove', function ($query) {
-            $query->whereIn('typeapprove', [1, 2, 3, 4, 5,6]);
-        })
-        ->get();
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('bookid', $request->bookid)
+            )
+            ->where('extype', 3)
+            ->whereHas('latestApprove', function ($query) {
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
+            })
+            ->get();
 
         if ($request->filled('exdate') && $request->filled('end_exdate')) {
             $expenses = $expenses->filter(function ($exp) use ($request) {
                 $departure = optional($exp->vbooking)->departure_date;
 
                 return $departure &&
-                       $departure >= $request->exdate &&
-                       $departure <= $request->end_exdate;
+                    $departure >= $request->exdate &&
+                    $departure <= $request->end_exdate;
             })->values();
         }
 
-    return view('front.techclaim.history', compact('expenses'));
+        return view('front.techclaim.history', compact('expenses'));
     }
 
     /**
@@ -236,35 +237,35 @@ class TechClaimController extends Controller
     //     return view('front.techclaim.create', compact(['booking', 'empid', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','pageTech']));
     // }
     public function create($id, $empid)
-{
-    // 1) Booking ต้องมี
-    $booking = Vbookingall::find($id);
-    if (!$booking) {
-        abort(404, 'Booking not found');
-    }
+    {
+        // 1) Booking ต้องมี
+        $booking = Vbookingall::find($id);
+        if (!$booking) {
+            abort(404, 'Booking not found');
+        }
 
-    // 2) คนต้องมี
-    $person = Valldataemp::where('CODEMPID', $empid)
-        ->where('STAEMP', '!=', '9')
-        ->first();
+        // 2) คนต้องมี
+        $person = Valldataemp::where('CODEMPID', $empid)
+            ->where('STAEMP', '!=', '9')
+            ->first();
 
-    if (!$person) {
-        abort(404, 'Employee not found');
-    }
+        if (!$person) {
+            abort(404, 'Employee not found');
+        }
 
-    $empemail    = $person->EMAIL ?? '';
-    $empfullname = trim(($person->NAMFIRSTT ?? '').' '.($person->NAMLASTT ?? ''));
+        $empemail    = $person->EMAIL ?? '';
+        $empfullname = trim(($person->NAMFIRSTT ?? '') . ' ' . ($person->NAMLASTT ?? ''));
 
-    $typegroup   = 1;
-    $totalDistance = 0;
-    $startplant = "";
-    $endplant = "";
-    $passengertype = 0;
-    $rate_id="";
-    $bath_per_km = "";
-    $oilid = "";
-    $data_oil_price = "";
-     if (($booking->type_reserve == 4)) {
+        $typegroup   = 1;
+        $totalDistance = 0;
+        $startplant = "";
+        $endplant = "";
+        $passengertype = 0;
+        $rate_id = "";
+        $bath_per_km = "";
+        $oilid = "";
+        $data_oil_price = "";
+        if (($booking->type_reserve == 4)) {
 
             // ตรวจสอบ ผู้ร่วมเดินทาง
             if ($empid == $booking->passenger_empid) {
@@ -324,87 +325,124 @@ class TechClaimController extends Controller
             $oilid = $oilPriceID;
         }
 
-    $PlantStart = $booking->bu;
-    $bu        = BuEmp($empid); // อาจคืนค่า null ได้ แต่ไม่ทำให้พัง
+        $PlantStart = $booking->bu;
+        $bu        = BuEmp($empid); // อาจคืนค่า null ได้ แต่ไม่ทำให้พัง
 
-    // ระดับพนักงาน
-    $empLevel = (int) (LevelEmp($empid) ?? 0);
-    $level    = $empLevel <= 7 ? 1 : 2;
+        // ระดับพนักงาน
+        $empLevel = (int) (LevelEmp($empid) ?? 0);
+        $level    = $empLevel <= 7 ? 1 : 2;
 
-    // สิทธิพิเศษ (กันพังด้วย ?->)
-    $groupspecial = GroupSpecial::where('empid', $empid)->where('deleted', 0)->first();
-    if ($groupspecial) {
-        $typegroup = in_array($groupspecial->typeid, [1,2], true) ? 2 : 3;
+        // สิทธิพิเศษ (กันพังด้วย ?->)
+        $groupspecial = GroupSpecial::where('empid', $empid)->where('deleted', 0)->first();
+        if ($groupspecial) {
+            $typegroup = in_array($groupspecial->typeid, [1, 2], true) ? 2 : 3;
+        }
+
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+        // วันเวลาเดินทาง (กัน null)
+        $departure_date = $booking->departure_date
+            ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i')
+            : null;
+        $return_date = $booking->return_date
+            ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+
+        if ((int)$booking->locationid !== 12) {
+            $startplant = $PlantStart;
+            $endplant   = $booking->locationbu;
+            $totalDistance = $this->getDistance($startplant, $endplant);
+        }
+
+        // กลุ่มมื้ออาหาร (ถ้า $bu หรือ level ไม่แมตช์ ผลจะเป็น null ได้)
+        $groupplant = Groupplant::with(['plant', 'meal.group', 'meal'])
+            ->where('deleted', 0)
+            ->whereHas('plant', fn($q) => $q->where('plantname', $bu))
+            ->whereHas('meal.group', fn($q) => $q->where('levelid', $level))
+            ->first();
+
+        $startDate = Carbon::parse($booking->departure_date);
+        $endDate   = Carbon::parse($booking->return_date);
+        $startTime = Carbon::parse($booking->departure_time);
+        $endTime   = Carbon::parse($booking->return_time);
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+
+        // สายอนุมัติ (กันพังด้วย null-safe)
+        $groupData = $groupspecial?->groupapprove ?? 1;   // <-- จุดที่พังบ่อย
+        $nextStep  = $empLevel > 7 ? 2 : 1;
+        $nextStepApprove = Approvestep($bu, 3, $nextStep, $groupData) ?? [];
+
+        $heademail = $nextStepApprove['email']    ?? '';
+        $headname  = $nextStepApprove['fullname'] ?? '';
+        $headempid = $nextStepApprove['empid']    ?? '';
+        $headlevel = $nextStepApprove['level']    ?? '';
+
+        $approve_g = 0;
+        $pageTech  = 1;
+
+        $ratefuels = Fuelprice::where('status', 1)
+            ->where('deleted', 0)
+            ->orderByDesc('startrate')
+            ->get();
+
+        $messageAlert = MessageAlert::where('status', 1)->where('deleted', 0)->first();
+        $message_data = $messageAlert->message ?? 'test';
+
+        //ตรวจว่าเป็น Base64 จริงไหม
+        $isBase64 = false;
+        if ($message_data) {
+            $decoded = base64_decode($message_data, true); // true = strict mode
+            if ($decoded !== false && base64_encode($decoded) === $message_data) {
+                $isBase64 = true;
+            }
+        }
+
+        // ถอดรหัสถ้าใช่ Base64
+        $message_decode = $isBase64 ? base64_decode($message_data) : $message_data;
+
+        return view('front.techclaim.create', compact(
+            'booking',
+            'empid',
+            'empemail',
+            'empfullname',
+            'typegroup',
+            'plants',
+            'ratefuels',
+            'departure_date',
+            'return_date',
+            'reasons',
+            'totalDistance',
+            'groupplant',
+            'Alldayfood',
+            'startDate',
+            'startTime',
+            'endDate',
+            'endTime',
+            'empLevel',
+            'headempid',
+            'headlevel',
+            'heademail',
+            'headname',
+            'approve_g',
+            'pageTech',
+            'passengertype',
+            'rate_id',
+            'data_oil_price',
+            'oilid',
+            'bath_per_km',
+            'messageAlert',
+            'message_decode'
+        ));
     }
-
-    // Plant
-    $plants = Plant::where('status', 1)->where('deleted', 0)->get();
-
-    // วันเวลาเดินทาง (กัน null)
-    $departure_date = $booking->departure_date
-        ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i')
-        : null;
-    $return_date = $booking->return_date
-        ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i')
-        : null;
-
-    $reasons = ['อบรม','สัมมนา','ฝึกงาน','ติดตั้งเครื่องจักร','ลูกค้าร้องเรียน','พบลูกค้า','อื่นๆ'];
-
-    if ((int)$booking->locationid !== 12) {
-        $startplant = $PlantStart;
-        $endplant   = $booking->locationbu;
-        $totalDistance = $this->getDistance($startplant, $endplant);
-    }
-
-    // กลุ่มมื้ออาหาร (ถ้า $bu หรือ level ไม่แมตช์ ผลจะเป็น null ได้)
-    $groupplant = Groupplant::with(['plant','meal.group','meal'])
-        ->where('deleted', 0)
-        ->whereHas('plant', fn($q) => $q->where('plantname', $bu))
-        ->whereHas('meal.group', fn($q) => $q->where('levelid', $level))
-        ->first();
-
-    $startDate = Carbon::parse($booking->departure_date);
-    $endDate   = Carbon::parse($booking->return_date);
-    $startTime = Carbon::parse($booking->departure_time);
-    $endTime   = Carbon::parse($booking->return_time);
-    $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
-
-    // สายอนุมัติ (กันพังด้วย null-safe)
-    $groupData = $groupspecial?->groupapprove ?? 1;   // <-- จุดที่พังบ่อย
-    $nextStep  = $empLevel > 7 ? 2 : 1;
-    $nextStepApprove = Approvestep($bu, 3, $nextStep, $groupData) ?? [];
-
-    $heademail = $nextStepApprove['email']    ?? '';
-    $headname  = $nextStepApprove['fullname'] ?? '';
-    $headempid = $nextStepApprove['empid']    ?? '';
-    $headlevel = $nextStepApprove['level']    ?? '';
-
-    $approve_g = 0;
-    $pageTech  = 1;
-
-    $ratefuels = Fuelprice::where('status', 1)
-        ->where('deleted', 0)
-        ->orderByDesc('startrate')
-        ->get();
-
-        $messageAlert = MessageAlert::where('status',1)->where('deleted',0)->first();
-
-    return view('front.techclaim.create', compact(
-        'booking','empid','empemail','empfullname','typegroup','plants','ratefuels',
-        'departure_date','return_date','reasons','totalDistance','groupplant','Alldayfood',
-        'startDate','startTime','endDate','endTime','empLevel','headempid','headlevel',
-        'heademail','headname','approve_g','pageTech','passengertype','rate_id','data_oil_price','oilid','bath_per_km','messageAlert'
-    ));
-}
 
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.

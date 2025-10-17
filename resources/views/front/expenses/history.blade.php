@@ -70,7 +70,8 @@
                                             <button type="submit"
                                                 class="btn btn-primary me-sm-3 me-1 waves-effect waves-light"><span
                                                     class="mdi mdi-file-search-outline"></span></button>
-                                                    <a href="{{ route('Expense.history') }}" class="btn btn-outline-secondary">Reset</a>
+                                            <a href="{{ route('Expense.history') }}"
+                                                class="btn btn-outline-secondary">Reset</a>
                                         </div>
                                     </div>
                                 </div>
@@ -135,10 +136,20 @@
                                             <a href="{{ route('Expense.show', $expense->id) }}"
                                                 class="btn btn-sm btn-info"><span
                                                     class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+
                                             @php
                                                 $latestApprove = $expense->latestApprove;
                                                 $empid = $expense->empid;
+                                                $approve = optional($expense->latestApprove);
                                             @endphp
+                                              {{-- @if (!is_null($approve->typeapprove))
+                                                @if ($approve->typeapprove == 1 && $approve->statusapprove == 0)
+                                                    <button class="btn btn-sm btn-danger"
+                                                        onclick="cancelExpense({{ $expense->id }})">
+                                                        <i class="mdi mdi-close-circle-outline"></i> ยกเลิก
+                                                    </button>
+                                                @endif
+                                            @endif --}}
                                             @if (
                                                 $latestApprove &&
                                                     $latestApprove->statusapprove == 2 &&
