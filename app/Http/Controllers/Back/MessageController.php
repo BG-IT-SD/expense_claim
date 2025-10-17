@@ -13,9 +13,28 @@ class MessageController extends Controller
      */
     public function index()
     {
-        $message = MessageAlert::where('status',1)->where('deleted',0)->first();
-        return view('back.message.index',compact('message'));
+        $message = MessageAlert::where('status', 1)
+            ->where('deleted', 0)
+            ->first();
+
+        if ($message && $message->message) {
+            $msg = trim($message->message);
+
+            //ตรวจว่าเป็น Base64 จริงหรือไม่ (กันข้อความเก่า)
+            $isBase64 = base64_encode(base64_decode($msg, true)) === $msg;
+
+            if ($isBase64) {
+                $decoded = base64_decode($msg);
+                if ($decoded !== false) {
+                    $message->message = $decoded; // ส่ง HTML จริงให้ Blade
+                }
+            }
+        }
+
+        return view('back.message.index', compact('message'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -53,7 +72,7 @@ class MessageController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
+
     {
         $validated = $request->validate([
             'message' => ['required', 'string'],   // HTML จาก Quill
@@ -68,9 +87,16 @@ class MessageController extends Controller
 
         $messageAlert->save();
 
-        return back()->with('success', 'Update Message Alert เรียบร้อยแล้ว');
+        // return back()->with('success', 'Update Message Alert เรียบร้อยแล้ว');
+        return redirect()
+            ->route('MessageAlert.index')
+            ->with('success', 'Update Message Alert เรียบร้อยแล้ว');
     }
-    }
+
+
+
+
+
 
     /**
      * Remove the specified resource from storage.

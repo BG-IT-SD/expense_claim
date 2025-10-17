@@ -432,10 +432,24 @@ class ExpenseController extends Controller
         // dd($passengertype);
 
         $messageAlert = MessageAlert::where('status',1)->where('deleted',0)->first();
+        $message_data = $messageAlert->message ?? 'test';
+
+        //ตรวจว่าเป็น Base64 จริงไหม
+        $isBase64 = false;
+        if ($message_data) {
+            $decoded = base64_decode($message_data, true); // true = strict mode
+            if ($decoded !== false && base64_encode($decoded) === $message_data) {
+                $isBase64 = true;
+            }
+        }
+
+        // ถอดรหัสถ้าใช่ Base64
+        $message_decode = $isBase64 ? base64_decode($message_data) : $message_data;
+
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','messageAlert']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','messageAlert','message_decode']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
