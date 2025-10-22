@@ -30,6 +30,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Models\MessageAlert;
+use App\Models\Approvespecial;
+
 
 class ExpenseController extends Controller
 {
@@ -431,7 +433,7 @@ class ExpenseController extends Controller
         // dd($booking);
         // dd($passengertype);
 
-        $messageAlert = MessageAlert::where('status',1)->where('deleted',0)->first();
+        $messageAlert = MessageAlert::where('status', 1)->where('deleted', 0)->first();
         $message_data = $messageAlert->message ?? 'test';
 
         //ตรวจว่าเป็น Base64 จริงไหม
@@ -446,10 +448,16 @@ class ExpenseController extends Controller
         // ถอดรหัสถ้าใช่ Base64
         $message_decode = $isBase64 ? base64_decode($message_data) : $message_data;
 
+        // $specialApprovers = "";
+        $specialApprovers = Approvespecial::where('status', 1)
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
+        // dd($specialApprovers);
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g','messageAlert','message_decode']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
@@ -837,12 +845,49 @@ class ExpenseController extends Controller
     }
 
 
+    // public function Heademp(Request $request)
+    // {
+    //     $keyword = $request->input('sKeyword');
+    //     $page = $request->input('page', 1);
+    //     $limit = 5;
+
+    //     $query = Valldataemp::query();
+
+    //     if ($keyword) {
+    //         $query->where('EMAIL', 'like', "%$keyword%");
+    //     }
+
+    //     $query->where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+    //         ->where('STAEMP', '!=', 9)
+    //         ->where('numlvl', '>=', 10);
+
+    //     $total = $query->count();
+
+    //     $results = $query->skip(($page - 1) * $limit)
+    //         ->take($limit)
+    //         ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT']) // ดึงหลาย field
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->CODEMPID,
+    //                 'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}"
+    //             ];
+    //         });
+
+    //     return response()->json([
+    //         'data' => $results,
+    //         'total_count' => $total,
+    //     ]);
+    // }
+
     public function Heademp(Request $request)
     {
         $keyword = $request->input('sKeyword');
         $page = $request->input('page', 1);
         $limit = 5;
 
+        // --- Query ปกติจาก v_alldataemp ---
         $query = Valldataemp::query();
 
         if ($keyword) {
@@ -859,19 +904,40 @@ class ExpenseController extends Controller
 
         $results = $query->skip(($page - 1) * $limit)
             ->take($limit)
-            ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT']) // ดึงหลาย field
+            ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT'])
             ->map(function ($item) {
                 return [
                     'id' => $item->CODEMPID,
-                    'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}"
+                    'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}",
+                    'group' => 'ทั่วไป'
                 ];
             });
 
+        // --- ดึงรายชื่ออนุมัติพิเศษ ---
+        $specials = Approvespecial::where('status', 1)
+            ->where('deleted', 0)
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->where('email', 'like', "%$keyword%")
+                    ->orWhere('fullname', 'like', "%$keyword%");
+            })
+            ->get(['empid', 'email', 'fullname'])
+            ->map(function ($s) {
+                return [
+                    'id' => $s->empid,
+                    'text' => "{$s->email} | {$s->fullname}",
+                    'group' => 'อนุมัติพิเศษ'
+                ];
+            });
+
+        // รวม 2 collection
+        $merged = $specials->merge($results);
+
         return response()->json([
-            'data' => $results,
-            'total_count' => $total,
+            'data' => $merged->values(),
+            'total_count' => $merged->count(),
         ]);
     }
+
 
     public function getAllHeadEmp(Request $request)
     {
@@ -882,7 +948,7 @@ class ExpenseController extends Controller
             ->where('deleted', 0)
             ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
             ->where('STAEMP', '!=', 9)
-            ->where('numlvl', '>=', 10)
+            // ->where('numlvl', '>=', 10)
             ->first();
 
         // ถ้าไม่เจอข้อมูลเลย

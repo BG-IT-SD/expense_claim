@@ -272,6 +272,7 @@
                                         @endphp
                                         <option value="{{ $empid }}">{{ $empemail . ' | ' . $empfullname }}
                                         </option>
+
                                     @else
                                         {{-- เงื่อนไขที่ 2 level < 10 --}}
                                         @if ($headempid == '')
@@ -287,21 +288,21 @@
                                             <option value="{{ $headempid }}">
                                                 {{ $heademail . ' | ' . $headname }}
                                             </option>
-                                            <option value="51000169">Nopthanin.A@bgc.co.th</option>
-                                            <option value="65000214">Yodsaphon.P@bgc.co.th</option>
+
+
                                             {{-- Old --}}
-                                                {{-- เงื่อนไขที่ 4 มีหัวหน้า --}}
-                                                {{-- @if ($headlevel >= 10) --}}
-                                                {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 8 --}}
-                                                {{-- <option value="">เลือกผู้อนุมัติ</option>
+                                            {{-- เงื่อนไขที่ 4 มีหัวหน้า --}}
+                                            {{-- @if ($headlevel >= 10) --}}
+                                            {{-- เงื่อนไขที่ 5 มีหัวหน้าและหัวหน้ามากกว่าเลเวล 10 ห้เลือกคนที่จะ approve แต่ต้องมากกว่าเลเวล 8 --}}
+                                            {{-- <option value="">เลือกผู้อนุมัติ</option>
                                                 @else
                                                     @php
                                                         $finalHEmail = $heademail;
                                                         $finalHName = $headname;
                                                         $finalId = $headempid;
                                                     @endphp --}}
-                                                {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
-                                                {{-- <option value="{{ $headempid }}">
+                                            {{-- เงื่อนไขที่ 6 มีหัวหน้า และขึ้นชื่อหัวหน้าตาม v_head_emp --}}
+                                            {{-- <option value="{{ $headempid }}">
                                                         {{ $heademail . ' | ' . $headname }}
                                                     </option>
                                                 @endif --}}
@@ -320,11 +321,12 @@
                                     class="form-control form-control-input">
                                 <input type="hidden" name="empleveldata" id="empleveldata"
                                     value="{{ $empLevel }}">
-                                    @if (isset($pageTech) && $pageTech == 1)
-                                    <input type="hidden" name="pageTech" id="pageTech" value="{{ $pageTech }}">
-                                    @else
+                                @if (isset($pageTech) && $pageTech == 1)
+                                    <input type="hidden" name="pageTech" id="pageTech"
+                                        value="{{ $pageTech }}">
+                                @else
                                     <input type="hidden" name="pageTech" id="pageTech" value="0">
-                                    @endif
+                                @endif
                             </div>
 
                         </div>

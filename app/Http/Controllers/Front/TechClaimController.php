@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Helpers\MailHelper;
+use App\Models\Approvespecial;
 use App\Models\FuelPrice91;
 use App\Models\MessageAlert;
 use App\Models\Vbookingall;
@@ -403,6 +404,12 @@ class TechClaimController extends Controller
         // ถอดรหัสถ้าใช่ Base64
         $message_decode = $isBase64 ? base64_decode($message_data) : $message_data;
 
+        //  $specialApprovers = "";
+        $specialApprovers = Approvespecial::where('status', 1)
+                        ->where('deleted', 0)
+                        ->orderBy('id')
+                        ->get();
+
         return view('front.techclaim.create', compact(
             'booking',
             'empid',
@@ -434,7 +441,8 @@ class TechClaimController extends Controller
             'oilid',
             'bath_per_km',
             'messageAlert',
-            'message_decode'
+            'message_decode',
+            'specialApprovers'
         ));
     }
 
