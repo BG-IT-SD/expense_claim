@@ -18,6 +18,7 @@ use App\Http\Controllers\Back\ImportlistController;
 use App\Http\Controllers\Back\MessageController;
 use App\Http\Controllers\Back\PricepermealController;
 use App\Http\Controllers\Back\RoleController;
+use App\Http\Controllers\Back\SettingSpecialApproveController;
 use App\Http\Controllers\Back\TypegroupController;
 use App\Http\Controllers\Back\UserController;
 use App\Http\Controllers\Back\UserroleController;
@@ -286,6 +287,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             // Message
             Route::resource('MessageAlert',MessageController::class);
+
+            // ApproveSpecial
+            Route::resource('SpecialApprove',SettingSpecialApproveController::class);
 
             // Import
             Route::prefix('ImportList')->name('importlist.')->group(function () {

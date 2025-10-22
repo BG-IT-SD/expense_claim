@@ -228,6 +228,7 @@
             'HRgroup.*',
             'ACgroup.*',
             'MessageAlert.index',
+            'SpecialApprove.index',
             'DriverApprove.*'
           ]) ? 'active open' : '' }}">
         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -286,6 +287,12 @@
           <li class="menu-item {{ request()->routeIs('MessageAlert.index') ? 'active' : '' }}">
             <a href="{{ route('MessageAlert.index') }}" class="menu-link">
               <div data-i18n="ข้อความแจ้งเตือน">ข้อความแจ้งเตือน</div>
+            </a>
+          </li>
+
+           <li class="menu-item {{ request()->routeIs('SpecialApprove.index') ? 'active' : '' }}">
+            <a href="{{ route('SpecialApprove.index') }}" class="menu-link">
+              <div data-i18n="รายการอนุมัติ M3">รายการอนุมัติ M3</div>
             </a>
           </li>
         </ul>
