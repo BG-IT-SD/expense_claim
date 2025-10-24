@@ -256,7 +256,7 @@ class HRController extends Controller
         //     })
         //     ->whereIn('extype', [1, 2, 3])
         //     ->get();
-        $expenses = Expense::with(['latestApprove', 'vbooking','vbookingdrv', 'user', 'tech'])
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'vbookingdrv', 'user', 'tech'])
             ->whereHas('latestApprove', function ($q) use ($usercheck) {
                 $q->where('typeapprove', 3)
                     ->where('statusapprove', 1)
@@ -373,6 +373,7 @@ class HRController extends Controller
     {
         $expense = Expense::with(['foods', 'logs.booking'])->findOrFail($id);
 
+
         $driver_empid = $expense->empid;
         $driver_name = optional($expense->tech)->fullname ?? '-';
 
@@ -420,6 +421,53 @@ class HRController extends Controller
                 'details' => $details,
             ];
         }
+        // foreach ($expense->foods as $food) {
+        //     $dayKey = $food->used_date;
+        //     $relatedLogs = $expense->logs->where('foodid', $food->id);
+
+        //     $details = [];
+        //     $start = null;
+        //     $end = null;
+
+        //     foreach ($relatedLogs as $log) {
+        //         $booking = $log->booking;
+        //         if (!$booking) continue;
+
+        //         // ✅ เวลาจริงจาก booking (สำหรับ "รายการย่อย")
+        //         $origStart = Carbon::parse($booking->departure_date . ' ' . $booking->departure_time);
+        //         $origEnd   = Carbon::parse($booking->return_date . ' ' . $booking->return_time);
+
+        //         // ✅ เวลาที่จะใช้ใน "หัวข้อหลัก" (อาจถูกปรับ)
+        //         $calcStart = $origStart->copy();
+        //         $calcEnd   = $origEnd->copy();
+
+        //         // ถ้า booking ข้ามวัน และวันปัจจุบันตรงกับวัน return_date → เริ่ม 00:00
+        //         if ($booking->departure_date != $booking->return_date && $booking->return_date == $dayKey) {
+        //             $calcStart = Carbon::parse($booking->return_date . ' 00:00');
+        //         }
+
+        //         // ✅ ใช้ calcStart/calcEnd สำหรับหัวข้อหลัก
+        //         $start = is_null($start) || $calcStart->lt($start) ? $calcStart : $start;
+        //         $end   = is_null($end) || $calcEnd->gt($end) ? $calcEnd : $end;
+
+        //         // ✅ ใช้เวลาจริง (ไม่ปรับ) สำหรับแสดงในรายการย่อย
+        //         $details[] = [
+        //             'id'            => $booking->id,
+        //             'location_name' => $booking->location_name,
+        //             'start'         => $origStart, // ← original
+        //             'end'           => $origEnd,   // ← original
+        //         ];
+        //     }
+
+        //     // fallback ถ้าไม่มี booking
+        //     $groupedTimeRanges[$dayKey] = [
+        //         'start'   => $start ?? Carbon::createFromTimeString('06:00'),
+        //         'end'     => $end ?? Carbon::createFromTimeString('23:59'),
+        //         'details' => $details,
+        //     ];
+        // }
+
+
 
         $approvals = Approve::where('exid', $expense->id)
             ->where('deleted', 0)
@@ -1181,7 +1229,7 @@ class HRController extends Controller
             ->first();
         // dd($nextstaffgroup);
 
-        $expenses = Expense::with(['vbooking','vbookingdrv', 'user', 'tech', 'userhr'])
+        $expenses = Expense::with(['vbooking', 'vbookingdrv', 'user', 'tech', 'userhr'])
             ->whereIn('id', $ids)
             ->get();
 

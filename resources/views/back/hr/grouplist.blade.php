@@ -132,12 +132,12 @@
                                         </td>
                                         <td>
                                             @if ($exgroup->typeapprove == 6 && $exgroup->statusapprove == 1)
-                                                <a href="{{ route('HR.export.group.pdf', $exgroup->id) }}"
+                                                <a href="{{ route('HR.export.group.pdffinal', $exgroup->id) }}"
                                                     class="btn btn-sm btn-danger" target="_blank">
                                                     <span class="mdi mdi-file-pdf-box"></span>
                                                     {{-- PDF --}}
                                                 </a>
-                                                <a href="{{ route('HR.export.group.excel', $exgroup->id) }}"
+                                                <a href="{{ route('HR.export.group.excelfinal', $exgroup->id) }}"
                                                     class="btn btn-sm btn-success" target="_blank">
                                                     <span class="mdi mdi-file-excel"></span>
                                                     {{-- Excel --}}

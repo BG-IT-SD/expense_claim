@@ -199,7 +199,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('hrheadapprove', [HRController::class, 'hrHextApprove'])->name('hrheadapprove');
 
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
+              Route::get('export/group/{id}/pdffinal', [ExportController::class, 'exportGroupPdfFinal'])->name('export.group.pdffinal');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
+            Route::get('export/group/{id}/excelfinal', [ExportController::class, 'exportGroupExcelFinal'])->name('export.group.excelfinal');
             Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
 
             Route::get('export', [HRController::class, 'export'])->name('export');
@@ -218,7 +220,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('approve', [AccountController::class, 'saveExgroupApproval'])->name('exgroup.approve');
             Route::get('view/{id}', [AccountController::class, 'view'])->name('view');
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
+            Route::get('export/group/{id}/pdffinal', [ExportController::class, 'exportGroupPdfFinal'])->name('export.group.pdffinal');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
+            Route::get('export/group/{id}/excelfinal', [ExportController::class, 'exportGroupExcelFinal'])->name('export.group.excelfinal');
             Route::get('listhold', [AccountController::class, 'ListHold'])->name('listhold');
             Route::post('HoldApprove/confirm', [AccountController::class, 'confirmHold'])->name('HoldApprove.confirm');
             Route::get('listapproved', [AccountController::class, 'ListApproved'])->name('listapproved');
