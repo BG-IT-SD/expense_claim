@@ -38,7 +38,7 @@ class DriverClaimController extends Controller
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
             ->whereHas('latestApprove', function ($query) use ($request) {
-                $query->whereIn('typeapprove', [1,2, 3, 4, 5, 6])
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6])
                     ->when(
                         $request->filled('status'),
                         fn($q) => $q->where('statusapprove', $request->status)
@@ -228,6 +228,16 @@ class DriverClaimController extends Controller
                         ]],
                     ];
                 } else {
+                    // if ($startTime->lt($groupedTimeRanges[$dayKey]['start'])) {
+                    //     $groupedTimeRanges[$dayKey]['start'] = $startTime;
+                    // }
+                    // if ($endTime->gt($groupedTimeRanges[$dayKey]['end'])) {
+                    //     $groupedTimeRanges[$dayKey]['end'] = $endTime;
+                    // }
+                    // $groupedTimeRanges[$dayKey]['details'][] = [
+                    //     'id'            => $booking->id,
+                    //     'location_name' => $booking->location_name,
+                    // ];
                     if ($startTime->lt($groupedTimeRanges[$dayKey]['start'])) {
                         $groupedTimeRanges[$dayKey]['start'] = $startTime;
                     }
@@ -237,9 +247,58 @@ class DriverClaimController extends Controller
                     $groupedTimeRanges[$dayKey]['details'][] = [
                         'id'            => $booking->id,
                         'location_name' => $booking->location_name,
+                        'start'         => $startTime,
+                        'end'           => $endTime,
                     ];
                 }
             }
+            // --- แตกเป็นรายวันตาม logic ของมื้ออาหาร ---
+            // for ($date = $startDT->copy()->startOfDay(); $date->lte($endDT->copy()->startOfDay()); $date->addDay()) {
+            //     $dayKey = $date->toDateString();
+
+            //     // ✅ ถ้า booking ข้ามวัน และวันปัจจุบันตรงกับวัน return_date → เริ่ม 00:00
+            //     if ($booking->departure_date != $booking->return_date && $booking->return_date == $dayKey) {
+            //         $startTime = Carbon::parse($booking->return_date . ' 00:00');
+            //     } else {
+            //         // ถ้าเป็นวันแรก → ใช้ departure_time จริง
+            //         // ถ้าเป็นวันอื่น (ระหว่าง) → เริ่มที่ 06:00
+            //         $startTime = $date->isSameDay($startDT)
+            //             ? $startDT->copy()
+            //             : $date->copy()->setTime(6, 0);
+            //     }
+
+            //     // เวลาสิ้นสุด
+            //     $endTime = $date->isSameDay($endDT)
+            //         ? $endDT->copy()
+            //         : $date->copy()->setTime(23, 59);
+
+            //     // ✅ เก็บข้อมูลลง groupedTimeRanges
+            //     if (!isset($groupedTimeRanges[$dayKey])) {
+            //         $groupedTimeRanges[$dayKey] = [
+            //             'start'   => $startTime,
+            //             'end'     => $endTime,
+            //             'details' => [[
+            //                 'id'            => $booking->id,
+            //                 'location_name' => $booking->location_name,
+            //                 'start'         => $startDT,
+            //                 'end'           => $endDT,
+            //             ]],
+            //         ];
+            //     } else {
+            //         if ($startTime->lt($groupedTimeRanges[$dayKey]['start'])) {
+            //             $groupedTimeRanges[$dayKey]['start'] = $startTime;
+            //         }
+            //         if ($endTime->gt($groupedTimeRanges[$dayKey]['end'])) {
+            //             $groupedTimeRanges[$dayKey]['end'] = $endTime;
+            //         }
+            //         $groupedTimeRanges[$dayKey]['details'][] = [
+            //             'id'            => $booking->id,
+            //             'location_name' => $booking->location_name,
+            //             'start'         => $startTime,
+            //             'end'           => $endTime,
+            //         ];
+            //     }
+            // }
         }
 
         // ✅ วันที่ที่มี booking จริง (คิดจากช่วงเวลาที่ซ่อมแล้ว รวม fallback)
@@ -463,6 +522,7 @@ class DriverClaimController extends Controller
     public function show($id, $type = null)
     {
         $expense = Expense::with(['foods', 'logs', 'bookings'])->findOrFail($id);
+        // dd($expense);
 
         $driver_empid = $expense->empid;
         $driver_name = optional($expense->employee)->fullname ?? '-'; // สมมติว่ามี relation employee
@@ -474,22 +534,77 @@ class DriverClaimController extends Controller
 
         $groupedTimeRanges = [];
 
+        // foreach ($expense->foods as $food) {
+        //     $dayKey = $food->used_date;
+
+        //     if (!isset($groupedTimeRanges[$dayKey])) {
+        //         $groupedTimeRanges[$dayKey] = [
+        //             'start' => Carbon::createFromTimeString('06:00'),
+        //             'end' => Carbon::createFromTimeString('23:59'),
+        //             'details' => [],
+        //         ];
+        //     }
+
+        //     $groupedTimeRanges[$dayKey]['details'][] = [
+        //         'id' => $food->bookid,
+        //         'location_name' => optional($food->booking)->location_name ?? '-',
+        //     ];
+        // }
         foreach ($expense->foods as $food) {
             $dayKey = $food->used_date;
 
-            if (!isset($groupedTimeRanges[$dayKey])) {
-                $groupedTimeRanges[$dayKey] = [
-                    'start' => Carbon::createFromTimeString('06:00'),
-                    'end' => Carbon::createFromTimeString('23:59'),
-                    'details' => [],
-                ];
-            }
+            // ดึง booking ทั้งหมดในวันนั้น (ไม่สนลำดับหรือ bookid)
+            $relatedBookings = $expense->bookings->filter(function ($b) use ($dayKey) {
+                // แปลงวันที่ booking ให้อยู่ในรูปแบบเดียวกับ used_date
+                $depDate = Carbon::parse($b->departure_date)->toDateString();
+                $retDate = Carbon::parse($b->return_date)->toDateString();
+                // ถ้าวันนี้อยู่ในช่วง departure-return แสดงว่ามีส่วนเกี่ยวข้อง
+                return $dayKey >= $depDate && $dayKey <= $retDate;
+            });
 
-            $groupedTimeRanges[$dayKey]['details'][] = [
-                'id' => $food->bookid,
-                'location_name' => optional($food->booking)->location_name ?? '-',
-            ];
+            if ($relatedBookings->isNotEmpty()) {
+                // หาเวลาน้อยสุดและมากสุดของทุก booking ในวันนั้น
+                $minStart = $relatedBookings->map(fn($b) => Carbon::parse($b->departure_time))->min();
+                $maxEnd   = $relatedBookings->map(fn($b) => Carbon::parse($b->return_time))->max();
+
+                // ถ้าวันนี้ยังไม่เคยบันทึก → สร้างใหม่
+                if (!isset($groupedTimeRanges[$dayKey])) {
+                    $groupedTimeRanges[$dayKey] = [
+                        'start' => $minStart,
+                        'end'   => $maxEnd,
+                        'details' => [],
+                    ];
+                } else {
+                    // ถ้าเคยมีแล้ว ให้ compare แล้วอัปเดตช่วงเวลา
+                    if ($minStart->lt($groupedTimeRanges[$dayKey]['start'])) {
+                        $groupedTimeRanges[$dayKey]['start'] = $minStart;
+                    }
+                    if ($maxEnd->gt($groupedTimeRanges[$dayKey]['end'])) {
+                        $groupedTimeRanges[$dayKey]['end'] = $maxEnd;
+                    }
+                }
+
+                // ✅ เก็บรายละเอียด booking ทุกตัวในวันนั้น
+                foreach ($relatedBookings as $b) {
+                    $groupedTimeRanges[$dayKey]['details'][] = [
+                        'id'            => $b->id,
+                        'location_name' => $b->location_name ?? '-',
+                        'start'         => Carbon::parse($b->departure_time),
+                        'end'           => Carbon::parse($b->return_time),
+                    ];
+                }
+            } else {
+                // fallback ถ้าไม่มี booking
+                if (!isset($groupedTimeRanges[$dayKey])) {
+                    $groupedTimeRanges[$dayKey] = [
+                        'start' => Carbon::createFromTimeString('06:00'),
+                        'end'   => Carbon::createFromTimeString('23:59'),
+                        'details' => [],
+                    ];
+                }
+            }
         }
+
 
         // ราคา
         $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
@@ -498,6 +613,7 @@ class DriverClaimController extends Controller
         $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
         $finalHNameNext = 'กมลวรรณ บรรชา';
         $finalIdNext = '66000510';
+
 
         return view('front.driver.show', compact(
             'expense',

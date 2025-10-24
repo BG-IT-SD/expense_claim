@@ -881,6 +881,63 @@ class ExpenseController extends Controller
     //     ]);
     // }
 
+    // public function Heademp(Request $request)
+    // {
+    //     $keyword = $request->input('sKeyword');
+    //     $page = $request->input('page', 1);
+    //     $limit = 5;
+
+    //     // --- Query ปกติจาก v_alldataemp ---
+    //     $query = Valldataemp::query();
+
+    //     if ($keyword) {
+    //         $query->where('EMAIL', 'like', "%$keyword%");
+    //     }
+
+    //     $query->where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+    //         ->where('STAEMP', '!=', 9)
+    //         ->where('numlvl', '>=', 10);
+
+    //     $total = $query->count();
+
+    //     $results = $query->skip(($page - 1) * $limit)
+    //         ->take($limit)
+    //         ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT'])
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->CODEMPID,
+    //                 'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}",
+    //                 'group' => 'ทั่วไป'
+    //             ];
+    //         });
+
+    //     // --- ดึงรายชื่ออนุมัติพิเศษ ---
+    //     $specials = Approvespecial::where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->when($keyword, function ($q) use ($keyword) {
+    //             $q->where('email', 'like', "%$keyword%")
+    //                 ->orWhere('fullname', 'like', "%$keyword%");
+    //         })
+    //         ->get(['empid', 'email', 'fullname'])
+    //         ->map(function ($s) {
+    //             return [
+    //                 'id' => $s->empid,
+    //                 'text' => "{$s->email} | {$s->fullname}",
+    //                 'group' => 'อนุมัติพิเศษ'
+    //             ];
+    //         });
+
+    //     // รวม 2 collection
+    //     $merged = $specials->merge($results);
+
+    //     return response()->json([
+    //         'data' => $merged->values(),
+    //         'total_count' => $merged->count(),
+    //     ]);
+    // }
+
     public function Heademp(Request $request)
     {
         $keyword = $request->input('sKeyword');
@@ -909,7 +966,7 @@ class ExpenseController extends Controller
                 return [
                     'id' => $item->CODEMPID,
                     'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}",
-                    'group' => 'ทั่วไป'
+                    'group' => 'ทั่วไป',
                 ];
             });
 
@@ -925,18 +982,19 @@ class ExpenseController extends Controller
                 return [
                     'id' => $s->empid,
                     'text' => "{$s->email} | {$s->fullname}",
-                    'group' => 'อนุมัติพิเศษ'
+                    'group' => 'M3',
                 ];
             });
 
-        // รวม 2 collection
-        $merged = $specials->merge($results);
+        // ✅ แปลงทั้งคู่ให้เป็น Collection ปลอดภัยก่อน merge
+        $merged = collect($specials)->merge(collect($results));
 
         return response()->json([
             'data' => $merged->values(),
             'total_count' => $merged->count(),
         ]);
     }
+
 
 
     public function getAllHeadEmp(Request $request)
