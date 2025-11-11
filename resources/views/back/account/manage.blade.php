@@ -31,10 +31,16 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="mb-1">ดาวน์โหลดเอกสาร</label>
                                     <br>
-                                    <a href="{{ route('Account.export.group.pdf', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
+                                    {{-- <a href="{{ route('Account.export.group.pdf', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
                                         <span class="mdi mdi-file-pdf-box"></span>
                                     </a>
                                     <a href="{{ route('Account.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success"  target="_blank">
+                                        <span class="mdi mdi-file-excel"></span>
+                                    </a> --}}
+                                    <a href="{{ route('Account.export.group.pdffinal', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
+                                        <span class="mdi mdi-file-pdf-box"></span>
+                                    </a>
+                                    <a href="{{ route('Account.export.group.excelfinal', $exgroup->id) }}" class="btn btn-sm btn-success"  target="_blank">
                                         <span class="mdi mdi-file-excel"></span>
                                     </a>
                                 </div>

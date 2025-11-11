@@ -22,6 +22,7 @@ class GroupSpecialImport implements ToModel, WithHeadingRow, WithValidation, Ski
         try {
             $empid = $row['empid'] ?? null;
             $bu = BuEmp($empid) ?? '-';
+            $dept = UserDept($empid) ?? '-';
 
             $user = GroupSpecial::create([
                 'typeid'   => $row['typeid'] ?? null,
@@ -29,6 +30,7 @@ class GroupSpecialImport implements ToModel, WithHeadingRow, WithValidation, Ski
                 'fullname' => $row['fullname'] ?? null,
                 'position' => $row['position'] ?? null,
                 'bu'       => $bu,
+                'dept'     => $dept,
             ]);
 
             $this->importResults[] = [
