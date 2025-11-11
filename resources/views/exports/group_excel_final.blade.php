@@ -117,13 +117,13 @@
                     <td style="text-align: center;border: 1px solid #000">
                         {{ Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ $days }}</td>
-                    <td style="text-align: right;border: 1px solid #000">="{{ number_format($food, 2) }}"</td>
-                    <td style="text-align: right;border: 1px solid #000">="{{ number_format($gas, 2) }}"</td>
-                    <td style="text-align: right;border: 1px solid #000">="{{ number_format($express, 2) }}"</td>
-                    <td style="text-align: right;border: 1px solid #000">="{{ number_format($public, 2) }}"</td>
-                    <td style="text-align: right;border: 1px solid #000">="{{ number_format($other, 2) }}"</td>
+                    <td style="text-align: right;border: 1px solid #000">{{ number_format($food, 2) }}</td>
+                    <td style="text-align: right;border: 1px solid #000">{{ number_format($gas, 2) }}</td>
+                    <td style="text-align: right;border: 1px solid #000">{{ number_format($express, 2) }}</td>
+                    <td style="text-align: right;border: 1px solid #000">{{ number_format($public, 2) }}</td>
+                    <td style="text-align: right;border: 1px solid #000">{{ number_format($other, 2) }}</td>
                     <td style="text-align: right;border: 1px solid #000">
-                        <strong>="{{ number_format(round($total), 2) }}"</strong></td>
+                        <strong>{{ number_format(round($total), 2) }}</strong></td>
                 </tr>
             @endforeach
 
@@ -133,12 +133,12 @@
                     style="text-align: center; vertical-align: middle; border:1px solid #000;">
                     <strong> รวมสถานที่ {{ $groupName }} </strong>
                 </td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_food), 2) }}"</strong></td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_gas), 2) }}"</strong></td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_express), 2) }}"</strong></td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_public), 2) }}"</strong></td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_other), 2) }}"</strong></td>
-                <td style="text-align: right; border:1px solid #000;"><strong>="{{ number_format(round($sum_total), 2) }}"</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_food), 2) }}</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_gas), 2) }}</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_express), 2) }}</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_public), 2) }}</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_other), 2) }}</strong></td>
+                <td style="text-align: right; border:1px solid #000;"><strong>{{ number_format(round($sum_total), 2) }}</strong></td>
             </tr>
 
             @php
@@ -158,22 +158,22 @@
                 <strong>Total</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_food), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_food), 2) }}</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_gas), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_gas), 2) }}</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_express), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_express), 2) }}</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_public), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_public), 2) }}</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_other), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_other), 2) }}</strong>
             </td>
             <td style="text-align: right; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
-                <strong>="{{ number_format(round($grand_total), 2) }}"</strong>
+                <strong>{{ number_format(round($grand_total), 2) }}</strong>
             </td>
         </tr>
     </tbody>

@@ -359,3 +359,12 @@ if (!function_exists('HRPosition')) {
         return  $position;
     }
 }
+
+if (!function_exists('UserDept')) {
+    function UserDept($empid)
+    {
+        $vAllemp = Valldataemp::where('CODEMPID', "$empid")->where('STAEMP', '!=', '9')->first();
+        $DEPT = $vAllemp?->DEPT ?? "";
+        return  $DEPT;
+    }
+}

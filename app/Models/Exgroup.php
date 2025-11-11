@@ -71,6 +71,11 @@ class Exgroup extends Model
         return $this->hasMany(Approve::class, 'exgroup', 'id');
     }
 
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class, 'exgroup', 'id');
+    }
+
     public function CreatedBy()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');

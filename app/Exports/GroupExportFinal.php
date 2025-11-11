@@ -12,8 +12,10 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Events\AfterSheet; // ใช้ได้ถ้าจะไปตั้ง merge/ความสูงเพิ่มเติม
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class GroupExportFinal implements FromView, WithStyles, WithDrawings
+class GroupExportFinal implements FromView, WithStyles, WithDrawings,WithColumnFormatting
 {
     protected $id;
 
@@ -201,6 +203,17 @@ class GroupExportFinal implements FromView, WithStyles, WithDrawings
 
 
         return $styles;
+    }
+    public function columnFormats(): array
+    {
+        return [
+            'L' => NumberFormat::FORMAT_NUMBER_00, // ค่าเบี้ยเลี้ยง / อาหาร
+            'M' => NumberFormat::FORMAT_NUMBER_00, // ค่าน้ำมัน
+            'N' => NumberFormat::FORMAT_NUMBER_00, // ค่าทางด่วน
+            'O' => NumberFormat::FORMAT_NUMBER_00, // ค่ารถโดยสารสาธารณะ
+            'P' => NumberFormat::FORMAT_NUMBER_00, // ค่าใช้จ่ายอื่นๆ
+            'Q' => NumberFormat::FORMAT_NUMBER_00, // Total
+        ];
     }
 
     /**

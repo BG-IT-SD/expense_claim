@@ -43,6 +43,11 @@ class Approve extends Model
         return $this->belongsTo(User::class, 'modified_by', 'id');
     }
 
+    public function exgroupRef()
+    {
+        return $this->belongsTo(Exgroup::class, 'exgroup', 'id');
+    }
+
     // ตั้งค่า 'create_by' อัตโนมัติเมื่อสร้างข้อมูลใหม่
     protected static function boot()
     {

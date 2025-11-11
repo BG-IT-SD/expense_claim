@@ -4,6 +4,7 @@ use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\ApproveLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Back\AccountController;
+use App\Http\Controllers\Back\AccountReportController;
 use App\Http\Controllers\Back\ACGroupController;
 use App\Http\Controllers\Back\ApporveDriverController;
 use App\Http\Controllers\Back\DistanceRateController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Back\HRgroupController;
 use App\Http\Controllers\Back\ImportlistController;
 use App\Http\Controllers\Back\MessageController;
 use App\Http\Controllers\Back\PricepermealController;
+use App\Http\Controllers\Back\ResendMailController;
 use App\Http\Controllers\Back\RoleController;
 use App\Http\Controllers\Back\SettingSpecialApproveController;
 use App\Http\Controllers\Back\TypegroupController;
@@ -48,14 +50,14 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/CheckEmpID', [AuthController::class, 'CheckEmpID'])->name('CheckEmpID');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/forgot-password/employee',[ForgotByEmployeeController::class, 'index'])
-     ->name('password.forgot-by-employee');
+Route::get('/forgot-password/employee', [ForgotByEmployeeController::class, 'index'])
+    ->name('password.forgot-by-employee');
 
-Route::post('/forgot-password/employee/verify',[ForgotByEmployeeController::class, 'verify'])
-     ->name('password.verify-employee');
+Route::post('/forgot-password/employee/verify', [ForgotByEmployeeController::class, 'verify'])
+    ->name('password.verify-employee');
 
 Route::post('/forgot-password/employee/reset', [ForgotByEmployeeController::class, 'reset'])
-     ->name('password.reset-employee');
+    ->name('password.reset-employee');
 // End Atuh
 
 Route::group(['middleware' => ['auth', 'remember.login']], function () {
@@ -137,7 +139,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::post('/headapprove/confirm', [HeadApprovedController::class, 'confirm'])->name('HeadApprove.confirm');
 
     Route::get('HeadHRApprove', [HeadApprovedController::class, 'indexhr'])
-    ->name('HeadHRApprove.index');
+        ->name('HeadHRApprove.index');
 
     // DriverClaim
     Route::prefix('DriverClaim')
@@ -199,14 +201,13 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('hrheadapprove', [HRController::class, 'hrHextApprove'])->name('hrheadapprove');
 
             Route::get('export/group/{id}/pdf', [ExportController::class, 'exportGroupPdf'])->name('export.group.pdf');
-              Route::get('export/group/{id}/pdffinal', [ExportController::class, 'exportGroupPdfFinal'])->name('export.group.pdffinal');
+            Route::get('export/group/{id}/pdffinal', [ExportController::class, 'exportGroupPdfFinal'])->name('export.group.pdffinal');
             Route::get('export/group/{id}/excel', [ExportController::class, 'exportGroupExcel'])->name('export.group.excel');
             Route::get('export/group/{id}/excelfinal', [ExportController::class, 'exportGroupExcelFinal'])->name('export.group.excelfinal');
             Route::get('groupdetail/{id}', [HRController::class, 'groupDetail'])->name('groupdetail');
 
             Route::get('export', [HRController::class, 'export'])->name('export');
             Route::get('aftedit/{id}/{type?}/{approve?}', [HRController::class, 'editapprove'])->name('aftedit');
-
         });
 
     // Account
@@ -227,7 +228,11 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('HoldApprove/confirm', [AccountController::class, 'confirmHold'])->name('HoldApprove.confirm');
             Route::get('listapproved', [AccountController::class, 'ListApproved'])->name('listapproved');
 
-
+            Route::get('/allowance-summary', [AccountReportController::class, 'index'])->name('AllowanceReport.index');
+            Route::get('/allowance-summary/export-excel', [AccountReportController::class, 'exportExcel'])->name('AllowanceReport.exportExcel');
+            Route::get('/allowance-summary/export-pdf', [AccountReportController::class, 'exportPdf'])->name('AllowanceReport.exportPdf');
+            Route::post('allowance-summary/data', [AccountReportController::class, 'getReportData'])
+            ->name('AllowanceReport.data');
         });
 
     Route::middleware('check.module.access:User,Staff|Admin|SuperAdmin')
@@ -290,10 +295,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::resource('Typegroup', TypegroupController::class);
 
             // Message
-            Route::resource('MessageAlert',MessageController::class);
+            Route::resource('MessageAlert', MessageController::class);
 
             // ApproveSpecial
-            Route::resource('SpecialApprove',SettingSpecialApproveController::class);
+            Route::resource('SpecialApprove', SettingSpecialApproveController::class);
 
             // Import
             Route::prefix('ImportList')->name('importlist.')->group(function () {
@@ -304,41 +309,38 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             });
 
             Route::prefix('HRgroup')->name('HRgroup.')->group(function () {
-                Route::get('index',[HRgroupController::class,'index'])->name('index');
-                Route::get('edit/{id}',[HRgroupController::class,'edit'])->name('edit');
-                Route::get('addlist/{id}',[HRgroupController::class,'addList'])->name('addlist');
-                Route::get('addplant/{id}',[HRgroupController::class,'addPlant'])->name('addplant');
-                Route::post('checkemphr',[HRgroupController::class,'CheckEmpID'])->name('checkemphr');
-                Route::post('saveplanthr',[HRgroupController::class,'SavePlant'])->name('saveplant');
-                Route::post('savelisthr',[HRgroupController::class,'SaveList'])->name('savelisthr');
-                Route::get('editlist/{id}',[HRgroupController::class,'editList'])->name('editlist');
-                Route::get('listemphrms',[HRgroupController::class,'ListEmpHrms'])->name('listemphrms');
-                Route::get('emphrmsdata',[HRgroupController::class,'getEmpData'])->name('emphrmsdata');
-                Route::post('updatelist',[HRgroupController::class,'UpdateList'])->name('updatelist');
-                Route::get('editplant/{id}',[HRgroupController::class,'editPlant'])->name('editplant');
-                Route::delete('delplant/{id}',[HRgroupController::class,'delPlant'])->name('delplant');
-
-
+                Route::get('index', [HRgroupController::class, 'index'])->name('index');
+                Route::get('edit/{id}', [HRgroupController::class, 'edit'])->name('edit');
+                Route::get('addlist/{id}', [HRgroupController::class, 'addList'])->name('addlist');
+                Route::get('addplant/{id}', [HRgroupController::class, 'addPlant'])->name('addplant');
+                Route::post('checkemphr', [HRgroupController::class, 'CheckEmpID'])->name('checkemphr');
+                Route::post('saveplanthr', [HRgroupController::class, 'SavePlant'])->name('saveplant');
+                Route::post('savelisthr', [HRgroupController::class, 'SaveList'])->name('savelisthr');
+                Route::get('editlist/{id}', [HRgroupController::class, 'editList'])->name('editlist');
+                Route::get('listemphrms', [HRgroupController::class, 'ListEmpHrms'])->name('listemphrms');
+                Route::get('emphrmsdata', [HRgroupController::class, 'getEmpData'])->name('emphrmsdata');
+                Route::post('updatelist', [HRgroupController::class, 'UpdateList'])->name('updatelist');
+                Route::get('editplant/{id}', [HRgroupController::class, 'editPlant'])->name('editplant');
+                Route::delete('delplant/{id}', [HRgroupController::class, 'delPlant'])->name('delplant');
             });
 
             Route::prefix('ACgroup')->name('ACgroup.')->group(function () {
-                Route::get('index',[ACGroupController::class,'index'])->name('index');
-                Route::get('edit/{id}',[ACGroupController::class,'edit'])->name('edit');
-                Route::get('addlist/{id}',[ACGroupController::class,'addList'])->name('addlist');
-                Route::get('addplant/{id}',[ACGroupController::class,'addPlant'])->name('addplant');
-                Route::post('checkemphr',[ACGroupController::class,'CheckEmpID'])->name('checkemphr');
-                Route::post('saveplanthr',[ACGroupController::class,'SavePlant'])->name('saveplant');
-                Route::post('savelisthr',[ACGroupController::class,'SaveList'])->name('savelisthr');
-                Route::get('editlist/{id}',[ACGroupController::class,'editList'])->name('editlist');
-                Route::get('listemphrms',[ACGroupController::class,'ListEmpHrms'])->name('listemphrms');
-                Route::get('emphrmsdata',[ACGroupController::class,'getEmpData'])->name('emphrmsdata');
-                Route::post('updatelist',[ACGroupController::class,'UpdateList'])->name('updatelist');
-                Route::get('editplant/{id}',[ACGroupController::class,'editPlant'])->name('editplant');
-                Route::delete('delplant/{id}',[ACGroupController::class,'delPlant'])->name('delplant');
-
+                Route::get('index', [ACGroupController::class, 'index'])->name('index');
+                Route::get('edit/{id}', [ACGroupController::class, 'edit'])->name('edit');
+                Route::get('addlist/{id}', [ACGroupController::class, 'addList'])->name('addlist');
+                Route::get('addplant/{id}', [ACGroupController::class, 'addPlant'])->name('addplant');
+                Route::post('checkemphr', [ACGroupController::class, 'CheckEmpID'])->name('checkemphr');
+                Route::post('saveplanthr', [ACGroupController::class, 'SavePlant'])->name('saveplant');
+                Route::post('savelisthr', [ACGroupController::class, 'SaveList'])->name('savelisthr');
+                Route::get('editlist/{id}', [ACGroupController::class, 'editList'])->name('editlist');
+                Route::get('listemphrms', [ACGroupController::class, 'ListEmpHrms'])->name('listemphrms');
+                Route::get('emphrmsdata', [ACGroupController::class, 'getEmpData'])->name('emphrmsdata');
+                Route::post('updatelist', [ACGroupController::class, 'UpdateList'])->name('updatelist');
+                Route::get('editplant/{id}', [ACGroupController::class, 'editPlant'])->name('editplant');
+                Route::delete('delplant/{id}', [ACGroupController::class, 'delPlant'])->name('delplant');
             });
 
-            Route::resource('DriverApprove',ApporveDriverController::class);
+            Route::resource('DriverApprove', ApporveDriverController::class);
         });
 
     Route::get('/download-sample', function () {
@@ -356,6 +358,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::get('/approve/viewgroup/{id}/{type}', [ApproveController::class, 'showgroup'])->name('approve.page.group');
     Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
     Route::post('/approve/confirmgrp/{id}', [ApproveController::class, 'confirmgroup'])->name('approve.confirmgroup');
+
+    // == หน้าสำหรับยิง Mail ทดสอบ ==
+    Route::get('/admin/resend-mail', [ResendMailController::class, 'showForm'])->name('tools.resendMail.show');
+    Route::post('/admin/resend-mail', [ResendMailController::class, 'sendMail'])->name('tools.resendMail.send');
 });
 
 // อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)

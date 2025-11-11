@@ -182,6 +182,23 @@
               <div data-i18n="รายการอนุมัติแล้ว">รายการอนุมัติแล้ว</div>
             </a>
           </li>
+          <li class="menu-item" style="">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle waves-effect">
+                    <div data-i18n="รายงาน">รายงาน</div>
+                  </a>
+                  <ul class="menu-sub">
+                    <li class="menu-item">
+                      <a href="{{ route('Account.AllowanceReport.index') }}" class="menu-link">
+                        <div data-i18n="สรุปเบี้ยเลี้ยงประจำเดือน">สรุปเบี้ยเลี้ยงประจำเดือน</div>
+                      </a>
+                    </li>
+                    {{-- <li class="menu-item">
+                      <a href="extended-ui-timeline-fullscreen.html" class="menu-link">
+                        <div data-i18n="Fullscreen">Fullscreen</div>
+                      </a>
+                    </li> --}}
+                  </ul>
+                </li>
         </ul>
       </li>
     @endif

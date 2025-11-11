@@ -56,9 +56,9 @@ class Expense extends Model
     public function latestApprove()
     {
         return $this->hasOne(Approve::class, 'exid', 'id')
-        ->where('deleted', 0)
-        ->where('status', 1)
-        ->latestOfMany(); // ✅ ดึง row ล่าสุด
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->latestOfMany(); // ✅ ดึง row ล่าสุด
     }
 
     public function fuelprice()
@@ -90,7 +90,7 @@ class Expense extends Model
     public function userhr()
     {
         return $this->belongsTo(Valldataemp::class, 'empid', 'CODEMPID')
-                    ->where('STAEMP', '!=', 9);
+            ->where('STAEMP', '!=', 9);
     }
 
     public function tech()
@@ -102,7 +102,7 @@ class Expense extends Model
         return $this->hasOne(Vbookingall::class, 'id', 'bookid');
     }
 
-        public function vbookingdrv()
+    public function vbookingdrv()
     {
         return $this->hasOne(Vbookingalldrv::class, 'id', 'bookid');
     }
@@ -131,6 +131,33 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class, 'modified_by', 'id');
     }
+
+    public function exgroup()
+    {
+        return $this->belongsTo(Exgroup::class, 'exgroup', 'id');
+    }
+
+    public function approves()
+    {
+        return $this->hasMany(Approve::class, 'exid', 'id')->where('deleted', 0);
+    }
+
+    public function groupSpecial()
+    {
+        return $this->belongsTo(GroupSpecial::class, 'empid', 'empid');
+    }
+
+
+    public function finalApprove()
+    {
+        return $this->hasOne(Approve::class, 'exid', 'id')
+            ->where('deleted', 0)
+            ->where('statusapprove', 1)
+            ->where('typeapprove', 6)
+            ->latestOfMany(); //ใช้ตัวล่าสุดเท่านั้น
+    }
+
+
 
     // ตั้งค่า 'create_by' อัตโนมัติเมื่อสร้างข้อมูลใหม่
     protected static function boot()
