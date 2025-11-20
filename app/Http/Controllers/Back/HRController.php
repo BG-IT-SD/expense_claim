@@ -623,6 +623,7 @@ class HRController extends Controller
         // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
         // $finalHNameNext = 'เสาวภา เข็มเหลือง';
         // $finalIdNext = '63000455';
+        // dd($expenseFoods);
 
         $passengertype = 0;
         if ($expense->vbooking->type_reserve == 4) {
@@ -698,6 +699,8 @@ class HRController extends Controller
             ->orderBy('id')
             ->get();
 
+
+
         $files = ExpenseFile::where('exid', $expense->id)
             ->where('deleted', 0)
             ->where('status', 1)
@@ -754,7 +757,6 @@ class HRController extends Controller
                 }
             }
         }
-
 
         return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons', 'approve', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
     }

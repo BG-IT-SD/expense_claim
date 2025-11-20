@@ -25,6 +25,7 @@
                     $from = $dayFood->copy()->setTime(6, 0);
                     $to = $dayFood->copy()->setTime(23, 59);
                 }
+
             @endphp
 
             <div class="col-sm-12">

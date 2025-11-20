@@ -87,6 +87,9 @@
                                                 @if (!is_null($expense->latestApprove->statusapprove))
                                                     {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
                                                 @endif
+                                                <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
                                             </td>
                                             <td>
                                                 {{ $i + 1 }}
