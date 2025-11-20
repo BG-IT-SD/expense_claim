@@ -593,7 +593,7 @@ class ExpenseController extends Controller
                 'emailstatus' => 1,
                 'statusapprove' => 0,
                 'login_token' => $token,
-                'token_expires_at' => now()->addDays(10),
+                'token_expires_at' => now()->addDays(30), // แก้ไขจาก 10 เป็น 30 วัน 19112025
             ]);
             $link = route('approve.magic.login', ['token' => $approve->login_token]);
             $data = [

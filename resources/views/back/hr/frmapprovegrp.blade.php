@@ -2,16 +2,59 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         {{-- <h4 class="py-3 mb-4 bg-secondary"><span class="text-muted fw-light ">Form/</span> เบิกเบี้ยงเลี้ยง/อาหาร/ค่าเดินทาง</h4> --}}
-        <div class="card shadow-none bg-transparent border border-secondary">
-            <div class="card-body text-secondary">
-                <h4 class="card-title text-secondary">เบิกเบี้ยงเลี้ยง/อาหาร/ค่าเดินทาง</h4>
+        <div class="expense-summary-card mb-3 shadow-sm">
+            <h4>เบิกเบี้ยเลี้ยง / อาหาร / ค่าเดินทาง dd</h4>
+
+            {{--  บรรทัดที่ 1 --}}
+            <div class="expense-summary-row">
+                <div class="expense-summary-item">
+                    <strong>ชื่อ – สกุล:</strong>
+                    <span>{{ optional($expense->userhr)->NAMFIRSTT . ' ' . optional($expense->userhr)->NAMLASTT ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>รหัสพนักงาน:</strong>
+                    <span>{{ $expense->empid ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>ระดับ (Level):</strong>
+                    <span>{{ optional($expense->userhr)->JOBGRADE_TITLE ?? '-' }}</span>
+                </div>
+            </div>
+
+            {{-- บรรทัดที่ 2 --}}
+            <div class="expense-summary-row">
+                <div class="expense-summary-item">
+                    <strong>เลขที่เอกสาร (Expense No.):</strong>
+                    <span>{{ $expense->id ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>วันที่เดินทางไป:</strong>
+                    <span>
+                        {{ optional($expense->vbooking)->departure_date
+                            ? \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y')
+                            : '-' }}
+                    </span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>วันที่เดินทางกลับ:</strong>
+                    <span>
+                        {{ optional($expense->vbooking)->return_date
+                            ? \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y')
+                            : '-' }}
+                    </span>
+                </div>
             </div>
         </div>
+
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                                    <h5>Default</h5>
-                                </div> -->
+                                                <h5>Default</h5>
+                                            </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -72,9 +115,11 @@
                             <input type="hidden" name="locationid" value="{{ $booking->locationid }}"> --}}
                             <input type="hidden" id="expense_id" name="expense_id" value="{{ $expense->id }}">
                             @if ($expense->extype == 3 || $expense->extype == 2)
-                            <input type="hidden" id="empfullname" name="empfullname" value="{{ $expense->tech->fullname }}">
+                                <input type="hidden" id="empfullname" name="empfullname"
+                                    value="{{ $expense->tech->fullname }}">
                             @else
-                            <input type="hidden" id="empfullname" name="empfullname" value="{{ $expense->user->fullname }}">
+                                <input type="hidden" id="empfullname" name="empfullname"
+                                    value="{{ $expense->user->fullname }}">
                             @endif
 
                             {{-- hidden --}}
@@ -150,10 +195,12 @@
         .timeline-horizontal {
             position: relative;
             display: flex;
-            justify-content: flex-start; /* 👈 เปลี่ยนจาก space-between เป็น flex-start */
+            justify-content: flex-start;
+            /* 👈 เปลี่ยนจาก space-between เป็น flex-start */
             align-items: flex-start;
             flex-wrap: nowrap;
-            gap: 50px; /* เพิ่มระยะห่างระหว่างจุด */
+            gap: 50px;
+            /* เพิ่มระยะห่างระหว่างจุด */
             padding: 30px 10px;
         }
 
@@ -206,6 +253,52 @@
             font-size: 13px;
             color: #555;
         }
+
+
+
+        .expense-summary-card {
+            background-color: #f9fafb;
+            border: 1px solid #d0d7de;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            color: #495057;
+        }
+
+        .expense-summary-card h4 {
+            font-weight: 600;
+            color: #2f3e46;
+            border-left: 4px solid #4b9e5f;
+            padding-left: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* 🔹 ตารางข้อมูลสองบรรทัด */
+        .expense-summary-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 0.25rem;
+        }
+
+        .expense-summary-item {
+            flex: 1 1 25%;
+            min-width: 220px;
+            margin-bottom: 0.5rem;
+        }
+
+        .expense-summary-item strong {
+            color: #111827;
+        }
+
+        /* ✨ จัดระยะห่างระหว่างหัวข้อ */
+        .expense-summary-item span {
+            color: #4b5563;
+        }
+
+        @media (max-width: 768px) {
+            .expense-summary-item {
+                flex: 1 1 100%;
+            }
+        }
     </style>
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
@@ -242,129 +335,4 @@
 
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step-view.js']) }}"></script>
-
-    <script>
-        // function initMap() {
-        //     const map = new google.maps.Map(document.getElementById("map"), {
-        //         mapTypeControl: false,
-        //         center: {
-        //             lat: 13.736717,
-        //             lng: 100.523186
-        //         }, // Default: Bangkok
-        //         zoom: 13,
-        //     });
-
-        //     new AutocompleteDirectionsHandler(map);
-        // }
-
-        // class AutocompleteDirectionsHandler {
-        //     map;
-        //     originPlaceId;
-        //     destinationPlaceId;
-        //     travelMode;
-        //     directionsService;
-        //     directionsRenderer;
-        //     constructor(map) {
-        //         this.map = map;
-        //         this.originPlaceId = "";
-        //         this.destinationPlaceId = "";
-        //         this.travelMode = google.maps.TravelMode.WALKING;
-        //         this.directionsService = new google.maps.DirectionsService();
-        //         this.directionsRenderer = new google.maps.DirectionsRenderer();
-        //         this.directionsRenderer.setMap(map);
-
-        //         const originInput = document.getElementById("origin-input");
-        //         const destinationInput = document.getElementById("destination-input");
-        //         const modeSelector = document.getElementById("mode-selector");
-        //         // Specify just the place data fields that you need.
-        //         const originAutocomplete = new google.maps.places.Autocomplete(
-        //             originInput, {
-        //                 fields: ["place_id"]
-        //             },
-        //         );
-        //         // Specify just the place data fields that you need.
-        //         const destinationAutocomplete = new google.maps.places.Autocomplete(
-        //             destinationInput, {
-        //                 fields: ["place_id"]
-        //             },
-        //         );
-
-        //         this.setupClickListener(
-        //             "changemode-walking",
-        //             google.maps.TravelMode.WALKING,
-        //         );
-        //         this.setupClickListener(
-        //             "changemode-transit",
-        //             google.maps.TravelMode.TRANSIT,
-        //         );
-        //         this.setupClickListener(
-        //             "changemode-driving",
-        //             google.maps.TravelMode.DRIVING,
-        //         );
-        //         this.setupPlaceChangedListener(originAutocomplete, "ORIG");
-        //         this.setupPlaceChangedListener(destinationAutocomplete, "DEST");
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        //             destinationInput,
-        //         );
-        //         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(modeSelector);
-        //     }
-        //     // Sets a listener on a radio button to change the filter type on Places
-        //     // Autocomplete.
-        //     setupClickListener(id, mode) {
-        //         const radioButton = document.getElementById(id);
-
-        //         radioButton.addEventListener("click", () => {
-        //             this.travelMode = mode;
-        //             this.route();
-        //         });
-        //     }
-        //     setupPlaceChangedListener(autocomplete, mode) {
-        //         autocomplete.bindTo("bounds", this.map);
-        //         autocomplete.addListener("place_changed", () => {
-        //             const place = autocomplete.getPlace();
-
-        //             if (!place.place_id) {
-        //                 window.alert("Please select an option from the dropdown list.");
-        //                 return;
-        //             }
-
-        //             if (mode === "ORIG") {
-        //                 this.originPlaceId = place.place_id;
-        //             } else {
-        //                 this.destinationPlaceId = place.place_id;
-        //             }
-
-        //             this.route();
-        //         });
-        //     }
-        //     route() {
-        //         if (!this.originPlaceId || !this.destinationPlaceId) {
-        //             return;
-        //         }
-
-        //         const me = this;
-
-        //         this.directionsService.route({
-        //                 origin: {
-        //                     placeId: this.originPlaceId
-        //                 },
-        //                 destination: {
-        //                     placeId: this.destinationPlaceId
-        //                 },
-        //                 travelMode: this.travelMode,
-        //             },
-        //             (response, status) => {
-        //                 if (status === "OK") {
-        //                     me.directionsRenderer.setDirections(response);
-        //                 } else {
-        //                     window.alert("Directions request failed due to " + status);
-        //                 }
-        //             },
-        //         );
-        //     }
-        // }
-
-        // window.initMap = initMap;
-    </script>
 @endsection
