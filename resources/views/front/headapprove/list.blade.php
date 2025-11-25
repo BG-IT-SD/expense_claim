@@ -100,6 +100,12 @@
                                         <th>Booking ID</th>
                                         <th>ID | Name</th>
                                         <th>Location</th>
+                                        <th>จำนวนวัน</th>
+                                        <th>ค่าเบี้ยเลี้ยง / อาหาร</th>
+                                        <th>ค่าน้ำมัน</th>
+                                        <th>ค่าทางด่วน</th>
+                                        <th>ค่ารถโดยสารสาธารณะ</th>
+                                        <th>ค่าใช้จ่ายอื่นๆ</th>
                                         <th>Type Approve</th>
                                         <th>Approve</th>
                                         <th>Approve Name</th>
@@ -108,7 +114,51 @@
                                     </tr>
                                 </thead>
                                 <tbody class="table-border-bottom-0">
+                                    @php
+                                        $sum_food = 0;
+                                        $sum_gas = 0;
+                                        $sum_express = 0;
+                                        $sum_publictransport = 0;
+                                        $sum_other = 0;
+                                        $sum_total = 0;
+                                    @endphp
                                     @foreach ($expenses as $key => $expense)
+                                        @php
+                                            $fullname =
+                                                $expense->extype == 2 || $expense->extype == 3
+                                                    ? $expense->tech->fullname
+                                                    : $expense->user->fullname;
+                                            if ($expense->extype == 2) {
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbookingdrv->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbookingdrv->return_date),
+                                                    ) + 1;
+                                            } else {
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
+                                            }
+
+                                            $food = $expense->costoffood ?? 0; //ค่าอาหาร
+                                            $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
+                                            $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
+                                            $publictransport = $expense->publictransportfare ?? 0; //ค่ารถสาธารณะ
+                                            $other = $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
+                                            $total = $food + $gas + $express + $publictransport + $other;
+
+                                            $sum_food += $food; //ค่าอาหาร
+                                            $sum_gas += $gas; // ค่าน้ำมัน
+                                            $sum_express += $express; //ค่าทางด่วน
+                                            $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
+                                            $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
+                                            $sum_total += $total;
+                                            $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
+                                        @endphp
                                         <tr>
                                             <td>
                                                 <input type="checkbox" name="approve_id[]"
@@ -178,6 +228,12 @@
                                                     {{ optional($expense->vbooking)->location_name ?? '-' }}
                                                 @endif
                                             </td>
+                                            <td>{{ $days }}</td>
+                                            <td>{{ number_format($food, 2) }}</td>
+                                            <td>{{ number_format($gas, 2) }}</td>
+                                            <td>{{ number_format($express, 2) }}</td>
+                                            <td>{{ number_format($publictransport, 2) }}</td>
+                                            <td>{{ number_format($other, 2) }}</td>
                                             <td>
                                                 @if (!is_null($expense->latestApprove->typeapprove))
                                                     {!! type_approve_text($expense->latestApprove->typeapprove, $expense->latestApprove->typeapprove) !!}

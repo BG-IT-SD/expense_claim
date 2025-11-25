@@ -49,10 +49,6 @@
                                     <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
                                         id="plant_{{ $plant['id'] }}" role="tabpanel">
 
-                                        {{-- <input type="text" class="current-plant" name="current_plant[]" value="{{ $plant['id'] }}">
-                                        <input type="text" class="current-plant-name" name="current_plant_name[]" value="{{ $plant['name'] }}"> --}}
-                                        {{-- Tables --}}
-
                                         <div class="table-responsive text-nowrap2">
                                             <table class="table appex" id="appex-{{ $plant['id'] }}">
                                                 <thead class="table-dark">
@@ -73,24 +69,29 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody class="table-border-bottom-0">
-                                                    @foreach ($expenses as $key => $expense)
-                                                        @if (BuEmp($expense->empid) == $plant['name'])
-                                                            <tr>
-                                                                <td>
-                                                                    <input type="checkbox" name="expense_ids[]"
-                                                                        class="expense-checkbox"
-                                                                        data-plant="plant_{{ $plant['id'] }}"
-                                                                        value="{{ $expense->id }}">
-                                                                </td>
-                                                                <td>{{ $expense->prefix . $expense->id }}</td>
-                                                                {{-- <td class="text-wrap">
+                                                    @php
+                                                        // ดึงรายการเฉพาะของโรงงานนี้ ถ้าไม่มีให้เป็นคอลเลกชันว่าง
+                                                        $plantExpenses = $expensesByPlant[$plant['name']] ?? collect();
+                                                    @endphp
+
+                                                    @foreach ($plantExpenses as $expense)
+                                                        <tr>
+                                                            <td>
+                                                                <input type="checkbox" name="expense_ids[]"
+                                                                    class="expense-checkbox"
+                                                                    data-plant="plant_{{ $plant['id'] }}"
+                                                                    value="{{ $expense->id }}">
+                                                            </td>
+
+                                                            <td>{{ $expense->prefix . $expense->id }}</td>
+                                                            {{-- <td class="text-wrap">
                                                                     {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
                                                                         'd/m/Y H:i',
                                                                     ) .
                                                                         ' - ' .
                                                                         \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
                                                                 </td> --}}
-                                                                {{-- <td class="text-wrap">
+                                                            {{-- <td class="text-wrap">
                                                                     @if ($expense->vbooking?->departure_date)
                                                                         {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
                                                                         -
@@ -99,111 +100,109 @@
                                                                         <span class="text-muted">-</span>
                                                                     @endif
                                                                 </td> --}}
-                                                                <td class="text-wrap">
-                                                                    @if ($expense->extype == 2)
-                                                                        @if ($expense->vbookingdrv)
-                                                                            {{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date . ' ' . $expense->vbookingdrv->departure_time)->format('d/m/Y H:i') }}
-                                                                            -
-                                                                            {{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date . ' ' . $expense->vbookingdrv->return_time)->format('d/m/Y H:i') }}
-                                                                        @else
-                                                                            <span class="text-muted">
-                                                                                -</span>
-                                                                        @endif
+                                                            <td class="text-wrap">
+                                                                @if ($expense->extype == 2)
+                                                                    @if ($expense->vbookingdrv)
+                                                                        {{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date . ' ' . $expense->vbookingdrv->departure_time)->format('d/m/Y H:i') }}
+                                                                        -
+                                                                        {{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date . ' ' . $expense->vbookingdrv->return_time)->format('d/m/Y H:i') }}
                                                                     @else
-                                                                        @if ($expense->vbooking)
-                                                                            {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
-                                                                            -
-                                                                            {{ \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
-                                                                        @else
-                                                                            <span class="text-muted">
-                                                                                -</span>
-                                                                        @endif
+                                                                        <span class="text-muted">
+                                                                            -</span>
                                                                     @endif
-                                                                </td>
-                                                                <td>{{ $expense->bookid }}</td>
-                                                                <td class="text-wrap">
-                                                                    @if ($expense->extype == 2 || $expense->extype == 3)
-                                                                        {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
+                                                                @else
+                                                                    @if ($expense->vbooking)
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
+                                                                        -
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
                                                                     @else
-                                                                        {{ $expense->empid . ' | ' . $expense->user->fullname }}
+                                                                        <span class="text-muted">
+                                                                            -</span>
                                                                     @endif
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $expense->bookid }}</td>
+                                                            <td class="text-wrap">
+                                                                @if ($expense->extype == 2 || $expense->extype == 3)
+                                                                    {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
+                                                                @else
+                                                                    {{ $expense->empid . ' | ' . $expense->user->fullname }}
+                                                                @endif
 
-                                                                </td>
-                                                                <td class="text-wrap">
-                                                                    {{ BuEmp($expense->empid) }}
-                                                                </td>
-                                                                {{-- <td>{{ $expense->vbooking->locationbu }}</td> --}}
-                                                                <td>
-                                                                    @if ($expense->extype == 2)
-                                                                        {{ $expense->vbookingdrv?->locationbu ?? '-' }}
-                                                                    @else
-                                                                        {{ $expense->vbooking?->locationbu ?? '-' }}
-                                                                    @endif
-                                                                </td>
-                                                                <td>{{ $expense->totalprice ?? 0 }}</td>
-                                                                <td>
-                                                                    @if (!is_null($expense->latestApprove->typeapprove))
-                                                                        {!! type_approve_text($expense->latestApprove->typeapprove, $expense->latestApprove->typeapprove) !!}
-                                                                    @endif
-                                                                </td>
-                                                                <td>
-                                                                    @if (!is_null($expense->latestApprove->statusapprove))
-                                                                        {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
-                                                                        {{-- {{ $expense->latestApprove->statusapprove.'type=>'.$expense->latestApprove->typeapprove }} --}}
-                                                                    @endif
-                                                                </td>
-                                                                {{-- <td >
+                                                            </td>
+                                                            <td class="text-wrap">
+                                                                {{ BuEmp($expense->empid) }}
+                                                            </td>
+                                                            {{-- <td>{{ $expense->vbooking->locationbu }}</td> --}}
+                                                            <td>
+                                                                @if ($expense->extype == 2)
+                                                                    {{ $expense->vbookingdrv?->locationbu ?? '-' }}
+                                                                @else
+                                                                    {{ $expense->vbooking?->locationbu ?? '-' }}
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $expense->totalprice ?? 0 }}</td>
+                                                            <td>
+                                                                @if (!is_null($expense->latestApprove->typeapprove))
+                                                                    {!! type_approve_text($expense->latestApprove->typeapprove, $expense->latestApprove->typeapprove) !!}
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if (!is_null($expense->latestApprove->statusapprove))
+                                                                    {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
+                                                                    {{-- {{ $expense->latestApprove->statusapprove.'type=>'.$expense->latestApprove->typeapprove }} --}}
+                                                                @endif
+                                                            </td>
+                                                            {{-- <td >
                                                             @if ($expense->latestApprove->statusapprove >= 3)
                                                                 {{ $expense->$latestApprove->approvename }}
                                                             @endif
                                                         </td> --}}
-                                                                <td class="text-nowrap">
-                                                                    @if ($expense->latestApprove->statusapprove == 2)
-                                                                        @if ($expense->extype == 2)
-                                                                            <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
-                                                                                target="_blank" class="btn btn-sm btn-info">
-                                                                                <span
-                                                                                    class="mdi mdi-eye-arrow-right-outline"></span>
-                                                                                View
-                                                                            </a>
-                                                                        @else
-                                                                            <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                                                target="_blank"
-                                                                                class="btn btn-sm btn-info"><span
-                                                                                    class="mdi mdi-eye-arrow-right-outline"></span>
-                                                                                View</a>
-                                                                        @endif
+                                                            <td class="text-nowrap">
+                                                                @if ($expense->latestApprove->statusapprove == 2)
+                                                                    @if ($expense->extype == 2)
+                                                                        <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
+                                                                            target="_blank" class="btn btn-sm btn-info">
+                                                                            <span
+                                                                                class="mdi mdi-eye-arrow-right-outline"></span>
+                                                                            View
+                                                                        </a>
                                                                     @else
-                                                                        @if ($expense->extype == 2)
-                                                                            <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
-                                                                                target="_blank" class="btn btn-sm btn-info">
-                                                                                <span
-                                                                                    class="mdi mdi-eye-arrow-right-outline"></span>
-                                                                                View
-                                                                            </a>
-                                                                        @else
-                                                                            <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                                                target="_blank"
-                                                                                class="btn btn-sm btn-info"><span
-                                                                                    class="mdi mdi-eye-arrow-right-outline"></span>
-                                                                                View</a>
-                                                                            <a href="{{ route('HR.aftedit', $expense->id) }}"
-                                                                                class="btn btn-sm btn-warning"><span
-                                                                                    class="mdi mdi-edit"></span> Edit</a>
-                                                                        @endif
+                                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                                            target="_blank"
+                                                                            class="btn btn-sm btn-info"><span
+                                                                                class="mdi mdi-eye-arrow-right-outline"></span>
+                                                                            View</a>
                                                                     @endif
+                                                                @else
+                                                                    @if ($expense->extype == 2)
+                                                                        <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
+                                                                            target="_blank" class="btn btn-sm btn-info">
+                                                                            <span
+                                                                                class="mdi mdi-eye-arrow-right-outline"></span>
+                                                                            View
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                                            target="_blank"
+                                                                            class="btn btn-sm btn-info"><span
+                                                                                class="mdi mdi-eye-arrow-right-outline"></span>
+                                                                            View</a>
+                                                                        <a href="{{ route('HR.aftedit', $expense->id) }}"
+                                                                            class="btn btn-sm btn-warning"><span
+                                                                                class="mdi mdi-edit"></span> Edit</a>
+                                                                    @endif
+                                                                @endif
 
-                                                                </td>
-                                                            </tr>
-                                                        @endif
+                                                            </td>
+                                                        </tr>
                                                     @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
-
-                                        {{-- Tables --}}
                                     </div>
                                 @endforeach
+
                                 {{-- content Tabs --}}
 
                             </div>
