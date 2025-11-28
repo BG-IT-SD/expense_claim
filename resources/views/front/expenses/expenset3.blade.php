@@ -79,7 +79,7 @@
                     <label class="form-check-label" for="checktoil_1">ประสงค์เบิกน้ำมัน</label>
                 </div>
                 <div class="form-check form-check-inline mt-3">
-                    <input class="form-check-inpu checktoilt" type="radio" name="checktoil" id="checktoil_2"
+                    <input class="form-check-input checktoil" type="radio" name="checktoil" id="checktoil_2"
                         value="2" checked="checked">
                     <label class="form-check-label" for="checktoil_2">ไม่ประสงค์เบิกน้ำมัน</label>
                 </div>

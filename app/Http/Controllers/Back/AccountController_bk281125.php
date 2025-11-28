@@ -218,197 +218,9 @@ class AccountController extends Controller
     //     }
     // }
 
-    // public function saveExgroupApproval(Request $request)
-    // {
-    //     // ถ้าจะใช้ validate ด้วย เอา rules กลับมาแบบนี้
-    //     $request->validate([
-    //         'expense_id'              => 'required|array',
-    //         'statsapprove'            => 'required|array',
-    //         'txtreason'               => 'nullable|array',
-    //         'nettotalfood'            => 'required',
-    //         'nettotalfuel'            => 'required',
-    //         'netexpresswaytoll'       => 'required',
-    //         'netpublictransportfare'  => 'required',
-    //         'netotherexpenses'        => 'required',
-    //         'nettotalother'           => 'required',
-    //         'nettotal'                => 'required',
-    //     ]);
-
-    //     // dd($request->all());
-
-    //     $exgroupId = (int) $request->input('exgroup_id');
-
-    //     $exgroup = Exgroup::where('id', $exgroupId)
-    //         ->where('statusapprove', '!=', 1)
-    //         ->first();
-
-    //     if (!$exgroup) {
-    //         return redirect()->route('Account.index')->with([
-    //             'message' => 'รายการนี้ถูกอนุมัติแล้ว',
-    //             'class'   => 'warning',
-    //         ]);
-    //     }
-
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // ดึงค่าจากฟอร์ม
-    //         $expenseIds     = $request->input('expense_id', []);
-    //         $statuses       = $request->input('statsapprove', []);
-    //         $reasons        = $request->input('txtreason', []);
-    //         $accountempid   = $request->input('accountempid');
-    //         $accountemail   = $request->input('accountemail');
-    //         $paymentdate    = $request->input('paymentdate');
-
-    //         // preload approve + expense + user/tech ทีเดียว ลด N+1 และลดเวลา
-    //         $approves = Approve::with(['expense.user', 'expense.tech', 'expense.vbooking'])
-    //             ->where('typeapprove', 6)
-    //             ->whereIn('exid', $expenseIds)
-    //             ->get()
-    //             ->keyBy('exid'); // key เป็น exid ไว้หาเร็ว ๆ
-
-    //         foreach ($expenseIds as $index => $exid) {
-    //             $status = $statuses[$index] ?? null;
-    //             $reason = $reasons[$index] ?? null;
-
-    //             /** @var \App\Models\Approve|null $approve */
-    //             $approve = $approves->get($exid);
-
-    //             if (!$approve) {
-    //                 // \Log::warning('Approve not found for exid when saving exgroup approval', [
-    //                 //     'exid'   => $exid,
-    //                 //     'index'  => $index,
-    //                 // ]);
-    //                 continue;
-    //             }
-
-    //             $expense = $approve->expense;
-
-    //             // หา fullname จากฐานข้อมูล ไม่ใช้ input form แล้ว
-    //             $fullname = '';
-
-    //             if ($expense) {
-    //                 if (in_array($expense->extype, [2, 3])) {
-    //                     // technician
-    //                     $fullname = optional($expense->tech)->fullname;
-    //                 } else {
-    //                     // employee
-    //                     $fullname = optional($expense->user)->fullname;
-    //                 }
-    //             }
-
-    //             $fullname = $fullname ?? '';
-
-    //             // ข้อมูลที่ใช้ในเมล
-    //             $totalprice = $expense->totalprice ?? 0;
-    //             $exdate     = optional(optional($expense)->vbooking)->departure_date;
-    //             $Tomail     = $expense ? (EmailEmp($expense->empid) ?? '') : '';
-
-    //             // อัปเดต approve
-    //             $approve->statusapprove = $status;
-    //             $approve->remark        = $reason;
-    //             $approve->save();
-
-    //             // ถ้าไม่มีเมล ก็ไม่ต้องส่ง
-    //             if ($Tomail === '' || !$status) {
-    //                 continue;
-    //             }
-
-    //             if ((int)$status === 1) {
-    //                 //สถานะอนุมัติ — ส่งเมลแจ้งยอดจ่าย
-    //                 $data = [
-    //                     'name'      => $fullname,
-    //                     'price'     => $totalprice,
-    //                     'pricedate' => $paymentdate,
-    //                     'expenseid' => $approve->exid,
-    //                 ];
-
-    //                 MailHelper::sendExternalMail(
-    //                     $Tomail,
-    //                     'แจ้งยอดการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่',
-    //                     'mails.accountapporve',
-    //                     $data,
-    //                     'Expense Claim System EX' . $exid
-    //                 );
-    //             } elseif ((int)$status === 2 || (int)$status === 9) {
-    //                 // สถานะ Reject หรือ Hold — ส่งเมลแจ้งผล
-    //                 $textreject = (int)$status === 2 ? 'ไม่ผ่านการอนุมัติ' : 'ติดสถานะHold';
-
-    //                 $data = [
-    //                     'name'      => $fullname,
-    //                     'text'      => $textreject,
-    //                     'expenseid' => $approve->exid,
-    //                     'exdate'    => $exdate,
-    //                     'remark'    => $reason,
-    //                 ];
-
-    //                 MailHelper::sendExternalMail(
-    //                     $Tomail,
-    //                     'แจ้งผลการเบิกเบี้ยเลี้ยงปฎิบัติงานนอกสถานที่จากบัญชี',
-    //                     'mails.accounthold',
-    //                     $data,
-    //                     'Expense Claim System EX' . $exid
-    //                 );
-    //             }
-    //         }
-
-    //         //อัปเดตยอดสุทธิใน exgroup
-    //         $exgroup->nettotalfood           = $this->cleanNumber($request->input('nettotalfood'));
-    //         $exgroup->nettotalfuel           = $this->cleanNumber($request->input('nettotalfuel'));
-    //         $exgroup->netexpresswaytoll      = $this->cleanNumber($request->input('netexpresswaytoll'));
-    //         $exgroup->netpublictransportfare = $this->cleanNumber($request->input('netpublictransportfare'));
-    //         $exgroup->netotherexpenses       = $this->cleanNumber($request->input('netotherexpenses'));
-    //         $exgroup->nettotalother          = $this->cleanNumber($request->input('nettotalother'));
-    //         $exgroup->nettotal               = $this->cleanNumber($request->input('nettotal'));
-    //         $exgroup->accountempid           = $accountempid;
-    //         $exgroup->accountemail           = $accountemail;
-    //         $exgroup->statusapprove          = 1;
-    //         $exgroup->paymentdate            = $paymentdate;
-    //         $exgroup->save();
-
-    //         DB::commit();
-
-    //         // log ไว้เหมือนเดิม
-    //         $logData = [
-    //             'exgroup'      => $exgroup->toArray(),
-    //             'expense_ids'  => $expenseIds,
-    //             'approves'     => Approve::whereIn('exid', $expenseIds)->where('typeapprove', 6)->get()->toArray(),
-    //             'statuses'     => $statuses,
-    //             'reasons'      => $reasons,
-    //             'accountempid' => $accountempid,
-    //             'accountemail' => $accountemail,
-    //             'paymentdate'  => $paymentdate,
-    //         ];
-
-    //         logAction(
-    //             'update',
-    //             'Exgroup',
-    //             'บันทึกผลอนุมัติกลุ่ม EXGROUP-' . $exgroup->id,
-    //             json_encode($logData)
-    //         );
-
-    //         return redirect()->route('Account.index')->with([
-    //             'message' => 'บันทึกผลอนุมัติเรียบร้อย',
-    //             'class'   => 'success',
-    //         ]);
-    //     } catch (\Throwable $e) {
-    //         DB::rollBack();
-
-    //         // \Log::error('saveExgroupApproval error', [
-    //         //     'message' => $e->getMessage(),
-    //         //     'trace'   => $e->getTraceAsString(),
-    //         // ]);
-
-    //         return redirect()->route('Account.index')->with([
-    //             'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage(),
-    //             'class'   => 'danger',
-    //         ]);
-    //     }
-    // }
-
     public function saveExgroupApproval(Request $request)
     {
-        //Validate input เหมือนเดิม
+        // ถ้าจะใช้ validate ด้วย เอา rules กลับมาแบบนี้
         $request->validate([
             'expense_id'              => 'required|array',
             'statsapprove'            => 'required|array',
@@ -422,9 +234,10 @@ class AccountController extends Controller
             'nettotal'                => 'required',
         ]);
 
+        // dd($request->all());
+
         $exgroupId = (int) $request->input('exgroup_id');
 
-        //เช็คว่า exgroup ยังไม่ถูกอนุมัติไปแล้ว
         $exgroup = Exgroup::where('id', $exgroupId)
             ->where('statusapprove', '!=', 1)
             ->first();
@@ -447,24 +260,33 @@ class AccountController extends Controller
             $accountemail   = $request->input('accountemail');
             $paymentdate    = $request->input('paymentdate');
 
-            // preload approve + expense + user/tech + vbooking ทีเดียว
+            // preload approve + expense + user/tech ทีเดียว ลด N+1 และลดเวลา
             $approves = Approve::with(['expense.user', 'expense.tech', 'expense.vbooking'])
                 ->where('typeapprove', 6)
                 ->whereIn('exid', $expenseIds)
                 ->get()
-                ->keyBy('exid'); // ใช้ exid เป็น key ให้หาเร็ว ๆ
+                ->keyBy('exid'); // key เป็น exid ไว้หาเร็ว ๆ
 
-            // เตรียม map ลดงานซ้ำใน loop ใหญ่
-            $fullnameMap = [];
-            $emailMap    = [];
-            $totalMap    = [];
-            $exdateMap   = [];
+            foreach ($expenseIds as $index => $exid) {
+                $status = $statuses[$index] ?? null;
+                $reason = $reasons[$index] ?? null;
 
-            foreach ($approves as $exidKey => $approveItem) {
-                $expense = $approveItem->expense;
+                /** @var \App\Models\Approve|null $approve */
+                $approve = $approves->get($exid);
 
-                // หา fullname ตาม extype
+                if (!$approve) {
+                    // \Log::warning('Approve not found for exid when saving exgroup approval', [
+                    //     'exid'   => $exid,
+                    //     'index'  => $index,
+                    // ]);
+                    continue;
+                }
+
+                $expense = $approve->expense;
+
+                // หา fullname จากฐานข้อมูล ไม่ใช้ input form แล้ว
                 $fullname = '';
+
                 if ($expense) {
                     if (in_array($expense->extype, [2, 3])) {
                         // technician
@@ -475,51 +297,24 @@ class AccountController extends Controller
                     }
                 }
 
-                $fullnameMap[$exidKey] = $fullname ?? '';
+                $fullname = $fullname ?? '';
 
-                // email พนักงาน
-                $emailMap[$exidKey] = $expense ? (EmailEmp($expense->empid) ?? '') : '';
-
-                // ยอดรวม
-                $totalMap[$exidKey] = $expense->totalprice ?? 0;
-
-                // วันที่เดินทาง
-                $exdateMap[$exidKey] = optional(optional($expense)->vbooking)->departure_date;
-            }
-
-            // loop หลัก — ใช้ข้อมูลจาก map แทนการคำนวณซ้ำ
-            foreach ($expenseIds as $index => $exid) {
-                $status = $statuses[$index] ?? null;
-                $reason = $reasons[$index] ?? null;
-
-                /** @var \App\Models\Approve|null $approve */
-                $approve = $approves->get($exid);
-
-                if (!$approve) {
-                    // ถ้าไม่มี approve ของ exid นี้ ก็ข้ามไป
-                    continue;
-                }
-
-                // ดึงข้อมูลจาก map ที่เตรียมไว้
-                $fullname   = $fullnameMap[$exid]  ?? '';
-                $Tomail     = $emailMap[$exid]     ?? '';
-                $totalprice = $totalMap[$exid]     ?? 0;
-                $exdate     = $exdateMap[$exid]    ?? null;
-
-                // เก็บ status เดิมไว้ ถ้าจะเอาไปเช็คไม่ให้ส่งเมลซ้ำ สามารถใช้ $oldStatus ตรงนี้ได้
-                // $oldStatus = (int) $approve->statusapprove;
+                // ข้อมูลที่ใช้ในเมล
+                $totalprice = $expense->totalprice ?? 0;
+                $exdate     = optional(optional($expense)->vbooking)->departure_date;
+                $Tomail     = $expense ? (EmailEmp($expense->empid) ?? '') : '';
 
                 // อัปเดต approve
                 $approve->statusapprove = $status;
                 $approve->remark        = $reason;
                 $approve->save();
 
-                // ถ้าไม่มีเมล หรือไม่มีสถานะ ก็ไม่ต้องส่ง
+                // ถ้าไม่มีเมล ก็ไม่ต้องส่ง
                 if ($Tomail === '' || !$status) {
                     continue;
                 }
 
-                if ((int) $status === 1) {
+                if ((int)$status === 1) {
                     //สถานะอนุมัติ — ส่งเมลแจ้งยอดจ่าย
                     $data = [
                         'name'      => $fullname,
@@ -535,9 +330,9 @@ class AccountController extends Controller
                         $data,
                         'Expense Claim System EX' . $exid
                     );
-                } elseif ((int) $status === 2 || (int) $status === 9) {
+                } elseif ((int)$status === 2 || (int)$status === 9) {
                     // สถานะ Reject หรือ Hold — ส่งเมลแจ้งผล
-                    $textreject = (int) $status === 2 ? 'ไม่ผ่านการอนุมัติ' : 'ติดสถานะHold';
+                    $textreject = (int)$status === 2 ? 'ไม่ผ่านการอนุมัติ' : 'ติดสถานะHold';
 
                     $data = [
                         'name'      => $fullname,
@@ -557,7 +352,7 @@ class AccountController extends Controller
                 }
             }
 
-            // อัปเดตยอดสุทธิใน exgroup
+            //อัปเดตยอดสุทธิใน exgroup
             $exgroup->nettotalfood           = $this->cleanNumber($request->input('nettotalfood'));
             $exgroup->nettotalfuel           = $this->cleanNumber($request->input('nettotalfuel'));
             $exgroup->netexpresswaytoll      = $this->cleanNumber($request->input('netexpresswaytoll'));
@@ -599,13 +394,17 @@ class AccountController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
+            // \Log::error('saveExgroupApproval error', [
+            //     'message' => $e->getMessage(),
+            //     'trace'   => $e->getTraceAsString(),
+            // ]);
+
             return redirect()->route('Account.index')->with([
                 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage(),
                 'class'   => 'danger',
             ]);
         }
     }
-
 
 
     private function cleanNumber($value)

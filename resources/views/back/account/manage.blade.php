@@ -148,7 +148,9 @@
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}
-                                                    <input type="hidden" name="fullname[]" value="{{ $fullname }}">
+                                                    {{-- <input type="text" name="fullname[]" value="{{ $fullname }}"> --}}
+                                                    {{-- <input type="hidden" name="fullname[{{ $expense->id }}]" value="{{ $fullname }}"> --}}
+
                                                 </td>
                                                 {{-- <td>{{ $expense->userhr->DEPT ?? '-' }}</td> --}}
                                                 <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
@@ -317,6 +319,7 @@
                                 </div>
 
                             </div>
+                            {{-- <input type="text" name="test" value="dfsfsdfsdfdsf"> --}}
                         </form>
                     </div>
 
