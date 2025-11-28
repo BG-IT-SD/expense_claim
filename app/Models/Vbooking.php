@@ -11,7 +11,8 @@ class Vbooking extends Model
 
     public function expense()
 {
-    return $this->hasOne(Expense::class, 'bookid', 'id');
+    return $this->hasOne(Expense::class, 'bookid', 'id')
+    ->latest('id');
 }
 }
 

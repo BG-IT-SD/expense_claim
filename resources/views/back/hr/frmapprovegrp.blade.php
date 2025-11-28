@@ -3,7 +3,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         {{-- <h4 class="py-3 mb-4 bg-secondary"><span class="text-muted fw-light ">Form/</span> เบิกเบี้ยงเลี้ยง/อาหาร/ค่าเดินทาง</h4> --}}
         <div class="expense-summary-card mb-3 shadow-sm">
-            <h4>เบิกเบี้ยเลี้ยง / อาหาร / ค่าเดินทาง dd</h4>
+            <h4>เบิกเบี้ยเลี้ยง / อาหาร / ค่าเดินทาง</h4>
 
             {{--  บรรทัดที่ 1 --}}
             <div class="expense-summary-row">

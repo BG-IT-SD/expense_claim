@@ -116,6 +116,7 @@ class ExpenseController extends Controller
             ->whereHas('latestApprove', function ($query) {
                 $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
             })
+            ->OrderByDesc('id')
             ->get();
 
         if ($request->filled('exdate') && $request->filled('end_exdate')) {
