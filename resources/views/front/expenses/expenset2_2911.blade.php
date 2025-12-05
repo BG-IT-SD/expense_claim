@@ -8,13 +8,11 @@
     <div class="row g-4">
         @foreach ($Alldayfood as $index => $dayFood)
             @php
-                // คำนวณช่วงเวลาในแต่ละวัน
+                // คำนวณช่วงเวลาในแต่ละวัน (ยึด logic เดิมของคุณ)
                 $mealchecked_1 = '';
                 $mealchecked_2 = '';
                 $mealchecked_3 = '';
                 $mealchecked_4 = '';
-
-                $isLastDay = $dayFood->equalTo($endDate);
 
                 if ($startDate->equalTo($endDate)) {
                     // มีแค่วันเดียว
@@ -34,39 +32,39 @@
                     $to = $dayFood->copy()->setTime(23, 59);
                 }
 
-                // ---- มื้อเช้า: เริ่มก่อน 08:00 (ใช้ logic เดิม) ----
-                if ($from->hour < 8 || ($to->hour > 6 && $from->hour < 8)) {
+                // ติ๊กอัตโนมัติ
+                // if ($from->hour < 8 || ($to->hour > 6 && $from->hour < 8)) {
+                //     $mealchecked_1 = 'checked';
+                // }
+                // if ($from->hour < 17 && $to->hour > 8) {
+                //     $mealchecked_2 = 'checked';
+                // }
+                // if ($from->hour < 23 && $to->hour > 17) {
+                //     $mealchecked_3 = 'checked';
+                // }
+                // if ($to->hour > 21) {
+                //     $mealchecked_4 = 'checked';
+                // }
+                // ติ๊กอัตโนมัติ
+                // มื้อเช้า: ต้องเริ่มก่อน 08:00
+               if ($from->hour < 8 || ($to->hour > 6 && $from->hour < 8)) {
                     $mealchecked_1 = 'checked';
                 }
-
-                // ---- มื้อกลางวัน ----
-                if ($isLastDay) {
-                    // ใช้สูตรใหม่เฉพาะวันสุดท้าย:
-                    // ออก 08:00–12:00 และถึง/ปฏิบัติงาน 13:00–17:00
-                    $lunchStartHour = $from->hour;
-                    $lunchEndHour = $to->hour;
-
-                    if ($lunchStartHour >= 8 && $lunchStartHour < 12 && $lunchEndHour >= 13 && $lunchEndHour <= 17) {
-                        $mealchecked_2 = 'checked';
-                    }
-                } else {
-                    // วันอื่น ๆ ใช้สูตรเดิม (เต็มวัน)
-                    if ($from->hour < 17 && $to->hour > 8) {
-                        $mealchecked_2 = 'checked';
-                    }
+                // มื้อกลางวัน: ถ้าอยู่ระหว่างหลัง 08:00 และก่อน 17:00
+                if ($from->hour < 17 && $to->hour > 8) {
+                    $mealchecked_2 = 'checked';
                 }
-
-                // ---- มื้อเย็น: ถ้าเดินทางกินเวลาเข้าไปเกิน 17:00 ----
+                // มื้อเย็น: ถ้าเดินทางกินเวลาเข้าไปเกิน 17:00
                 if ($from->hour < 23 && $to->hour > 17) {
                     $mealchecked_3 = 'checked';
                 }
-
-                // ---- มื้อดึก: ถ้ามีสิ้นสุดหลัง 21:00 ----
+                // มื้อดึก: ถ้ามีสิ้นสุดหลัง 21:00
                 if ($to->hour > 21) {
                     $mealchecked_4 = 'checked';
                 }
-            @endphp
 
+                $isLastDay = $dayFood->equalTo($endDate);
+            @endphp
 
             <div class="col-sm-12">
                 <div class="card meal-day-box {{ $isLastDay ? 'is-last-day' : '' }}">
