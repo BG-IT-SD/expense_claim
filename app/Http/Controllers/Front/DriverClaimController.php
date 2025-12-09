@@ -661,7 +661,7 @@ class DriverClaimController extends Controller
 
         $bookings = Vbookmanage::where('driver_empid', $empid)
             ->whereNotIn('id', $usedBookIds)
-            ->whereDate('departure_date', '>=', Carbon::now()->subDays(7)) // ⬅ ดึงย้อนหลัง 7 วัน
+            ->whereDate('departure_date', '>=', Carbon::now()->subDays(30)) // ⬅ ดึงย้อนหลัง 7 วัน
             ->orderByDesc('departure_date')
             ->get();
 
