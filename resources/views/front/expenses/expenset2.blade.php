@@ -40,21 +40,21 @@
                 }
 
                 // ---- มื้อกลางวัน ----
-                if ($isLastDay) {
+                // if ($isLastDay) {
                     // ใช้สูตรใหม่เฉพาะวันสุดท้าย:
                     // ออก 08:00–12:00 และถึง/ปฏิบัติงาน 13:00–17:00
-                    $lunchStartHour = $from->hour;
-                    $lunchEndHour = $to->hour;
+                //     $lunchStartHour = $from->hour;
+                //     $lunchEndHour = $to->hour;
 
-                    if ($lunchStartHour >= 8 && $lunchStartHour < 12 && $lunchEndHour >= 13 && $lunchEndHour <= 17) {
-                        $mealchecked_2 = 'checked';
-                    }
-                } else {
+                //     if ($lunchStartHour >= 8 && $lunchStartHour < 12 && $lunchEndHour >= 13 && $lunchEndHour <= 17) {
+                //         $mealchecked_2 = 'checked';
+                //     }
+                // } else {
                     // วันอื่น ๆ ใช้สูตรเดิม (เต็มวัน)
                     if ($from->hour < 17 && $to->hour > 8) {
                         $mealchecked_2 = 'checked';
                     }
-                }
+                // }
 
                 // ---- มื้อเย็น: ถ้าเดินทางกินเวลาเข้าไปเกิน 17:00 ----
                 if ($from->hour < 23 && $to->hour > 17) {
