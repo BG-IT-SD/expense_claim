@@ -270,7 +270,7 @@ class ApproveController extends Controller
                 ->limit(1);
         })
             ->where('step', 2)
-            ->where('extype',1)
+            ->where('extype', 1)
             ->where('status', 1)
             ->where('deleted', 0)
             ->first();
@@ -286,7 +286,7 @@ class ApproveController extends Controller
             // $nextemail = 'Kamolwan.b@bgiglass.com';
         }
 
-        return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail'));
+        return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail','type'));
     }
 
     public function confirmgroup(Request $request, $id)
@@ -405,6 +405,138 @@ class ApproveController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withErrors(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+        }
+    }
+
+
+    public function hrrject(Request $request)
+    {
+        $request->validate([
+            'expense_id' => 'required|integer|exists:expenses,id',
+            'reason'     => 'required|string',
+        ], [
+            'expense_id.required' => 'ไม่พบรหัสรายการเบิก',
+            'reason.required'     => 'กรุณากรอกเหตุผล',
+        ]);
+
+        $expenseId = (int) $request->expense_id;
+        $reason    = $request->reason;
+        $empid     = Auth::user()->empid ?? null; // คนที่กด reject
+        $typeapprove = $request->typeapprove;
+
+
+        try {
+            DB::transaction(function () use ($expenseId, $reason, $empid,$typeapprove) {
+
+                // 1หา approve แถวล่าสุดของ exid นี้ (เช่น typeapprove 4 = HRตรวจสอบแล้ว)
+                $approve = Approve::where('exid', $expenseId)
+                    ->where('typeapprove', $typeapprove)
+                    ->where('deleted', 0)
+                    ->whereNotNull('exgroup')
+                    ->orderByDesc('id')
+                    ->first();
+
+                if ($approve) {
+                    $approve->update([
+                        'statusapprove' => 2,          // 2 = Reject
+                        'remark'        => $reason,
+                        'empid'         => $empid ?? $approve->empid,
+                        'exgroup'        => null,
+                        'login_token'    => null,
+                    ]);
+                }
+
+                // 2) ปรับยอดรวมใน exgroup
+               $expense = Expense::with('exgroupData')->findOrFail($expenseId);
+                $exgroup = $expense->exgroupData;
+
+                if (!$exgroup) {
+                    throw new \Exception("รายการนี้ไม่อยู่ในกลุ่ม จึงไม่สามารถหักยอดรวมได้");
+                }
+
+
+                if ($exgroup) {
+                    // ====== ยอดของบรรทัดนี้ (จาก expenses table) ======
+                    $food   = $expense->costoffood          ?? 0;
+                    $fuel   = $expense->gasolinecost        ?? 0;
+                    $exp    = $expense->expresswaytoll      ?? 0;
+                    $public = $expense->publictransportfare ?? 0;
+                    $other  = $expense->otherexpenses       ?? 0;
+
+                    // ถ้าคุณใช้ totalprice เป็นยอดรวมต่อบรรทัดก็มีให้ใช้
+                    $lineTotal = $expense->totalprice ?? 0;
+
+                    // ====== หักออกจากยอดรวมใน exgroup (ตามโครงในรูป) ======
+
+                    // 1) ยอดหลักแต่ละประเภท
+                    $exgroup->totalfood           = max(0, ($exgroup->totalfood           ?? 0) - $food);
+                    $exgroup->totalfuel           = max(0, ($exgroup->totalfuel           ?? 0) - $fuel);
+                    $exgroup->expresswaytoll      = max(0, ($exgroup->expresswaytoll      ?? 0) - $exp);
+                    $exgroup->publictransportfare = max(0, ($exgroup->publictransportfare ?? 0) - $public);
+                    $exgroup->otherexpenses       = max(0, ($exgroup->otherexpenses       ?? 0) - $other);
+
+                    // 2) totalother = expressway + public + other
+                    $exgroup->totalother = max(
+                        0,
+                        ($exgroup->expresswaytoll      ?? 0)
+                            + ($exgroup->publictransportfare ?? 0)
+                            + ($exgroup->otherexpenses       ?? 0)
+                    );
+
+                    // 3) total = food + fuel + totalother
+                    $exgroup->total = max(
+                        0,
+                        ($exgroup->totalfood  ?? 0)
+                            + ($exgroup->totalfuel  ?? 0)
+                            + ($exgroup->totalother ?? 0)
+                    );
+
+                    // ✅ ถ้าต้องการให้ column net* เดินตาม total ไปด้วยแบบง่าย ๆ
+                    // (ถ้าคุณมี logic ภาษี/หักอื่น ๆ ให้เปลี่ยนตรงนี้ทีหลังได้)
+                    $exgroup->netexpresswaytoll      = $exgroup->expresswaytoll;
+                    $exgroup->netpublictransportfare = $exgroup->publictransportfare;
+                    $exgroup->netotherexpenses       = $exgroup->otherexpenses;
+                    $exgroup->nettotalfood           = $exgroup->totalfood;
+                    $exgroup->nettotalfuel           = $exgroup->totalfuel;
+
+                    $exgroup->nettotalother = max(
+                        0,
+                        ($exgroup->netexpresswaytoll      ?? 0)
+                            + ($exgroup->netpublictransportfare ?? 0)
+                            + ($exgroup->netotherexpenses       ?? 0)
+                    );
+
+                    $exgroup->nettotal = max(
+                        0,
+                        ($exgroup->nettotalfood  ?? 0)
+                            + ($exgroup->nettotalfuel  ?? 0)
+                            + ($exgroup->nettotalother ?? 0)
+                    );
+
+                    $exgroup->save();
+
+                    // 4) ตัด expense ออกจากกลุ่มด้วย (กันไม่ให้ยอดรวมผิดรอบหน้า)
+                    $expense->exgroup = null;
+
+                    // ถ้ามี status สำหรับสถานะ reject ก็อาจตั้งตรงนี้ เช่น 2 หรือ 9 ตามระบบคุณ
+                    // $expense->status = 9;
+
+                    $expense->save();
+                }
+            });
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'บันทึกการ Reject และอัปเดตรวมกลุ่มเรียบร้อยแล้ว',
+                'class'   => 'success',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'เกิดข้อผิดพลาดระหว่างบันทึกข้อมูล',
+                'error'   => $e->getMessage(),
+                'class'   => 'error',
+            ], 500);
         }
     }
 }

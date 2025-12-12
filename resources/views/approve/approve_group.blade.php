@@ -23,9 +23,10 @@
                         </div>
                         <div class="card-body row">
                             <div class="table-responsive text-nowrap">
-                                <table class="table table-bordered text-center">
+                                <table class="table table-bordered text-center lock-table">
                                     <thead class="table-secondary">
                                         <tr>
+                                            <th class="sticky-col">Action</th>
                                             <th>ลำดับ</th>
                                             <th>EXID</th>
                                             <th>สถานที่ไปปฏิบัติงาน</th>
@@ -86,6 +87,31 @@
                                                 $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
                                             @endphp
                                             <tr>
+                                                <td class="sticky-col">
+                                                    @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
+                                                        <select class="status-dropdown action-select" name="statsapprove[]"
+                                                            data-id = "{{ $expense->id }}" style="width: 110px;">
+                                                            <option value="1" data-color="bg-success">Approve</option>
+                                                            {{-- <option value="9" data-color="bg-warning">Hold</option> --}}
+                                                            <option value="2" data-color="bg-danger">Reject</option>
+                                                        </select>
+                                                        <div class="reasonarea" data-id="{{ $expense->id }}"
+                                                            style="display: {{ $expense->reason ? 'block' : 'none' }};">
+                                                            <hr>
+                                                            <button type="button" class="btn btn-sm btn-secondary"
+                                                                title="{{ $expense->reason ?? 'ดูเหตุผล' }}">
+                                                                เหตุผล
+                                                            </button>
+                                                            <input type="hidden" name="txtreason[]"
+                                                                data-id="{{ $expense->id }}" class="txtreason"
+                                                                value="{{ $expense->reason ?? '' }}">
+                                                        </div>
+                                                    @else
+                                                        @if ($type == 4)
+                                                             {!! status_approve_badge(1, $type) !!}
+                                                        @endif
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     {{ $i + 1 }}
                                                     <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
@@ -135,7 +161,7 @@
                                         @endforeach
 
                                         <tr class="table-warning fw-bold">
-                                            <td colspan="12">รวม</td>
+                                            <td colspan="13">รวม</td>
                                             <td>{{ number_format($sum_food, 2) }}
                                             </td>
                                             <td>{{ number_format($sum_gas, 2) }}
@@ -259,7 +285,8 @@
                                         <input type="hidden" name="nextempid" id="nextempid" value="{{ $nextempid }}">
                                         <input type="hidden" name="nextfullname" id="nextfullname"
                                             value="{{ $nextfullname }}">
-                                        <input type="hidden" name="nextemail" id="nextemail" value="{{ $nextemail }}">
+                                        <input type="hidden" name="nextemail" id="nextemail"
+                                            value="{{ $nextemail }}">
 
                                         <input type="hidden" name="expenseidgroup" id="expenseidgroup"
                                             value="{{ 'EXGROUP-' . $exgroup->id }}">
@@ -294,6 +321,8 @@
 @endsection
 @section('jscustom')
     <script>
+        const pageTypeApprove = @json($approve->typeapprove);
+
         $(document).ready(function() {
             let isSubmitting = false;
 
@@ -345,6 +374,144 @@
                     $('#approveForm').submit();
                 }
             });
+
+            $('.status-dropdown').select2({
+                templateResult: function(data) {
+                    if (!data.id) return data.text;
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+
+                    if ($(data.element).data('color')) {
+                        $result.addClass(
+                            $(data.element).data('color') + ' text-white px-2 rounded'
+                        );
+                    }
+
+                    return $result;
+                },
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+
+                    if ($(data.element).data('color')) {
+                        $result.addClass(
+                            $(data.element).data('color') + ' text-white px-2 rounded'
+                        );
+                    }
+
+                    return $result;
+                },
+            });
+
+            $('.action-select').on('change', function() {
+                const action = $(this).val();
+                const rowId = $(this).data('id');
+                const $select = $(this);
+
+                if (action === '9' || action === '2') {
+                    const label = action === '9' ? 'Hold' : 'Reject';
+
+                    Swal.fire({
+                        title: 'กรุณากรอกเหตุผล',
+                        input: 'textarea',
+                        inputLabel: 'เหตุผลที่เลือก ' + label,
+                        inputPlaceholder: 'พิมพ์เหตุผลที่นี่...',
+                        showCancelButton: true,
+                        confirmButtonText: 'ยืนยัน',
+                        cancelButtonText: 'ยกเลิก',
+                        inputValidator: value => {
+                            if (!value) return 'กรุณากรอกเหตุผลก่อน!';
+                        },
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const reason = result.value;
+
+                            const $rowBox = $('.reasonarea[data-id="' + rowId + '"]');
+                            const $input = $rowBox.find('.txtreason');
+                            const $btn = $rowBox.find('button');
+
+                            $input.val(reason);
+                            $btn
+                                .attr('title', reason)
+                                .attr('data-bs-original-title', reason)
+                                .tooltip('dispose')
+                                .tooltip();
+                            $rowBox.show();
+                            $.ajax({
+                                url: '/approve/hr-reject', // เปลี่ยนเป็น route ที่ใช้จริง
+                                type: 'POST',
+                                data: {
+                                    expense_id: rowId,
+                                    status: action, // 2 = reject, 9 = hold
+                                    reason: reason,
+                                    typeapprove: pageTypeApprove,
+                                },
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                        'content')
+                                },
+                                success: function(res) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'บันทึกข้อมูลเรียบร้อย',
+                                        timer: 1200,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        // รีหน้าใหม่หลังบันทึกเสร็จ
+                                        window.location.reload();
+                                    });
+                                },
+                                error: function(xhr) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'บันทึกไม่สำเร็จ',
+                                        text: xhr.responseJSON?.error ||
+                                            'กรุณาลองใหม่อีกครั้ง',
+                                    });
+
+                                    // ย้อน dropdown กลับไป Approve ถ้า error
+                                    $select.val('1').trigger('change');
+                                }
+                            });
+
+                        } else {
+                            $select.val('1').trigger('change'); // กลับไป Approve
+                        }
+                    });
+                } else {
+                    $select.val('1').trigger('change'); // กลับไป Approve
+                }
+            });
         });
     </script>
+@endsection
+@section('csscustom')
+    <style>
+        .lock-table {
+            border-collapse: collaps;
+            width: max-content;
+        }
+
+        .lock-table th,
+        .lock-table td {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 1;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/select2/select2.css') }}" />
+@endsection
+@section('jsvendor')
+    <script src="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
 @endsection

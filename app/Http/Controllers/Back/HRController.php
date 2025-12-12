@@ -185,6 +185,13 @@ class HRController extends Controller
                         ->orWhere(function ($sub) {
                             $sub->where('typeapprove', 3)
                                 ->where('statusapprove', 0);
+                        })
+                        ->orWhere(function ($sub2) {
+                            $sub2->where('typeapprove', 4)
+                                ->where('statusapprove', 2);
+                        })->orWhere(function ($sub3) {
+                            $sub3->where('typeapprove', 5)
+                                ->where('statusapprove', 2);
                         });
                 });
             })
@@ -270,44 +277,44 @@ class HRController extends Controller
     //     return view('back.hr.approved', compact('expenses', 'page', 'plantNames'));
     // }
     public function history()
-{
-    ini_set('max_execution_time', 300);
-    $empid = Auth::user()->empid;
+    {
+        ini_set('max_execution_time', 300);
+        $empid = Auth::user()->empid;
 
-    // พนักงาน HR + โรงงานที่ดูแล
-    $staff = ApproveStaff::with(['plantSettingDetails.plant'])
-        ->where('empid', $empid)
-        ->where('deleted', 0)
-        ->where('step', 9)
-        ->first();
+        // พนักงาน HR + โรงงานที่ดูแล
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+            ->where('empid', $empid)
+            ->where('deleted', 0)
+            ->where('step', 9)
+            ->first();
 
-    $plantNames = $staff?->plantSettingDetails
-        ->pluck('plant.plantname', 'plant.id')
-        ->filter()
-        ->map(fn($name, $id) => ['id' => $id, 'name' => $name])
-        ->values();
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname', 'plant.id')
+            ->filter()
+            ->map(fn($name, $id) => ['id' => $id, 'name' => $name])
+            ->values();
 
-    $usercheck = $empid;
+        $usercheck = $empid;
 
-    // ดึงเฉพาะ expense ที่อนุมัติแล้วโดยคนนี้
-    $expenses = Expense::with(['latestApprove', 'vbooking', 'vbookingdrv', 'user', 'tech'])
-        ->whereHas('latestApprove', function ($q) use ($usercheck) {
-            $q->where('typeapprove', 3)
-              ->where('statusapprove', 1)
-              ->when((string) $usercheck !== '58000545', fn ($qq) => $qq->where('empid', $usercheck));
-        })
-        ->whereIn('extype', [1, 2, 3])
-        ->get();
+        // ดึงเฉพาะ expense ที่อนุมัติแล้วโดยคนนี้
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'vbookingdrv', 'user', 'tech'])
+            ->whereHas('latestApprove', function ($q) use ($usercheck) {
+                $q->where('typeapprove', 3)
+                    ->where('statusapprove', 1)
+                    ->when((string) $usercheck !== '58000545', fn($qq) => $qq->where('empid', $usercheck));
+            })
+            ->whereIn('extype', [1, 2, 3])
+            ->get();
 
-    // 🟢 แบ่งกลุ่มตาม BU/Plant แค่ครั้งเดียว (ลด N×M loop)
-    $expensesByPlant = $expenses->groupBy(function ($expense) {
-        return BuEmp($expense->empid);   // ใช้ helper แค่ครั้งละ 1 รอบต่อ expense
-    });
+        // 🟢 แบ่งกลุ่มตาม BU/Plant แค่ครั้งเดียว (ลด N×M loop)
+        $expensesByPlant = $expenses->groupBy(function ($expense) {
+            return BuEmp($expense->empid);   // ใช้ helper แค่ครั้งละ 1 รอบต่อ expense
+        });
 
-    $page = 'HR.show';
+        $page = 'HR.show';
 
-    return view('back.hr.approved', compact('expensesByPlant', 'page', 'plantNames'));
-}
+        return view('back.hr.approved', compact('expensesByPlant', 'page', 'plantNames'));
+    }
 
 
     public function groupList(Request $request)

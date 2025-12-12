@@ -63,10 +63,10 @@
                                             <select name="bu" id="bu" class="form-select">
                                                 <option value="" disabled selected>-- เลือกBU --</option>
                                                 @foreach ($plants as $key => $plant)
-                                                <option value="{{ $plant->plantname }}">
-                                                    {{ $plant->plantname }}
-                                                </option>
-                                            @endforeach
+                                                    <option value="{{ $plant->plantname }}">
+                                                        {{ $plant->plantname }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -171,6 +171,19 @@
                                                 {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
                                                 {{-- {{ $expense->latestApprove->statusapprove.'type=>'.$expense->latestApprove->typeapprove }} --}}
                                             @endif
+                                            {{-- ปุ่มดูเหตุผล --}}
+                                            @php
+                                                $reason = optional($expense->latestApprove)->remark;
+                                            @endphp
+
+                                            @if ($reason)
+                                            <hr>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="{{ $reason }}">
+                                                    <i class="mdi mdi-information-outline">สาเหตุ</i>
+                                                </button>
+                                            @endif
                                         </td>
                                         {{-- <td >
                                         @if ($expense->latestApprove->statusapprove >= 3)
@@ -186,12 +199,18 @@
                                                 <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
                                                     target="_blank" class="btn btn-sm btn-info"><span
                                                         class="mdi mdi-eye-arrow-right-outline"></span> View</a>
+                                                @if ($expense->latestApprove->typeapprove == 4)
+                                                    <a href="{{ route('HR.edit', $expense->id) }}" target="_blank"
+                                                        class="btn btn-sm btn-warning"><span
+                                                            class="mdi mdi-eye-circle-outline"></span> ตรวจสอบอีกครั้ง</a>
+                                                @endif
                                                 {{-- <button class="btn btn-sm btn-danger"><span
                                                         class="mdi mdi-trash-can-outline"></span></button> --}}
                                             @else
                                                 <button class="btn btn-sm btn-info btn-passenger" type="button"
                                                     class="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modalGroup" data-bookid="{{ $expense->bookid }}"><span
+                                                    data-bs-target="#modalGroup"
+                                                    data-bookid="{{ $expense->bookid }}"><span
                                                         class="mdi mdi-plus-box-multiple-outline"></span></button>
                                                 @if ($expense->latestApprove->typeapprove == 1 && $expense->latestApprove->statusapprove == 0)
                                                     <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
