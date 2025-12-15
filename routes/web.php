@@ -358,6 +358,7 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::get('/approve/viewgroup/{id}/{type}', [ApproveController::class, 'showgroup'])->name('approve.page.group');
     Route::post('/approve/confirm/{id}', [ApproveController::class, 'confirm'])->name('approve.confirm');
     Route::post('/approve/confirmgrp/{id}', [ApproveController::class, 'confirmgroup'])->name('approve.confirmgroup');
+    Route::post('approve/hr-reject',[ApproveController::class,'hrrject'])->name('approve.');
 
     // == หน้าสำหรับยิง Mail ทดสอบ ==
     Route::get('/admin/resend-mail', [ResendMailController::class, 'showForm'])->name('tools.resendMail.show');

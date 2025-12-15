@@ -147,6 +147,12 @@ class Expense extends Model
         return $this->belongsTo(GroupSpecial::class, 'empid', 'empid');
     }
 
+    public function exgroupData()
+    {
+        return $this->belongsTo(Exgroup::class, 'exgroup', 'id');
+    }
+
+
 
     public function finalApprove()
     {
