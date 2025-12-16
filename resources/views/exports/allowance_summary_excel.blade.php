@@ -6,7 +6,6 @@
     <title>รายงานสรุปเบี้ยเลี้ยงประจำเดือน</title>
 
     <style>
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -82,7 +81,6 @@
                     $currentGroupId = optional($r->finalApprove->exgroupRef)->id;
                     $total_travel = $r->travelexpenses + $r->gasolinecost;
 
-
                     if ($r->extype == 1) {
                         $fullname = optional($r->user)->fullname ?? '-';
                         $dept = optional($r->user)->dept ?? '-';
@@ -126,21 +124,24 @@
                     </td>
                     <td>
                         @if (optional($r->vbooking)->departure_date && optional($r->vbooking)->return_date)
-                            {{ \Carbon\Carbon::parse($r->vbooking->return_date)->diffInDays(
-                                \Carbon\Carbon::parse($r->vbooking->departure_date),
+                            {{ \Carbon\Carbon::parse($r->vbooking->departure_date)->diffInDays(
+                                \Carbon\Carbon::parse($r->vbooking->return_date),
+                                true,
                             ) + 1 }}
                         @else
                             -
                         @endif
+
                     </td>
                     <td class="text-right">{{ number_format(round($r->costoffood), 2) }}</td>
                     <td class="text-right">{{ number_format(round($r->expresswaytoll), 2) }}</td>
                     <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
-                    <td class="text-right text-bold"><strong>{{ number_format(round($r->totalprice), 2) }}</strong></td>
+                    <td class="text-right text-bold"><strong>{{ number_format(round($r->totalprice), 2) }}</strong>
+                    </td>
                     <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
                 </tr>
 
-            @php($lastGroupId = $currentGroupId)
+                @php($lastGroupId = $currentGroupId)
             @endforeach
 
 
