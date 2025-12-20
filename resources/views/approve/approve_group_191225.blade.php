@@ -59,60 +59,33 @@
 
                                         @foreach ($expenses as $i => $expense)
                                             @php
-                                                $booking =
-                                                    $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
-
-                                                $startDate = optional($booking)->departure_date;
-                                                $endDate = null;
-
-                                                // --- หาวันสิ้นสุด ---
-                                                if ($expense->extype == 2) {
-                                                    $lastLog = $expense->logs->sortByDesc('id')->first();
-
-                                                    if (
-                                                        $lastLog &&
-                                                        preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
-                                                    ) {
-                                                        $endDate = $m[0]; // yyyy-mm-dd จาก remark เช่น 2025-12-16
-                                                    } else {
-                                                        $endDate = optional($booking)->return_date; // ✅ fallback ที่ถูกต้อง
-                                                    }
-                                                } else {
-                                                    $endDate = optional($booking)->return_date;
-                                                }
-
                                                 $fullname =
                                                     $expense->extype == 2 || $expense->extype == 3
                                                         ? $expense->tech->fullname
                                                         : $expense->user->fullname;
 
-                                                // --- จำนวนวัน (กันติดลบ + รวมวันแรก) ---
                                                 $days =
-                                                    $startDate && $endDate
-                                                        ? \Carbon\Carbon::parse($startDate)->diffInDays(
-                                                                \Carbon\Carbon::parse($endDate),
-                                                                true,
-                                                            ) + 1
-                                                        : 0;
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
 
-                                                // --- ค่าตัวเงิน ---
-                                                $food = $expense->costoffood ?? 0;
-                                                $gas = $expense->gasolinecost ?? 0;
-                                                $express = $expense->expresswaytoll ?? 0;
-                                                $publictransport = $expense->publictransportfare ?? 0;
-                                                $other = $expense->otherexpenses ?? 0;
+                                                $food = $expense->costoffood ?? 0; //ค่าอาหาร
+                                                $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
+                                                $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
+                                                $publictransport = $expense->publictransportfare ?? 0; //ค่ารถสาธารณะ
+                                                $other = $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
                                                 $total = $food + $gas + $express + $publictransport + $other;
 
-                                                $sum_food += $food;
-                                                $sum_gas += $gas;
-                                                $sum_express += $express;
-                                                $sum_publictransport += $publictransport;
-                                                $sum_other += $other;
+                                                $sum_food += $food; //ค่าอาหาร
+                                                $sum_gas += $gas; // ค่าน้ำมัน
+                                                $sum_express += $express; //ค่าทางด่วน
+                                                $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
+                                                $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
                                                 $sum_total += $total;
                                                 $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
                                             @endphp
-
-
                                             <tr>
                                                 <td class="sticky-col">
                                                     @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
@@ -135,7 +108,7 @@
                                                         </div>
                                                     @else
                                                         @if ($type == 4)
-                                                            {!! status_approve_badge(1, $type) !!}
+                                                             {!! status_approve_badge(1, $type) !!}
                                                         @endif
                                                     @endif
                                                 </td>
@@ -145,33 +118,18 @@
 
                                                 </td>
                                                 <td> {{ 'EX' . $expense->id }}
-                                                    @if ($expense->extype == 2)
-                                                        <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
-                                                            target="_blank" class="btn btn-sm btn-info">
-                                                            <span class="mdi mdi-eye-arrow-right-outline"></span>
-                                                            View
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                            target="_blank" class="btn btn-sm btn-info">
-                                                            <span class="mdi mdi-eye-arrow-right-outline"></span>
-                                                            View
-                                                        </a>
-                                                    @endif
-                                                    {{-- <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
                                                         target="_blank" class="btn btn-sm btn-info"><span
-                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a> --}}
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a>
 
                                                     @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
                                                         {{-- <a href="{{ route('HR.aftedit', $expense->id) }}"
                                                             class="btn btn-sm btn-warning"><span
                                                                 class="mdi mdi-edit"></span> Edit</a> --}}
-                                                        @if ($expense->extype != 2)
-                                                            <a href="{{ route('HR.aftedit', [$expense->id, 1, 1]) }}"
-                                                                class="btn btn-sm btn-warning">
-                                                                <span class="mdi mdi-edit"></span> Edit
-                                                            </a>
-                                                        @endif
+                                                        <a href="{{ route('HR.aftedit', [$expense->id, 1, 1]) }}"
+                                                            class="btn btn-sm btn-warning">
+                                                            <span class="mdi mdi-edit"></span> Edit
+                                                        </a>
                                                     @endif
                                                 </td>
                                                 <td>{{ $expense->vbooking->display_location }}</td>
@@ -181,11 +139,18 @@
                                                 <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
                                                 <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                                 <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
-                                               <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}</td>
-                                                <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}</td>
+                                                <td>
+                                                    {{ $expense->vbooking && $expense->vbooking->departure_date
+                                                        ? \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y')
+                                                        : '-' }}
+                                                </td>
+                                                <td>
+                                                    {{ $expense->vbooking && $expense->vbooking->return_date
+                                                        ? \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y')
+                                                        : '-' }}
+                                                </td>
 
-
-                                                <td>{{ $days ?: '-' }}</td>
+                                                <td>{{ $days }}</td>
                                                 <td>{{ number_format($food, 2) }}</td>
                                                 <td>{{ number_format($gas, 2) }}</td>
                                                 <td>{{ number_format($express, 2) }}</td>

@@ -219,9 +219,9 @@
                 <label for="returntime">ถึงเวลา</label>
             </div> --}}
             <div class="form-floating form-floating-outline">
-                <input type="text" id="departuretime" name="departuretime" placeholder="20:00:00" class="form-control"
+                <input type="text" id="returntime" name="returntime" placeholder="20:00:00" class="form-control"
                     required />
-                <label for="departuretime">เวลาที่เริ่มเดินทางจริง</label>
+                <label for="returntime">ถึงเวลา</label>
             </div>
         </div>
         <div class="col-sm-6">
@@ -244,13 +244,6 @@
                     <label for="totaldistance_text">ระยะทางไป-กลับ</label>
                 </div>
             @endif
-        </div>
-         <div class="col-sm-6">
-            <div class="form-floating form-floating-outline">
-                <input type="text" id="returntime" name="returntime" placeholder="20:00:00" class="form-control"
-                    required />
-                <label for="returntime">เวลาที่ถึงจริง</label>
-            </div>
         </div>
     </div>
     <div class="alert alert-primary mb-3 mt-3">

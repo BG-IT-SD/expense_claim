@@ -91,43 +91,24 @@
                                                         @php
                                                             // คำนวณจำนวนวัน
                                                             if ($expense->extype == 2) {
-                                                                // วันเริ่มต้นจาก bookingdrv
-                                                                $startDate = optional($expense->vbookingdrv)
-                                                                    ->departure_date;
-
-                                                                // วันสิ้นสุด: เอาจาก expense_logs (วันที่มากที่สุด)
-                                                                $lastLog = $expense->logs->sortByDesc('id')->first();
-
-                                                                if (
-                                                                    $lastLog &&
-                                                                    preg_match(
-                                                                        '/\d{4}-\d{2}-\d{2}/',
-                                                                        $lastLog->remark,
-                                                                        $m,
-                                                                    )
-                                                                ) {
-                                                                    // เช่น "เบิกค่าอาหารวันที่ 2025-12-16"
-                                                                    $endDate = $m[0];
-                                                                } else {
-                                                                    // fallback ถ้าไม่มี log
-                                                                    $endDate = optional($expense->vbookingdrv)
-                                                                        ->return_date;
-                                                                }
+                                                                $days =
+                                                                    \Carbon\Carbon::parse(
+                                                                        $expense->vbookingdrv->departure_date,
+                                                                    )->diffInDays(
+                                                                        \Carbon\Carbon::parse(
+                                                                            $expense->vbookingdrv->return_date,
+                                                                        ),
+                                                                    ) + 1;
                                                             } else {
-                                                                // extype อื่น ใช้ booking ปกติ
-                                                                $startDate = optional($expense->vbooking)
-                                                                    ->departure_date;
-                                                                $endDate = optional($expense->vbooking)->return_date;
+                                                                $days =
+                                                                    \Carbon\Carbon::parse(
+                                                                        $expense->vbooking->departure_date,
+                                                                    )->diffInDays(
+                                                                        \Carbon\Carbon::parse(
+                                                                            $expense->vbooking->return_date,
+                                                                        ),
+                                                                    ) + 1;
                                                             }
-
-                                                            // ✅ คำนวณจำนวนวัน (absolute + รวมวันแรก)
-                                                            $days =
-                                                                $startDate && $endDate
-                                                                    ? \Carbon\Carbon::parse($startDate)->diffInDays(
-                                                                            \Carbon\Carbon::parse($endDate),
-                                                                            true,
-                                                                        ) + 1
-                                                                    : 0;
 
                                                             // ยอดค่าใช้จ่ายแต่ละประเภท
                                                             $food = $expense->costoffood ?? 0;
@@ -154,95 +135,24 @@
                                                             </td>
 
                                                             <td class="sticky-col col-datetime text-wrap">
-                                                                @php
-                                                                    // เลือก booking ตาม extype
-                                                                    $booking =
-                                                                        $expense->extype == 2
-                                                                            ? $expense->vbookingdrv
-                                                                            : $expense->vbooking;
-
-                                                                    // เวลาเริ่ม (ใช้จาก booking ตามเดิม)
-                                                                    $startText = null;
-                                                                    if (
-                                                                        $booking &&
-                                                                        $booking->departure_date &&
-                                                                        $booking->departure_time
-                                                                    ) {
-                                                                        $startText = \Carbon\Carbon::parse(
-                                                                            $booking->departure_date .
-                                                                                ' ' .
-                                                                                $booking->departure_time,
-                                                                        )->format('d/m/Y H:i');
-                                                                    }
-
-                                                                    // เวลาเลิก (extype=2 ใช้จาก logs, ไม่ใช่ return_date เดิม)
-                                                                    $endText = null;
-
-                                                                    if ($expense->extype == 2) {
-                                                                        // หา log ล่าสุดของ exid นี้ (ถ้าต้องกรอง bookid ให้ uncomment)
-                                                                        $logsForBooking = $expense->logs;
-                                                                        // if ($booking && $booking->id) $logsForBooking = $logsForBooking->where('bookid', $booking->id);
-
-                                                                        $lastLog = $logsForBooking
-                                                                            ->sortByDesc('id')
-                                                                            ->first();
-
-                                                                        if (
-                                                                            $lastLog &&
-                                                                            preg_match(
-                                                                                '/\d{4}-\d{2}-\d{2}/',
-                                                                                $lastLog->remark,
-                                                                                $m,
-                                                                            )
-                                                                        ) {
-                                                                            // remark เช่น "เบิกค่าอาหารวันที่ 2025-12-16" → แสดงแค่วันที่ (ไม่มีเวลา)
-                                                                            $endText = \Carbon\Carbon::parse(
-                                                                                $m[0],
-                                                                            )->format('d/m/Y');
-                                                                        } else {
-                                                                            // fallback ถ้าหาไม่ได้ (จะใช้ created_at ของ log หรือ return_date ก็ได้)
-                                                                            if ($lastLog) {
-                                                                                $endText = \Carbon\Carbon::parse(
-                                                                                    $lastLog->created_at,
-                                                                                )->format('d/m/Y H:i');
-                                                                            } elseif (
-                                                                                $booking &&
-                                                                                $booking->return_date &&
-                                                                                $booking->return_time
-                                                                            ) {
-                                                                                $endText = \Carbon\Carbon::parse(
-                                                                                    $booking->return_date .
-                                                                                        ' ' .
-                                                                                        $booking->return_time,
-                                                                                )->format('d/m/Y H:i');
-                                                                            }
-                                                                        }
-                                                                    } else {
-                                                                        // extype อื่น ใช้ return_date + return_time ตามเดิม
-                                                                        if (
-                                                                            $booking &&
-                                                                            $booking->return_date &&
-                                                                            $booking->return_time
-                                                                        ) {
-                                                                            $endText = \Carbon\Carbon::parse(
-                                                                                $booking->return_date .
-                                                                                    ' ' .
-                                                                                    $booking->return_time,
-                                                                            )->format('d/m/Y H:i');
-                                                                        }
-                                                                    }
-                                                                @endphp
-
-                                                                @if ($startText)
-                                                                    {{ $startText }}
-                                                                    @if ($endText)
-                                                                        - {{ $endText }}
+                                                                @if ($expense->extype == 2)
+                                                                    @if ($expense->vbookingdrv)
+                                                                        {{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date . ' ' . $expense->vbookingdrv->departure_time)->format('d/m/Y H:i') }}
+                                                                        -
+                                                                        {{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date . ' ' . $expense->vbookingdrv->return_time)->format('d/m/Y H:i') }}
+                                                                    @else
+                                                                        <span class="text-muted">-</span>
                                                                     @endif
                                                                 @else
-                                                                    <span class="text-muted">-</span>
+                                                                    @if ($expense->vbooking)
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') }}
+                                                                        -
+                                                                        {{ \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                                    @else
+                                                                        <span class="text-muted">-</span>
+                                                                    @endif
                                                                 @endif
                                                             </td>
-
 
                                                             <td class="sticky-col col-booking">
                                                                 {{ $expense->bookid }}

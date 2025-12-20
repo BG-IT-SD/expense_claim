@@ -30,28 +30,28 @@ class AccountReportController extends Controller
             $bookingQuery = Vbookingall::on('booking_carv2');
             $bookingQuery->where(function ($q) use ($search_plant) {
                 $q->where('location_name', 'LIKE', "%{$search_plant}%")
-                    ->orWhere('locationbu', 'LIKE', "%{$search_plant}%");
+                  ->orWhere('locationbu', 'LIKE', "%{$search_plant}%");
             });
             $bookIds = $bookingQuery->pluck('id');
         }
 
         $query = Expense::with([
-            'exgroup',
-            'userhr',
-            'user',
-            'groupSpecial',
-            'finalApprove',
-            'vbooking'
-        ])
+                'exgroup',
+                'userhr',
+                'user',
+                'groupSpecial',
+                'finalApprove',
+                'vbooking'
+            ])
             ->whereHas('approves', function ($q) {
                 $q->where('typeapprove', 6)
-                    ->where('statusapprove', 1)
-                    ->where('deleted', 0)
-                    ->whereIn('id', function ($sub) {
-                        $sub->selectRaw('MAX(id)')
-                            ->from('approve')
-                            ->groupBy('exid');
-                    });
+                  ->where('statusapprove', 1)
+                  ->where('deleted', 0)
+                  ->whereIn('id', function ($sub) {
+                      $sub->selectRaw('MAX(id)')
+                          ->from('approve')
+                          ->groupBy('exid');
+                  });
             });
 
         // ค้นหาตามช่วงวันที่
@@ -72,9 +72,9 @@ class AccountReportController extends Controller
                 $q->whereHas('user', function ($sub) use ($search_name) {
                     $sub->where('fullname', 'like', "%{$search_name}%");
                 })
-                    ->orWhereHas('groupSpecial', function ($sub) use ($search_name) {
-                        $sub->where('fullname', 'like', "%{$search_name}%");
-                    });
+                ->orWhereHas('groupSpecial', function ($sub) use ($search_name) {
+                    $sub->where('fullname', 'like', "%{$search_name}%");
+                });
             });
         }
 
@@ -84,9 +84,9 @@ class AccountReportController extends Controller
                 $q->whereHas('user', function ($sub) use ($search_department) {
                     $sub->where('dept', 'like', "%{$search_department}%");
                 })
-                    ->orWhereHas('groupSpecial', function ($sub) use ($search_department) {
-                        $sub->where('dept', 'like', "%{$search_department}%");
-                    });
+                ->orWhereHas('groupSpecial', function ($sub) use ($search_department) {
+                    $sub->where('dept', 'like', "%{$search_department}%");
+                });
             });
         }
 
@@ -109,13 +109,8 @@ class AccountReportController extends Controller
         $results = collect();
 
         return view('back.account.allowance_summary', compact(
-            'results',
-            'start',
-            'end',
-            'search_name',
-            'search_plant',
-            'search_department',
-            'search_empid'
+            'results', 'start', 'end',
+            'search_name', 'search_plant', 'search_department', 'search_empid'
         ));
     }
 
@@ -142,9 +137,9 @@ class AccountReportController extends Controller
         $recordsFiltered = $recordsTotal;
 
         $query->orderBy('exgroup', 'desc')
-            ->orderBy($orderColumnName, $orderDir)
-            ->skip($start)
-            ->take($length);
+              ->orderBy($orderColumnName, $orderDir)
+              ->skip($start)
+              ->take($length);
 
         $data = $query->get();
 
@@ -172,30 +167,6 @@ class AccountReportController extends Controller
                 $dept = '-';
             }
 
-            // --------- คำนวณ day_count ---------
-            $booking = $row->extype == 2 ? $row->vbookingdrv : $row->vbooking;
-            $startDate = optional($booking)->departure_date;
-            $endDate   = null;
-
-            if ($row->extype == 2) {
-                // ใช้วันที่จาก expense_logs (ล่าสุด)
-                $lastLog = $row->logs->sortByDesc('id')->first();
-
-                if ($lastLog && preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
-                    $endDate = $m[0];
-                } else {
-                    $endDate = optional($booking)->return_date; // fallback
-                }
-            } else {
-                $endDate = optional($booking)->return_date;
-            }
-
-            $dayCount = ($startDate && $endDate)
-                ? \Carbon\Carbon::parse($startDate)
-                ->diffInDays(\Carbon\Carbon::parse($endDate), true) + 1
-                : '-';
-
-
             $formattedData[] = [
                 'exid' => $row->id,
                 'payment_date_display' => $payment_data,
@@ -205,14 +176,16 @@ class AccountReportController extends Controller
                 'user_fullname' => $fullname,
                 'user_dept' => $dept,
                 'user_level' => optional($row->userhr)->JOBGRADE_TITLE ?? '???',
-                'departurefrom' => $startDate
-                    ? \Carbon\Carbon::parse($startDate)->format('Y-m-d')
+                'departurefrom' => optional($row->vbooking)->departure_date
+                    ? \Carbon\Carbon::parse($row->vbooking->departure_date)->format('Y-m-d')
                     : '-',
-
-                'returnfrom' => $endDate
-                    ? \Carbon\Carbon::parse($endDate)->format('Y-m-d')
+                'returnfrom' => optional($row->vbooking)->return_date
+                    ? \Carbon\Carbon::parse($row->vbooking->return_date)->format('Y-m-d')
                     : '-',
-                'day_count' => $dayCount,
+                'day_count' => (optional($row->vbooking)->departure_date && optional($row->vbooking)->return_date)
+                    ? (\Carbon\Carbon::parse($row->vbooking->departure_date)
+                        ->diffInDays(\Carbon\Carbon::parse($row->vbooking->return_date)) + 1)
+                    : '-',
                 'costoffood' => number_format(round($row->costoffood), 2),
                 'expresswaytoll' => number_format(round($row->expresswaytoll), 2),
                 'travel_cost' => number_format(round($total_travel), 2),

@@ -17,8 +17,7 @@
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span>
                             รายการขอเบิกเบี้ยเลี้ยงและค่าเดินทางกลุ่ม:
-                            {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate . ' [ BU : ' . $exgroup->plantname . ' ]' }}
-                        </h3>
+                            {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate. ' [ BU : ' . $exgroup->plantname. ' ]' }}</h3>
                     </div>
                     <div class="card-body row">
                         <form id="approveForm" action="{{ route('Account.exgroup.approve') }}" method="POST">
@@ -36,15 +35,13 @@
                                     {{-- <a href="{{ route('Account.export.group.pdf', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
                                         <span class="mdi mdi-file-pdf-box"></span>
                                     </a> --}}
-                                    <a href="{{ route('Account.export.group.pdffinal', $exgroup->id) }}"
-                                        class="btn btn-sm btn-danger" target="_blank">
+                                    <a href="{{ route('Account.export.group.pdffinal', $exgroup->id) }}" class="btn btn-sm btn-danger" target="_blank">
                                         <span class="mdi mdi-file-pdf-box"></span>
                                     </a>
                                     {{-- <a href="{{ route('Account.export.group.excel', $exgroup->id) }}" class="btn btn-sm btn-success"  target="_blank">
                                         <span class="mdi mdi-file-excel"></span>
                                     </a> --}}
-                                    <a href="{{ route('Account.export.group.excelfinal', $exgroup->id) }}"
-                                        class="btn btn-sm btn-success" target="_blank">
+                                     <a href="{{ route('Account.export.group.excelfinal', $exgroup->id) }}" class="btn btn-sm btn-success"  target="_blank">
                                         <span class="mdi mdi-file-excel"></span>
                                     </a>
                                 </div>
@@ -64,8 +61,8 @@
                                             <th>รหัสพนักงาน</th>
                                             <th>ชื่อ – นามสกุล</th>
                                             {{-- <th>หน่วยงาน</th> --}}
-                                            <th>ระดับ</th>
-                                            {{-- <th>เลขบัญชี</th> --}}
+                                             <th>ระดับ</th>
+                                        {{--<th>เลขบัญชี</th> --}}
                                             <th>จากวันที่</th>
                                             <th>ถึงวันที่</th>
                                             <th>จำนวนวัน</th>
@@ -94,39 +91,13 @@
                                                         ? $expense->tech->fullname
                                                         : $expense->user->fullname;
 
-                                                // เลือก booking
-                                                $booking =
-                                                    $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
-
-                                                $startDate = optional($booking)->departure_date;
-                                                $endDate = null;
-
-                                                if ($expense->extype == 2) {
-                                                    // ถ้ามี bookid ใน logs แนะนำกรองให้ตรง booking ด้วย
-                                                    $logs = $expense->logs;
-                                                    // $logs = $logs->where('bookid', optional($booking)->id); // <-- uncomment ถ้า logs มี bookid
-
-                                                    $lastLog = $logs->sortByDesc('id')->first();
-
-                                                    if (
-                                                        $lastLog &&
-                                                        preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
-                                                    ) {
-                                                        $endDate = $m[0];
-                                                    } else {
-                                                        $endDate = optional($booking)->return_date; // fallback
-                                                    }
-                                                } else {
-                                                    $endDate = optional($booking)->return_date;
-                                                }
-
                                                 $days =
-                                                    $startDate && $endDate
-                                                        ? \Carbon\Carbon::parse($startDate)->diffInDays(
-                                                                \Carbon\Carbon::parse($endDate),
-                                                                true,
-                                                            ) + 1
-                                                        : 0;
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
+
                                                 $food = $expense->costoffood ?? 0; //ค่าอาหาร
                                                 $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
                                                 $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
@@ -166,12 +137,12 @@
                                                 </td>
                                                 {{-- <td>{{ $expense->userhr->DEPT ?? '-' }}</td> --}}
                                                 <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
-                                                {{-- <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td> --}}
-                                                <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}
+                                            {{-- <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td> --}}
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
                                                 </td>
-                                                <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
                                                 </td>
-                                                <td>{{ $days ?: '-' }}</td>
+                                                <td>{{ $days }}</td>
                                                 <td>{{ number_format($food, 2) }}</td>
                                                 <td>{{ number_format($gas, 2) }}</td>
                                                 <td>{{ number_format($express, 2) }}</td>
@@ -216,7 +187,7 @@
 
                                             </td>
                                             <td>
-                                                {{ number_format(round($sum_total), 2) }}
+                                                {{ number_format(round($sum_total),2) }}
 
                                             </td>
 
@@ -290,13 +261,13 @@
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                    {{ number_format(round($exgroup->total), 2) }}</span>
+                                                    {{ number_format(round($exgroup->total),2) }}</span>
 
                                             </td>
                                             <td>
                                                 <span
                                                     class="btn rounded-pill btn-success waves-effect waves-light totalExpenseNet">
-                                                    {{ number_format(round($exgroup->nettotal), 2) }}</span>
+                                                    {{ number_format(round($exgroup->nettotal),2) }}</span>
                                                 <input type="hidden" name="nettotal" class="row-totalexNet"
                                                     data-id="{{ $expense->id }}"
                                                     value="{{ round($exgroup->nettotal) }}">
