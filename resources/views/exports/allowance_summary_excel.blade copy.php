@@ -91,36 +91,14 @@
                         $fullname = '-';
                         $dept = '-';
                     }
-
-                    // เลือก booking ตาม extype
-                    $booking = $r->extype == 2 ? $r->vbookingdrv : $r->vbooking;
-                    $startDate = optional($booking)->departure_date;
-                    $endDate = null;
-
-                    if ($r->extype == 2) {
-                        $lastLog = $r->logs->sortByDesc('id')->first();
-
-                        if ($lastLog && preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
-                            $endDate = $m[0]; // yyyy-mm-dd จาก remark
-                        } else {
-                            $endDate = optional($booking)->return_date; // fallback
-                        }
-                    } else {
-                        $endDate = optional($booking)->return_date;
-                    }
-
-                    $dayCount =
-                        $startDate && $endDate
-                            ? \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate), true) + 1
-                            : null;
                 @endphp
 
 
-                {{-- @if ($lastGroupId !== null && $currentGroupId !== $lastGroupId)
+                @if ($lastGroupId !== null && $currentGroupId !== $lastGroupId)
                     <tr class="group-spacer">
                         <td colspan="15"></td>
                     </tr>
-                @endif --}}
+                @endif
 
                 <tr>
                     <td>
@@ -135,14 +113,25 @@
                     <td>{{ $dept }}</td>
                     <td>{{ optional($r->userhr)->JOBGRADE_TITLE ?? '-' }}</td>
                     <td>
-                        {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('Y-m-d') : '-' }}
+                        {{ optional($r->vbooking)->departure_date
+                            ? \Carbon\Carbon::parse($r->vbooking->departure_date)->format('Y-m-d')
+                            : '-' }}
                     </td>
+                    <td>
+                        {{ optional($r->vbooking)->return_date
+                            ? \Carbon\Carbon::parse($r->vbooking->return_date)->format('Y-m-d')
+                            : '-' }}
+                    </td>
+                    <td>
+                        @if (optional($r->vbooking)->departure_date && optional($r->vbooking)->return_date)
+                            {{ \Carbon\Carbon::parse($r->vbooking->departure_date)->diffInDays(
+                                \Carbon\Carbon::parse($r->vbooking->return_date),
+                                true,
+                            ) + 1 }}
+                        @else
+                            -
+                        @endif
 
-                    <td>
-                        {{ $endDate ? \Carbon\Carbon::parse($endDate)->format('Y-m-d') : '-' }}
-                    </td>
-                    <td>
-                        {{ $dayCount ?? '-' }}
                     </td>
                     <td class="text-right">{{ number_format(round($r->costoffood), 2) }}</td>
                     <td class="text-right">{{ number_format(round($r->expresswaytoll), 2) }}</td>

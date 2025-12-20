@@ -321,6 +321,9 @@ class DriverClaimController extends Controller
         $finalHEmailNext  = $nextStepApprove['email']    ?? '';
         $finalHNameNext   = $nextStepApprove['fullname'] ?? '';
         $finalIdNext      = $nextStepApprove['empid']    ?? '';
+        // $finalHEmailNext  = 'Kamolwan.b@bgiglass.com'    ?? '';
+        // $finalHNameNext   = 'กมลวรรณ บรรชา' ?? '';
+        // $finalIdNext      = '66000510' ?? '';
 
         return view(
             'front.driver.create',

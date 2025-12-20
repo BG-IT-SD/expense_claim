@@ -286,7 +286,9 @@ class ApproveController extends Controller
             // $nextemail = 'Kamolwan.b@bgiglass.com';
         }
 
-        return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail','type'));
+         $page = 'HR.show';
+
+        return view('approve.approve_group', compact('approve', 'expenses', 'exgroup', 'nextstaffgroup', 'nextempid', 'nextfullname', 'nextemail','type','page'));
     }
 
     public function confirmgroup(Request $request, $id)

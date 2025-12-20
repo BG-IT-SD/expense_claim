@@ -135,10 +135,10 @@
                     </td>
                     <td style="text-align: center;border: 1px solid #000">{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                     <td style="text-align: center;border: 1px solid #000">
-                        {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}</td>
+                        {{ Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}</td>
                     <td style="text-align: center;border: 1px solid #000">
-                       {{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}</td>
-                    <td style="text-align: center;border: 1px solid #000">{{ $days ?: '-' }}</td>
+                        {{ Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}</td>
+                    <td style="text-align: center;border: 1px solid #000">{{ $days }}</td>
                     <td style="text-align: right;border: 1px solid #000">{{ number_format($food, 2) }}</td>
                     <td style="text-align: right;border: 1px solid #000">{{ number_format($gas, 2) }}</td>
                     <td style="text-align: right;border: 1px solid #000">{{ number_format($express, 2) }}</td>

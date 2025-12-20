@@ -1,31 +1,19 @@
 @extends('layouts.template')
-
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        {{-- Search --}}
         <div class="row">
-            <!-- Basic Layout -->
-            <div class="col-xxl-12">
-                @if (session('message'))
-                    {{-- alert --}}
-                    <div class="alert alert-{{ session('class') }} alert-dismissible h4" role="alert">
-                        <span class="mdi mdi-bell"></span> {{ session('message') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {{--  alert --}}
-                @endif
-                <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span> รายการขออนุมัติกลุ่ม:
-                            {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }} [ {{ $exgroup->plantname }}
-                            ]</h3>
-                    </div>
-                    <div class="card-body row">
+            <div class="col-12 mb-4">
+                <form action="#" method="POST" id="frmSendGroupApprove">
+                    @csrf
+                    <div class="card p-5">
+                        <h5 class="card-header"><i class="mdi mdi-view-list"></i> สรุปรายชื่อพนักงาน
+                            เบิกค่าเดินทาง/เบี้ยเลี้ยง {{ $plantName }}
+                        </h5>
+                        <p>ประจำสัปดาห์: {{ Thaidatenow(\Carbon\Carbon::now()) }}</p>
                         <div class="table-responsive text-nowrap">
                             <table class="table table-bordered text-center">
                                 <thead class="table-secondary">
                                     <tr>
-                                        <th>Approve</th>
                                         <th>ลำดับ</th>
                                         <th>EXID</th>
                                         <th>สถานที่ไปปฏิบัติงาน</th>
@@ -62,40 +50,21 @@
                                                 $expense->extype == 2 || $expense->extype == 3
                                                     ? $expense->tech->fullname
                                                     : $expense->user->fullname;
-
-                                            // เลือก booking
-                                            $booking =
-                                                $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
-
-                                            $startDate = optional($booking)->departure_date;
-                                            $endDate = null;
-
                                             if ($expense->extype == 2) {
-                                                // ถ้ามี bookid ใน logs แนะนำกรองให้ตรง booking ด้วย
-                                                $logs = $expense->logs;
-                                                // $logs = $logs->where('bookid', optional($booking)->id); // <-- uncomment ถ้า logs มี bookid
-
-                                                $lastLog = $logs->sortByDesc('id')->first();
-
-                                                if (
-                                                    $lastLog &&
-                                                    preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
-                                                ) {
-                                                    $endDate = $m[0];
-                                                } else {
-                                                    $endDate = optional($booking)->return_date; // fallback
-                                                }
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbookingdrv->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbookingdrv->return_date),
+                                                    ) + 1;
                                             } else {
-                                                $endDate = optional($booking)->return_date;
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
                                             }
-
-                                            $days =
-                                                $startDate && $endDate
-                                                    ? \Carbon\Carbon::parse($startDate)->diffInDays(
-                                                            \Carbon\Carbon::parse($endDate),
-                                                            true,
-                                                        ) + 1
-                                                    : 0;
 
                                             $food = $expense->costoffood ?? 0; //ค่าอาหาร
                                             $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
@@ -114,68 +83,66 @@
                                         @endphp
                                         <tr>
                                             <td>
-                                                @if (!is_null($expense->latestApprove->statusapprove))
-                                                    {!! hr_status_approve_badge($expense->latestApprove->statusapprove, $expense->latestApprove->typeapprove) !!}
-                                                @endif
-                                                {{-- <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                    target="_blank" class="btn btn-sm btn-info"><span
-                                                        class="mdi mdi-eye-arrow-right-outline"></span> View</a> --}}
-                                                @if ($expense->extype == 2)
-                                                    <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
-                                                        target="_blank" class="btn btn-sm btn-info">
-                                                        <span class="mdi mdi-eye-arrow-right-outline"></span>
-                                                        View
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
-                                                        target="_blank" class="btn btn-sm btn-info">
-                                                        <span class="mdi mdi-eye-arrow-right-outline"></span>
-                                                        View
-                                                    </a>
-                                                @endif
-                                            </td>
-                                            <td>
                                                 {{ $i + 1 }}
                                                 <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
 
                                             </td>
                                             <td> {{ 'EX' . $expense->id }}</td>
-                                            <td>{{ $expense->vbooking->display_location }}</td>
+                                            @if ($expense->extype == 2)
+                                                <td>{{ $expense->vbookingdrv->display_location }}</td>
+                                            @else
+                                                <td>{{ $expense->vbooking->display_location }}</td>
+                                            @endif
                                             <td>{{ BuEmp($expense->empid) }}</td>
                                             <td>{{ $expense->empid }}</td>
                                             <td class="text-start">{{ $fullname }}</td>
                                             <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
                                             <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                             <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
-                                            <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}
-                                            </td>
-                                            <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}
-                                            </td>
+                                            @if ($expense->extype == 2)
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date)->format('d/m/Y') }}
+                                                </td>
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date)->format('d/m/Y') }}
+                                                </td>
+                                            @else
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
+                                                </td>
+                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
+                                                </td>
+                                            @endif
 
-                                            <td>{{ $days ?: '-' }}</td>
+                                            <td>{{ $days }}</td>
                                             <td>{{ number_format($food, 2) }}</td>
                                             <td>{{ number_format($gas, 2) }}</td>
                                             <td>{{ number_format($express, 2) }}</td>
                                             <td>{{ number_format($publictransport, 2) }}</td>
                                             <td>{{ number_format($other, 2) }}</td>
-                                            <td>{{ number_format(round($total), 2) }}</td>
+                                            <td>{{ number_format($total, 2) }}</td>
                                         </tr>
                                     @endforeach
 
                                     <tr class="table-warning fw-bold">
-                                        <td colspan="13">รวม</td>
+                                        <td colspan="12">รวม</td>
                                         <td>{{ number_format($sum_food, 2) }}
+                                            <input type="hidden" name="totalfood" value="{{ $sum_food ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_gas, 2) }}
+                                            <input type="hidden" name="totalfuel" value="{{ $sum_gas ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_express, 2) }}
+                                            <input type="hidden" name="expresswaytoll" value="{{ $sum_express ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_publictransport, 2) }}
+                                            <input type="hidden" name="publictransportfare"
+                                                value="{{ $sum_publictransport ?? 0 }}">
                                         </td>
                                         <td>{{ number_format($sum_other, 2) }}
+                                            <input type="hidden" name="otherexpenses" value="{{ $sum_other ?? 0 }}">
                                         </td>
                                         <td>
                                             {{ number_format(round($sum_total), 2) }}
+                                            <input type="hidden" name="total" value="{{ round($sum_total) ?? 0 }}">
+                                            <input type="hidden" name="totalother" value="{{ $sumtotalother ?? 0 }}">
                                         </td>
                                     </tr>
                                 </tbody>
@@ -191,9 +158,6 @@
                                         <th>
                                             <h6>จำนวนเงินขอเบิก / บาท</h6>
                                         </th>
-                                        <th>
-                                            <h6>จำนวนเงินเบิกได้ / บาท</h6>
-                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -201,42 +165,21 @@
                                         <td>ค่าอาหาร</td>
                                         <td>
                                             <span class="btn rounded-pill btn-primary waves-effect waves-light">
-                                                {{ number_format($exgroup->totalfood, 2) }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="btn rounded-pill btn-info waves-effect waves-light sum-mealnet">
-                                                {{ number_format($exgroup->nettotalfood, 2) }}</span>
-                                            <input type="hidden" name="nettotalfood" class="row-foodnet"
-                                                data-id="{{ $expense->id }}"
-                                                value="{{ number_format($exgroup->nettotalfood, 2) }}">
+                                                {{ number_format($sum_food, 2) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>ค่าเดินทาง และ อื่นๆ</td>
                                         <td>
                                             <span
-                                                class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ number_format($exgroup->totalother, 2) }}</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="btn rounded-pill btn-info waves-effect waves-light totaltravelnet">{{ number_format($exgroup->nettotalother, 2) }}</span>
-                                            <input type="hidden" name="nettotalother" class="row-othernet"
-                                                data-id="{{ $expense->id }}"
-                                                value="{{ number_format($exgroup->nettotalother, 2) }}">
+                                                class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ number_format($sumtotalother, 2) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>ค่าน้ำมัน</td>
                                         <td>
                                             <span
-                                                class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ number_format($exgroup->totalfuel, 2) }}</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="btn rounded-pill btn-info waves-effect waves-light gasolinecostnet">{{ number_format($exgroup->nettotalfuel, 2) }}</span>
-                                            <input type="hidden" name="nettotalfuel" class="row-gasnet"
-                                                data-id="{{ $expense->id }}"
-                                                value="{{ number_format($exgroup->nettotalfuel, 2) }}">
+                                                class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ number_format($sum_gas, 2) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -244,28 +187,32 @@
                                         <td>
                                             <span
                                                 class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
-                                                {{ number_format($exgroup->total, 2) }}</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="btn rounded-pill btn-success waves-effect waves-light totalExpenseNet">
-                                                {{ number_format($exgroup->nettotal, 2) }}</span>
-                                            <input type="hidden" name="nettotal" class="row-totalexNet"
-                                                data-id="{{ $expense->id }}"
-                                                value="{{ number_format($exgroup->nettotal, 2) }}">
+                                                {{ number_format(round($sum_total), 2) }}</span>
                                         </td>
                                     </tr>
-
                                 </tbody>
                             </table>
                         </div>
-
+                        {{-- NextName --}}
                         <div class="row text-center mt-5">
+                            <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
+
+                                <h5 class="card-header">ผู้จัดทำ</h5>
+                                <div class="card-body">
+                                    <h5><span class="badge rounded-pill bg-primary">{{ $makeusername ?? '-' }}</span></h5>
+                                    <input type="hidden" name="created_by" value="{{ $makeuserempid ?? '' }}">
+                                    <hr>
+                                    HR
+                                </div>
+
+                            </div>
                             <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
 
                                 <h5 class="card-header">ผู้ตรวจสอบ</h5>
                                 <div class="card-body">
-                                    <h5><span class="badge rounded-pill bg-primary">{{ $checked_by }}</span></h5>
+                                    <h5><span class="badge rounded-pill bg-primary">{{ $makeusername ?? '-' }}</span></h5>
+                                    <input type="hidden" name="checkempid" value="{{ $makeuserempid ?? '' }}">
+                                    <input type="hidden" name="checkname" value="{{ $makeusername ?? '' }}">
                                     <hr>
                                     HR
                                 </div>
@@ -273,32 +220,52 @@
                             </div>
                             <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
 
-                                <h5 class="card-header">ผู้อนุมัติ 1</h5>
+                                <h5 class="card-header">ผู้อนุมัติ</h5>
                                 <div class="card-body">
-                                    <h5><span class="badge rounded-pill bg-primary">{{ $nextuser }}</span>
+                                    <h5><span
+                                            class="badge rounded-pill bg-primary">{{ $nextstaffgroup->fullname ?? '-' }}</span>
                                     </h5>
+                                    <input type="hidden" name="nextmpid" value="{{ $nextstaffgroup->empid ?? '' }}">
+                                    <input type="hidden" name="nextemail" value="{{ $nextstaffgroup->email ?? '' }}">
+                                    <input type="hidden" name="approvename" value="{{ $nextstaffgroup->fullname ?? '' }}">
                                     <hr>
                                     HR
                                 </div>
 
                             </div>
-                            <div class="col-md-4 card shadow-none bg-transparent border border-primary mb-3">
-
-                                <h5 class="card-header">ผู้อนุมัติ 2</h5>
-                                <div class="card-body">
-                                    <h5><span class="badge rounded-pill bg-primary">{{ $finaluser }}</span>
-                                    </h5>
-                                    <hr>
-                                    HR
-                                </div>
-
+                            <hr>
+                            <input type="hidden" name="plantid" value="{{ $plantID }}">
+                            <input type="hidden" name="plantname" value="{{ $plantName }}">
+                            <div class="col-md-12">
+                                <button type="button" id="confrimapprove" class="btn btn-primary"><span
+                                        class="mdi mdi-content-save"></span>
+                                    ยืนยันข้อมูลและส่งอนุมัติในขั้นตอนถัดไป</button>
                             </div>
                         </div>
+                        {{-- EndNextName --}}
+
 
                     </div>
-
-                </div>
+                </form>
             </div>
         </div>
     </div>
+@endsection
+@section('jscustom')
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!}, // ✅ ป้องกัน Error ใน JavaScript
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+    <script>
+        const hrHeadApproveUrl = "{{ route('HR.hrheadapprove') }}";
+    </script>
+    <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/hr/approve.js']) }}"></script>
 @endsection

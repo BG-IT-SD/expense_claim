@@ -128,56 +128,34 @@
                                                 $expense->extype == 2 || $expense->extype == 3
                                                     ? $expense->tech->fullname
                                                     : $expense->user->fullname;
-
-                                            // ---------------- หาวันเริ่ม / วันสิ้นสุด ----------------
                                             if ($expense->extype == 2) {
-                                                // start = departure_date จาก vbookingdrv
-                                                $startDate = optional($expense->vbookingdrv)->departure_date;
-
-                                                // end = วันที่ล่าสุดจาก expense_logs ของ exid นี้
-                                                $lastLog = $expense->logs->sortByDesc('id')->first();
-
-                                                if (
-                                                    $lastLog &&
-                                                    preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
-                                                ) {
-                                                    // เช่น "เบิกค่าอาหารวันที่ 2025-12-16"
-                                                    $endDate = $m[0]; // 2025-12-16
-                                                } else {
-                                                    // ถ้าหาไม่ได้ ใช้ return_date เดิมเป็น fallback
-                                                    $endDate = optional($expense->vbookingdrv)->return_date;
-                                                }
-                                            } else {
-                                                // extype อื่นใช้ booking ปกติ
-                                                $startDate = optional($expense->vbooking)->departure_date;
-                                                $endDate = optional($expense->vbooking)->return_date;
-                                            }
-
-                                            // ✅ จำนวนวัน = ต่างระหว่าง start–end (absolute) + 1
-                                            if ($startDate && $endDate) {
                                                 $days =
-                                                    \Carbon\Carbon::parse($startDate)->diffInDays(
-                                                        \Carbon\Carbon::parse($endDate),
-                                                        true,
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbookingdrv->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbookingdrv->return_date),
                                                     ) + 1;
                                             } else {
-                                                $days = 0;
+                                                $days =
+                                                    \Carbon\Carbon::parse(
+                                                        $expense->vbooking->departure_date,
+                                                    )->diffInDays(
+                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
+                                                    ) + 1;
                                             }
 
-                                            // --------- ค่าตัวเงิน (เหมือนเดิมของคุณ) ---------
-                                            $food = $expense->costoffood ?? 0;
-                                            $gas = $expense->gasolinecost ?? 0;
-                                            $express = $expense->expresswaytoll ?? 0;
-                                            $publictransport = $expense->publictransportfare ?? 0;
-                                            $other = $expense->otherexpenses ?? 0;
-
+                                            $food = $expense->costoffood ?? 0; //ค่าอาหาร
+                                            $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
+                                            $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
+                                            $publictransport = $expense->publictransportfare ?? 0; //ค่ารถสาธารณะ
+                                            $other = $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
                                             $total = $food + $gas + $express + $publictransport + $other;
 
-                                            $sum_food += $food;
-                                            $sum_gas += $gas;
-                                            $sum_express += $express;
-                                            $sum_publictransport += $publictransport;
-                                            $sum_other += $other;
+                                            $sum_food += $food; //ค่าอาหาร
+                                            $sum_gas += $gas; // ค่าน้ำมัน
+                                            $sum_express += $express; //ค่าทางด่วน
+                                            $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
+                                            $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
                                             $sum_total += $total;
                                             $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
                                         @endphp
@@ -193,13 +171,19 @@
                                                         class="badge rounded-pill bg-primary">{{ number_format($expense->totalprice, 2) }}</span>
                                                 </h6>
                                             </td>
-
+                                            {{-- <td class="text-nowrap">
+                                                {{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format(
+                                                    'd/m/Y H:i',
+                                                ) .
+                                                    ' - ' .
+                                                    \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}
+                                                <input type="hidden" name="departuredate[]"
+                                                    value="{{ \Carbon\Carbon::parse($expense->vbooking->departure_date . ' ' . $expense->vbooking->departure_time)->format('d/m/Y H:i') . ' - ' . \Carbon\Carbon::parse($expense->vbooking->return_date . ' ' . $expense->vbooking->return_time)->format('d/m/Y H:i') }}">
+                                            </td> --}}
                                             @php
-                                                // เลือก booking ตาม extype
                                                 $booking =
                                                     $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
 
-                                                // วันที่-เวลาเริ่มต้น (เหมือนเดิม)
                                                 $dep =
                                                     optional($booking)->departure_date &&
                                                     optional($booking)->departure_time
@@ -209,45 +193,19 @@
                                                                 optional($booking)->departure_time,
                                                         )->format('d/m/Y H:i')
                                                         : null;
-
-                                                // ================== วันที่สิ้นสุด ==================
-                                                if ($expense->extype == 2) {
-                                                    // หา log ล่าสุดของ exid นี้ (จะกรองตาม bookid ด้วยก็ได้ ถ้าต้องการ)
-                                                    $lastLog = $expense->logs
-                                                        //->where('bookid', optional($booking)->id)   // ถ้าต้องใช้ bookid ให้ uncomment บรรทัดนี้
-                                                        ->sortByDesc('id')
-                                                        ->first();
-
-                                                    $ret = null;
-                                                    if ($lastLog) {
-                                                        // พยายามดึงวันที่จาก remark เช่น "เบิกค่าอาหารวันที่ 2025-12-16"
-                                                        if (preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
-                                                            $ret = \Carbon\Carbon::parse($m[0])->format('d/m/Y');
-                                                        } else {
-                                                            // ถ้าหาวันใน remark ไม่ได้ ใช้ created_at ของ log แทน
-                                                            $ret = \Carbon\Carbon::parse($lastLog->created_at)->format(
-                                                                'd/m/Y H:i',
-                                                            );
-                                                        }
-                                                    }
-                                                } else {
-                                                    // เดิม: ใช้ return_date/return_time จาก booking
-                                                    $ret =
-                                                        optional($booking)->return_date &&
-                                                        optional($booking)->return_time
-                                                            ? \Carbon\Carbon::parse(
-                                                                optional($booking)->return_date .
-                                                                    ' ' .
-                                                                    optional($booking)->return_time,
-                                                            )->format('d/m/Y H:i')
-                                                            : null;
-                                                }
+                                                $ret =
+                                                    optional($booking)->return_date && optional($booking)->return_time
+                                                        ? \Carbon\Carbon::parse(
+                                                            optional($booking)->return_date .
+                                                                ' ' .
+                                                                optional($booking)->return_time,
+                                                        )->format('d/m/Y H:i')
+                                                        : null;
                                             @endphp
 
                                             <td class="text-nowrap">
                                                 {{ $dep && $ret ? $dep . ' - ' . $ret : $dep ?? '-' }}
                                             </td>
-
 
 
 
@@ -301,13 +259,9 @@
                                                             2,
                                                             $groupData,
                                                         );
-                                                        // $nextempid = $nextStepApprove['empid'] ?? '';
-                                                        // $nextemail = $nextStepApprove['email'] ?? '';
-                                                        // $nextfullname = $nextStepApprove['fullname'] ?? '';
-
-                                                        $nextempid = '66000510' ?? '';
-                                                        $nextemail = 'Kamolwan.b@bgiglass.com' ?? '';
-                                                        $nextfullname = 'กมลวรรณ บรรชา' ?? '';
+                                                        $nextempid = $nextStepApprove['empid'] ?? '';
+                                                        $nextemail = $nextStepApprove['email'] ?? '';
+                                                        $nextfullname = $nextStepApprove['fullname'] ?? '';
                                                     @endphp
                                                     {{ $nextfullname }}
                                                     <input type="hidden" name="nextemail[]" value="{{ $nextemail }}">

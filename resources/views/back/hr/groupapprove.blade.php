@@ -50,34 +50,54 @@
                                                 $expense->extype == 2 || $expense->extype == 3
                                                     ? $expense->tech->fullname
                                                     : $expense->user->fullname;
+
+                                            // เลือก booking
+                                            $booking =
+                                                $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
+
+                                            $startDate = optional($booking)->departure_date;
+                                            $endDate = null;
+
                                             if ($expense->extype == 2) {
-                                                $days =
-                                                    \Carbon\Carbon::parse(
-                                                        $expense->vbookingdrv->departure_date,
-                                                    )->diffInDays(
-                                                        \Carbon\Carbon::parse($expense->vbookingdrv->return_date),
-                                                    ) + 1;
+                                                // ถ้ามี bookid ใน logs แนะนำกรองให้ตรง booking ด้วย
+                                                $logs = $expense->logs;
+                                                // $logs = $logs->where('bookid', optional($booking)->id); // <-- uncomment ถ้า logs มี bookid
+
+                                                $lastLog = $logs->sortByDesc('id')->first();
+
+                                                if (
+                                                    $lastLog &&
+                                                    preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
+                                                ) {
+                                                    $endDate = $m[0];
+                                                } else {
+                                                    $endDate = optional($booking)->return_date; // fallback
+                                                }
                                             } else {
-                                                $days =
-                                                    \Carbon\Carbon::parse(
-                                                        $expense->vbooking->departure_date,
-                                                    )->diffInDays(
-                                                        \Carbon\Carbon::parse($expense->vbooking->return_date),
-                                                    ) + 1;
+                                                $endDate = optional($booking)->return_date;
                                             }
 
-                                            $food = $expense->costoffood ?? 0; //ค่าอาหาร
-                                            $gas = $expense->gasolinecost ?? 0; // ค่าน้ำมัน
-                                            $express = $expense->expresswaytoll ?? 0; //ค่าทางด่วน
-                                            $publictransport = $expense->publictransportfare ?? 0; //ค่ารถสาธารณะ
-                                            $other = $expense->otherexpenses ?? 0; // ค่าใช้จ่ายอื่นๆ
+                                            $days =
+                                                $startDate && $endDate
+                                                    ? \Carbon\Carbon::parse($startDate)->diffInDays(
+                                                            \Carbon\Carbon::parse($endDate),
+                                                            true,
+                                                        ) + 1
+                                                    : 0;
+
+                                            $food = $expense->costoffood ?? 0;
+                                            $gas = $expense->gasolinecost ?? 0;
+                                            $express = $expense->expresswaytoll ?? 0;
+                                            $publictransport = $expense->publictransportfare ?? 0;
+                                            $other = $expense->otherexpenses ?? 0;
+
                                             $total = $food + $gas + $express + $publictransport + $other;
 
-                                            $sum_food += $food; //ค่าอาหาร
-                                            $sum_gas += $gas; // ค่าน้ำมัน
-                                            $sum_express += $express; //ค่าทางด่วน
-                                            $sum_publictransport += $publictransport; // ค่ารถสาธารณะ
-                                            $sum_other += $other; // ค่าใช้จ่ายอื่นๆ
+                                            $sum_food += $food;
+                                            $sum_gas += $gas;
+                                            $sum_express += $express;
+                                            $sum_publictransport += $publictransport;
+                                            $sum_other += $other;
                                             $sum_total += $total;
                                             $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
                                         @endphp
@@ -99,19 +119,12 @@
                                             <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
                                             <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                                             <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
-                                            @if ($expense->extype == 2)
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->departure_date)->format('d/m/Y') }}
-                                                </td>
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbookingdrv->return_date)->format('d/m/Y') }}
-                                                </td>
-                                            @else
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}
-                                                </td>
-                                                <td>{{ \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}
-                                                </td>
-                                            @endif
+                                            <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}
+                                            </td>
+                                            <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}
+                                            </td>
 
-                                            <td>{{ $days }}</td>
+                                            <td>{{ $days ?: '-' }}</td>
                                             <td>{{ number_format($food, 2) }}</td>
                                             <td>{{ number_format($gas, 2) }}</td>
                                             <td>{{ number_format($express, 2) }}</td>

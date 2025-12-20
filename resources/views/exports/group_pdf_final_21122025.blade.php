@@ -18,12 +18,7 @@
             src: url('{{ public_path('fonts/THSarabunNew-Bold.ttf') }}') format('truetype');
         }
 
-        body,
-        table,
-        th,
-        tr,
-        td,
-        b {
+        body, table, th, tr, td, b {
             font-family: 'THSarabunNew', sans-serif;
             font-size: 10pt;
         }
@@ -40,17 +35,15 @@
         $grouped = $expenses->groupBy(function ($e) {
             $locationId = $e->vbooking->locationid ?? null;
             $locationBu = $e->vbooking->locationbu ?? null;
-            return $locationId == 12 ? 'อื่นๆ' : ($locationBu ?: $e->vbooking->display_location ?? 'ไม่ระบุสถานที่');
+            return $locationId == 12
+                ? 'อื่นๆ'
+                : ($locationBu ?: $e->vbooking->display_location ?? 'ไม่ระบุสถานที่');
         });
 
         // เรียงชื่อกลุ่ม (อังกฤษก่อน Other ท้าย)
         $grouped = $grouped->sortKeysUsing(function ($a, $b) {
-            if ($a === 'อื่นๆ') {
-                return 1;
-            }
-            if ($b === 'อื่นๆ') {
-                return -1;
-            }
+            if ($a === 'อื่นๆ') return 1;
+            if ($b === 'อื่นๆ') return -1;
             return strnatcasecmp($a, $b);
         });
     @endphp
@@ -110,33 +103,10 @@
                             $expense->extype == 2 || $expense->extype == 3
                                 ? $expense->tech->fullname
                                 : $expense->user->fullname;
-                        // เลือก booking
-                        $booking = $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
-
-                        $startDate = optional($booking)->departure_date;
-                        $endDate = null;
-
-                        if ($expense->extype == 2) {
-                            // ถ้ามี bookid ใน logs แนะนำกรองให้ตรง booking ด้วย
-                            $logs = $expense->logs;
-                            // $logs = $logs->where('bookid', optional($booking)->id); // <-- uncomment ถ้า logs มี bookid
-
-                            $lastLog = $logs->sortByDesc('id')->first();
-
-                            if ($lastLog && preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
-                                $endDate = $m[0];
-                            } else {
-                                $endDate = optional($booking)->return_date; // fallback
-                            }
-                        } else {
-                            $endDate = optional($booking)->return_date;
-                        }
-
                         $days =
-                            $startDate && $endDate
-                                ? \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate), true) +
-                                    1
-                                : 0;
+                            Carbon::parse($expense->vbooking->departure_date)->diffInDays(
+                                Carbon::parse($expense->vbooking->return_date),
+                            ) + 1;
                         $food = $expense->costoffood ?? 0;
                         $gas = $expense->gasolinecost ?? 0;
                         $express = $expense->expresswaytoll ?? 0;
@@ -163,10 +133,10 @@
                         <td style="text-align: center;">{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
                         <td style="text-align: center;">{{ $expense->userhr->NUMBANK ?? '-' }}</td>
                         <td style="text-align: center;">
-                            {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}</td>
+                            {{ Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y') }}</td>
                         <td style="text-align: center;">
-                            {{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}</td>
-                        <td style="text-align: center;">{{ $days ?: '-' }}</td>
+                            {{ Carbon::parse($expense->vbooking->return_date)->format('d/m/Y') }}</td>
+                        <td style="text-align: center;">{{ $days }}</td>
                         <td style="text-align: right;">{{ number_format($food, 2) }}</td>
                         <td style="text-align: right;">{{ number_format($gas, 2) }}</td>
                         <td style="text-align: right;">{{ number_format($express, 2) }}</td>
@@ -204,18 +174,12 @@
                 <td colspan="11" style="text-align: center; text-decoration: underline;">
                     <b>Total</b>
                 </td>
-                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_food), 2) }}
-                </td>
-                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_gas), 2) }}
-                </td>
-                <td style="text-align: right; text-decoration: underline;">
-                    {{ number_format(round($grand_express), 2) }}</td>
-                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_public), 2) }}
-                </td>
-                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_other), 2) }}
-                </td>
-                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_total), 2) }}
-                </td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_food), 2) }}</td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_gas), 2) }}</td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_express), 2) }}</td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_public), 2) }}</td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_other), 2) }}</td>
+                <td style="text-align: right; text-decoration: underline;">{{ number_format(round($grand_total), 2) }}</td>
             </tr>
         </tbody>
     </table>
@@ -253,12 +217,9 @@
             </tr>
             <tr>
                 <td colspan="6"></td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">
-                    {{ HRPosition($exgroup->checkempid) }}</td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">
-                    {{ HRPosition($exgroup->nextmpid) }}</td>
-                <td colspan="2" style="border: 1px solid #000; text-align: center;">
-                    {{ HRPosition($exgroup->finalempid) }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->checkempid) }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->nextmpid) }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center;">{{ HRPosition($exgroup->finalempid) }}</td>
                 <td colspan="6"></td>
             </tr>
         </tbody>

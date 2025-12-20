@@ -1408,7 +1408,9 @@ class HRController extends Controller
         $nextuser = $exgroup->nextuser->fullname ?? "";
         $finaluser = $exgroup->finaluser->fullname ?? "";
 
-        return view('back.hr.groupdetail', compact('expenses', 'exgroup', 'create_by', 'checked_by', 'nextuser', 'finaluser'));
+        $page = 'HR.show';
+
+        return view('back.hr.groupdetail', compact('expenses', 'exgroup', 'create_by', 'checked_by', 'nextuser', 'finaluser','page'));
     }
 
     public function export(Request $request)
