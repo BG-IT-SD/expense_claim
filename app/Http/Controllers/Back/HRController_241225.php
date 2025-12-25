@@ -849,10 +849,6 @@ class HRController extends Controller
                     'distancenote' => $request->distancenote ?? '',
                     'totaldistance' => $request->totaldistance ?? 0,
                     // New
-                    // New24122025
-                    'departuretime' => $request->departuretime,
-                    'remarknew' => $request->remarknew ?? null,
-                    // New24122025
                 ]);
             }
 

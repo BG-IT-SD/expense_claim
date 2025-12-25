@@ -185,12 +185,14 @@
             </div>
         </div>
         <div class="col-sm-6">
-
+            {{-- <div class="form-floating form-floating-outline">
+                <input type="time" id="returntime" name="returntime" class="form-control" value="">
+                <label for="returntime">ถึงเวลา</label>
+            </div> --}}
             <div class="form-floating form-floating-outline">
-                <input type="text" id="departuretime" name="departuretime" class="form-control"
-                    value="{{ $expense->departuretime }}" required
-                    @if ($isView == 0) disabled @endif />
-                <label for="เวลาที่เริ่มเดินทางจริง">เวลาที่เริ่มเดินทางจริง</label>
+                <input type="text" id="returntime" name="returntime" class="form-control"
+                    value="{{ $expense->returntime }}" required  @if ($isView == 0) disabled @endif />
+                <label for="returntime">ถึงเวลา</label>
             </div>
         </div>
         <div class="col-sm-6">
@@ -209,14 +211,6 @@
                         💡 สามารถแก้ไขระยะทางได้ (ระบบจะคำนวณค่าน้ำมันใหม่อัตโนมัติ)
                     </small>
                 @endif
-            </div>
-        </div>
-        <div class="col-sm-6">
-
-            <div class="form-floating form-floating-outline">
-                <input type="text" id="returntime" name="returntime" class="form-control"
-                    value="{{ $expense->returntime }}" required @if ($isView == 0) disabled @endif />
-                <label for="returntime">เวลาที่ถึงจริง</label>
             </div>
         </div>
 
@@ -246,12 +240,6 @@
                 </div>
             </div>
         @endif
-        <div class="col-sm-12">
-                <div class="form-floating form-floating-outline mb-4">
-                    <textarea class="form-control h-px-100" id="remarknew" name="remarknew"  @if ($isView == 0) disabled @endif>{{ $expense->remarknew }}</textarea>
-                    <label for="remarknew">หมายเหตุ</label>
-                </div>
-            </div>
         <div class="col-12 d-flex justify-content-between">
             <button type="button" class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>

@@ -2,16 +2,63 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         {{-- <h4 class="py-3 mb-4 bg-secondary"><span class="text-muted fw-light ">Form/</span> เบิกเบี้ยงเลี้ยง/อาหาร/ค่าเดินทาง</h4> --}}
-        <div class="card shadow-none bg-transparent border border-secondary">
+        {{-- <div class="card shadow-none bg-transparent border border-secondary">
             <div class="card-body text-secondary">
                 <h4 class="card-title text-secondary">เบิกเบี้ยงเลี้ยง/อาหาร/ค่าเดินทาง</h4>
+            </div>
+        </div> --}}
+        <div class="expense-summary-card mb-3 shadow-sm">
+            <h4>เบิกเบี้ยเลี้ยง / อาหาร / ค่าเดินทาง</h4>
+
+            {{--  บรรทัดที่ 1 --}}
+            <div class="expense-summary-row">
+                <div class="expense-summary-item">
+                    <strong>ชื่อ – สกุล:</strong>
+                    <span>{{ optional($expense->userhr)->NAMFIRSTT . ' ' . optional($expense->userhr)->NAMLASTT ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>รหัสพนักงาน:</strong>
+                    <span>{{ $expense->empid ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>ระดับ (Level):</strong>
+                    <span>{{ optional($expense->userhr)->JOBGRADE_TITLE ?? '-' }}</span>
+                </div>
+            </div>
+
+            {{-- บรรทัดที่ 2 --}}
+            <div class="expense-summary-row">
+                <div class="expense-summary-item">
+                    <strong>เลขที่เอกสาร (Expense No.):</strong>
+                    <span>{{ $expense->id ?? '-' }}</span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>วันที่เดินทางไป:</strong>
+                    <span>
+                        {{ optional($expense->vbooking)->departure_date
+                            ? \Carbon\Carbon::parse($expense->vbooking->departure_date)->format('d/m/Y')
+                            : '-' }}
+                    </span>
+                </div>
+
+                <div class="expense-summary-item">
+                    <strong>วันที่เดินทางกลับ:</strong>
+                    <span>
+                        {{ optional($expense->vbooking)->return_date
+                            ? \Carbon\Carbon::parse($expense->vbooking->return_date)->format('d/m/Y')
+                            : '-' }}
+                    </span>
+                </div>
             </div>
         </div>
         <!-- Default -->
         <div class="row">
             <!-- <div class="col-12">
-                                    <h5>Default</h5>
-                                </div> -->
+                                        <h5>Default</h5>
+                                    </div> -->
 
             <!-- Default Wizard -->
             <div class="col-12 mb-4">
@@ -140,10 +187,12 @@
         .timeline-horizontal {
             position: relative;
             display: flex;
-            justify-content: flex-start; /* 👈 เปลี่ยนจาก space-between เป็น flex-start */
+            justify-content: flex-start;
+            /* 👈 เปลี่ยนจาก space-between เป็น flex-start */
             align-items: flex-start;
             flex-wrap: nowrap;
-            gap: 50px; /* เพิ่มระยะห่างระหว่างจุด */
+            gap: 50px;
+            /* เพิ่มระยะห่างระหว่างจุด */
             padding: 30px 10px;
         }
 
@@ -196,6 +245,50 @@
             font-size: 13px;
             color: #555;
         }
+
+        .expense-summary-card {
+            background-color: #f9fafb;
+            border: 1px solid #d0d7de;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            color: #495057;
+        }
+
+        .expense-summary-card h4 {
+            font-weight: 600;
+            color: #2f3e46;
+            border-left: 4px solid #4b9e5f;
+            padding-left: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* 🔹 ตารางข้อมูลสองบรรทัด */
+        .expense-summary-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 0.25rem;
+        }
+
+        .expense-summary-item {
+            flex: 1 1 25%;
+            min-width: 220px;
+            margin-bottom: 0.5rem;
+        }
+
+        .expense-summary-item strong {
+            color: #111827;
+        }
+
+        /* ✨ จัดระยะห่างระหว่างหัวข้อ */
+        .expense-summary-item span {
+            color: #4b5563;
+        }
+
+        @media (max-width: 768px) {
+            .expense-summary-item {
+                flex: 1 1 100%;
+            }
+        }
     </style>
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/typeahead-js/typeahead.css') }}" />
@@ -232,5 +325,4 @@
 
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/expense.js']) }}"></script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step-view.js']) }}"></script>
-
 @endsection

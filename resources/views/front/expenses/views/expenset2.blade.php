@@ -11,14 +11,31 @@
                 $usedDateStr = $dayFood->toDateString();
                 $food = $expenseFoods[$usedDateStr] ?? null;
 
+                $departureHHmm = null;
+                if (!empty($expense->departuretime)) {
+                    try {
+                        $departureHHmm = \Carbon\Carbon::parse($expense->departuretime)->format('H:i');
+                    } catch (\Exception $e) {
+                        $departureHHmm = null;
+                    }
+                }
+
                 // คำนวณช่วงเวลาในแต่ละวัน (เหมือนหน้า create)
                 if ($startDate->equalTo($endDate)) {
                     // มีแค่วันเดียว
-                    $from = $dayFood->copy()->setTimeFromTimeString($startTime);
-                    $to = $endTime; // Carbon
+                    // $from = $dayFood->copy()->setTimeFromTimeString($startTime);
+                    // $to = $endTime; // Carbon
+                    $useStart = $departureHHmm ?? $startTime;
+                    $from = $dayFood->copy()->setTimeFromTimeString($useStart);
+                    $to = $endTime;
                 } elseif ($dayFood->equalTo($startDate)) {
                     // วันแรก
-                    $from = $dayFood->copy()->setTimeFromTimeString($startTime);
+                    // $from = $dayFood->copy()->setTimeFromTimeString($startTime);
+                    // $to = $dayFood->copy()->setTime(23, 59);
+                    // ✅ วันแรก: ถ้ามี departuretime ให้ใช้แทน startTime
+                    $useStart = $departureHHmm ?? $startTime;
+
+                    $from = $dayFood->copy()->setTimeFromTimeString($useStart);
                     $to = $dayFood->copy()->setTime(23, 59);
                 } elseif ($dayFood->equalTo($endDate)) {
                     // วันสุดท้าย

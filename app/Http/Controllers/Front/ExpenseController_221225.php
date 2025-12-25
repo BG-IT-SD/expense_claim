@@ -476,7 +476,6 @@ class ExpenseController extends Controller
             'empid' => 'required',
             'extype' => 'required',
             'returntime' => 'required',
-            'departuretime' => 'required',
             'totaldistance' => 'required',
             'costoffood' => 'required',
             'travelexpenses' => 'required',
@@ -561,11 +560,6 @@ class ExpenseController extends Controller
                 'travelexpenses' => $request->travelexpenses,
                 'gasolinecost' => $request->gasolinecost,
                 'totalprice' => $request->totalExpense,
-
-                // new 22/12/25
-                 'departuretime' => $request->departuretime,
-                 'remarknew' => $request->remarknew ?? null,
-                // new 22/12/25
             ]);
 
             if (is_array($request->days)) {

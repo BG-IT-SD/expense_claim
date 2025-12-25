@@ -219,7 +219,7 @@
                 <label for="returntime">ถึงเวลา</label>
             </div> --}}
             <div class="form-floating form-floating-outline">
-                <input type="text" id="departuretime" name="departuretime" placeholder="20:00:00" class="form-control"
+                <input type="text" id="departuretime" name="departuretime" placeholder="06:00:00" class="form-control"
                     required />
                 <label for="departuretime">เวลาที่เริ่มเดินทางจริง</label>
             </div>
@@ -277,6 +277,12 @@
                 </div>
             </div>
         @endif
+        <div class="col-sm-12">
+                <div class="form-floating form-floating-outline mb-4">
+                    <textarea class="form-control h-px-100" id="remarknew" name="remarknew"></textarea>
+                    <label for="remarknew">หมายเหตุ</label>
+                </div>
+            </div>
         <div class="col-12 d-flex justify-content-between">
             <button class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
