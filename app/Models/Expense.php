@@ -50,7 +50,9 @@ class Expense extends Model
         'distancemore',
         'distancenote',
         'afdistance',
-        'basedistance'
+        'basedistance',
+        'departuretime',
+        'remarknew'
     ];
 
     public function latestApprove()

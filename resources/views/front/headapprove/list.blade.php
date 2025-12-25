@@ -301,13 +301,13 @@
                                                             2,
                                                             $groupData,
                                                         );
-                                                        // $nextempid = $nextStepApprove['empid'] ?? '';
-                                                        // $nextemail = $nextStepApprove['email'] ?? '';
-                                                        // $nextfullname = $nextStepApprove['fullname'] ?? '';
+                                                        $nextempid = $nextStepApprove['empid'] ?? '';
+                                                        $nextemail = $nextStepApprove['email'] ?? '';
+                                                        $nextfullname = $nextStepApprove['fullname'] ?? '';
 
-                                                        $nextempid = '66000510' ?? '';
-                                                        $nextemail = 'Kamolwan.b@bgiglass.com' ?? '';
-                                                        $nextfullname = 'กมลวรรณ บรรชา' ?? '';
+                                                        // $nextempid = '66000510' ?? '';
+                                                        // $nextemail = 'Kamolwan.b@bgiglass.com' ?? '';
+                                                        // $nextfullname = 'กมลวรรณ บรรชา' ?? '';
                                                     @endphp
                                                     {{ $nextfullname }}
                                                     <input type="hidden" name="nextemail[]" value="{{ $nextemail }}">
