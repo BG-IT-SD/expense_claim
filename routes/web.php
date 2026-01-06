@@ -26,6 +26,7 @@ use App\Http\Controllers\Back\UserController;
 use App\Http\Controllers\Back\UserroleController;
 use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\ForgotByEmployeeController;
+use App\Http\Controllers\Front\CarBookingController;
 use App\Http\Controllers\Front\DriverClaimController;
 use App\Http\Controllers\Front\ExpenseController;
 use App\Http\Controllers\Front\HeadApprovedController;
@@ -156,6 +157,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::post('/', [DriverClaimController::class, 'store'])->name('store');
             Route::get('history', [DriverClaimController::class, 'history'])->name('history');
             Route::get('drivershow/{id}/{type}', [HRController::class, 'show'])->name('show');
+            Route::put('/CarBooking/{bookid}/time', [CarBookingController::class, 'updateTime'])
+            ->name('CarBooking.updateTime');
         });
 
 
