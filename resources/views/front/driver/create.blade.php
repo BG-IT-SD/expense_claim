@@ -78,16 +78,30 @@
                                                         <strong>Booking ที่เกี่ยวข้อง:</strong>
                                                         <ul>
                                                             @foreach ($groupedTimeRanges[$dayKey]['details'] as $b)
-                                                            <li>
-                                                                ID: {{ $b['id'] }} | {{ $b['location_name'] }}
-                                                                @if (isset($b['start']) && isset($b['end']))
-                                                                    <br>
-                                                                    <span class="text-muted small">
-                                                                        เวลาเดินทาง: {{ $b['start']->format('H:i') }} - {{ $b['end']->format('H:i') }}
-                                                                    </span>
-                                                                @endif
-                                                            </li>
-                                                        @endforeach
+                                                                <li>
+                                                                    ID: {{ $b['id'] }} | {{ $b['location_name'] }}
+                                                                    @if (isset($b['start']) && isset($b['end']))
+                                                                        <br>
+                                                                        <span class="text-muted small">
+                                                                            เวลาเดินทาง: {{ $b['start']->format('H:i') }} -
+                                                                            {{ $b['end']->format('H:i') }}
+                                                                        </span>
+                                                                    @endif
+                                                                    {{-- ปุ่มแก้ไขเวลา --}}
+                                                                    {{-- <button type="button"
+                                                                        class="btn btn-sm btn-outline-primary ms-2 btnEditBookingTime"
+                                                                        data-bookid="{{ $b['id'] }}"
+                                                                        data-date="{{ $dayFood->toDateString() }}"
+                                                                        data-start="{{ isset($b['start']) ? $b['start']->format('H:i') : '' }}"
+                                                                        data-end="{{ isset($b['end']) ? $b['end']->format('H:i') : '' }}"
+                                                                        data-location="{{ $b['location_name'] }}"
+                                                                        data-action="{{ route('DriverClaim.CarBooking.updateTime', ['bookid' => $b['id']]) }}"
+                                                                        >
+                                                                        <span class="mdi mdi-clock-edit-outline"></span>
+                                                                        แก้ไขเวลา
+                                                                    </button> --}}
+                                                                </li>
+                                                            @endforeach
                                                         </ul>
                                                     </div>
                                                 @endif
@@ -110,7 +124,8 @@
                                                             <td>
                                                                 <i class="mdi mdi-food-outline text-danger me-2"></i>
                                                                 เบิกมื้ออาหาร
-                                                                <input type="hidden" name="days[{{ $index }}][date]"
+                                                                <input type="hidden"
+                                                                    name="days[{{ $index }}][date]"
                                                                     value="{{ $dayFood->toDateString() }}">
                                                             </td>
 
@@ -137,14 +152,13 @@
                                     </div>
                                 </div>
                                 @foreach ($groupedTimeRanges[$dayKey]['details'] as $detail)
-                                <input type="hidden"
-                                    name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][id]"
-                                    value="{{ $detail['id'] }}">
-                                <input type="hidden"
-                                    name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][location_name]"
-                                    value="{{ $detail['location_name'] }}">
+                                    <input type="hidden"
+                                        name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][id]"
+                                        value="{{ $detail['id'] }}">
+                                    <input type="hidden"
+                                        name="groupedTimeRanges[{{ $dayKey }}][details][{{ $loop->index }}][location_name]"
+                                        value="{{ $detail['location_name'] }}">
                                 @endforeach
-
                             @endforeach
 
 
@@ -183,7 +197,7 @@
                                                 value="{{ $finalHNameNext }}" class="form-control form-control-input">
                                             <input type="hidden" name="head_id" id="head_id" value="{{ $finalIdNext }}"
                                                 class="form-control form-control-input">
-                                                <input type="hidden" name="driver_name" value="{{ $driver_name }}">
+                                            <input type="hidden" name="driver_name" value="{{ $driver_name }}">
                                         </div>
                                     </div>
                                 </div>
@@ -211,8 +225,76 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal: Edit Booking Time -->
+{{-- <div class="modal fade" id="modalEditBookingTime" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formEditBookingTime" method="POST" class="modal-content">
+            @csrf
+            @method('PUT')
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    แก้ไขเวลา Booking: <span id="mBookId"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-2 text-muted small">
+                    วันที่: <span id="mDate"></span> | สถานที่: <span id="mLocation"></span>
+                </div>
+
+                <input type="hidden" name="bookid" id="inputBookId">
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label">เวลาเริ่ม (24 ชม)</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="start_time"
+                            id="inputStart"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label">เวลาสิ้นสุด (24 ชม)</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="end_time"
+                            id="inputEnd"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-text mt-2">
+                    รูปแบบเวลา: 00:00 – 23:59
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                    ยกเลิก
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="mdi mdi-content-save-outline"></span> บันทึก
+                </button>
+            </div>
+        </form>
+    </div>
+</div> --}}
+
+@endsection
+
+@section('csscustom')
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
 @endsection
 
 @section('jscustom')
+    <script src="{{ asset('template/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js') }}"></script>
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/driver/create.js']) }}"></script>
 @endsection
