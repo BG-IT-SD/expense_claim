@@ -109,6 +109,11 @@ class Expense extends Model
         return $this->hasOne(Vbookingalldrv::class, 'id', 'bookid');
     }
 
+    public function vbookingreport()
+    {
+        return $this->hasOne(BookingReport::class, 'id', 'bookid');
+    }
+
     public function approval()
     {
         return $this->hasOne(Approve::class, 'exid', 'id');
@@ -155,7 +160,6 @@ class Expense extends Model
     }
 
 
-
     public function finalApprove()
     {
         return $this->hasOne(Approve::class, 'exid', 'id')
@@ -179,5 +183,22 @@ class Expense extends Model
         static::updating(function ($userrole) {
             $userrole->modified_by = Auth::id();
         });
+    }
+
+    public function getGoogleMapsUrlAttribute(): ?string
+    {
+        // เช็คว่ามีค่าครบทั้ง 4 จุดหรือไม่
+        if (!$this->latitude || !$this->longitude || !$this->latitude_b || !$this->longitude_b) {
+            return null;
+        }
+
+        $params = [
+            'api' => 1,
+            'origin' => "{$this->latitude},{$this->longitude}",
+            'destination' => "{$this->latitude_b},{$this->longitude_b}",
+            'travelmode' => 'driving'
+        ];
+
+        return "https://www.google.com/maps/dir/?" . http_build_query($params);
     }
 }

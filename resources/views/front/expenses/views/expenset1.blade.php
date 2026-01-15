@@ -91,6 +91,12 @@
             <div class="col-sm-3">
                 <span class="badge rounded-pill bg-warning"><span class="mdi mdi-map-marker-multiple"></span> สถานที่
                     จาก google map</span>
+                @if ($expense->google_maps_url)
+                    <hr>
+                    <a href="{{ $expense->google_maps_url }}" target="_blank" class="btn btn-sm btn-primary">
+                        <i class="mdi mdi-map-marker-multiple"></i> View Google Maps
+                    </a>
+                @endif
             </div>
             <div class="col-sm-9">
             </div>
@@ -247,11 +253,12 @@
             </div>
         @endif
         <div class="col-sm-12">
-                <div class="form-floating form-floating-outline mb-4">
-                    <textarea class="form-control h-px-100" id="remarknew" name="remarknew"  @if ($isView == 0) disabled @endif>{{ $expense->remarknew }}</textarea>
-                    <label for="remarknew">หมายเหตุ</label>
-                </div>
+            <div class="form-floating form-floating-outline mb-4">
+                <textarea class="form-control h-px-100" id="remarknew" name="remarknew"
+                    @if ($isView == 0) disabled @endif>{{ $expense->remarknew }}</textarea>
+                <label for="remarknew">หมายเหตุ</label>
             </div>
+        </div>
         <div class="col-12 d-flex justify-content-between">
             <button type="button" class="btn btn-outline-secondary btn-prev waves-effect" disabled="">
                 <i class="mdi mdi-arrow-left me-sm-1 me-0"></i>
