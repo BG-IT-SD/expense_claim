@@ -18,6 +18,7 @@ use App\Http\Controllers\Back\HRgroupController;
 use App\Http\Controllers\Back\ImportlistController;
 use App\Http\Controllers\Back\MessageController;
 use App\Http\Controllers\Back\PricepermealController;
+use App\Http\Controllers\Back\ReportHRController;
 use App\Http\Controllers\Back\ResendMailController;
 use App\Http\Controllers\Back\RoleController;
 use App\Http\Controllers\Back\SettingSpecialApproveController;
@@ -211,6 +212,12 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
 
             Route::get('export', [HRController::class, 'export'])->name('export');
             Route::get('aftedit/{id}/{type?}/{approve?}', [HRController::class, 'editapprove'])->name('aftedit');
+
+            Route::get('reporthr',[ReportHRController::class,'index'])->name('reporthr');
+            Route::post('/reporthr/data', [ReportHRController::class, 'data'])->name('reporthr.data');
+
+            // export
+            Route::get('/reporthr/export', [ReportHRController::class, 'export'])->name('reporthr.export');
         });
 
     // Account

@@ -63,7 +63,7 @@
                                             <span id="text-account">
                                                 <button type="button" class="btn btn-sm btn-warning text-nowrap"
                                                     data-bs-animation="true" data-bs-toggle="popover"
-                                                    data-bs-placement="right" data-bs-content="{{ $account->NUMBANK }}"
+                                                    data-bs-placement="right" data-bs-content="{{ $account->NUMBANK ?? '-' }}"
                                                     title="Account Number">
                                                     <span class="mdi mdi-eye-lock"></span>
                                                 </button>

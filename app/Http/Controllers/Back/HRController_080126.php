@@ -282,12 +282,7 @@ class HRController extends Controller
         $empid = Auth::user()->empid;
 
         // พนักงาน HR + โรงงานที่ดูแล
-        $staff = ApproveStaff::with([
-            'plantSettingDetails' => function ($q) {
-                $q->where('deleted', 0)
-                    ->with('plant'); // โหลด plant ต่อ
-            }
-        ])
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
             ->where('empid', $empid)
             ->where('deleted', 0)
             ->where('step', 9)
@@ -298,7 +293,6 @@ class HRController extends Controller
             ->filter()
             ->map(fn($name, $id) => ['id' => $id, 'name' => $name])
             ->values();
-
         // dd($plantNames);
 
         $usercheck = $empid;

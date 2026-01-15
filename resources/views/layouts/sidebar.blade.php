@@ -145,6 +145,7 @@
                     'HR.driverapproved',
                     'HR.hrnextapprove',
                     'HR.grouplist',
+                    'HR.reporthr',
                 ])
                     ? 'active open'
                     : '' }}">
@@ -173,6 +174,19 @@
                         <a href="{{ route('HR.grouplist') }}" class="menu-link">
                             <div data-i18n="รายการอนุมัติ">รายการอนุมัติ</div>
                         </a>
+                    </li>
+                     <li class="menu-item" style="">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle waves-effect">
+                            <div data-i18n="รายงาน">รายงาน</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="{{ route('HR.reporthr') }}" class="menu-link">
+                                    <div data-i18n="Report HR">Report HR</div>
+                                </a>
+                            </li>
+
+                        </ul>
                     </li>
                 </ul>
             </li>
