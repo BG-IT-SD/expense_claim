@@ -12,6 +12,7 @@ use App\Models\GroupSpecial;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AllowanceSummaryExport;
+use App\Models\Plant;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AccountReportController extends Controller
@@ -24,6 +25,7 @@ class AccountReportController extends Controller
         $search_plant = $request->input('search_plant');
         $search_department = $request->input('search_department');
         $search_empid = $request->input('search_empid');
+        $search_bu = $request->input('search_bu');
 
         $bookIds = null;
         if ($search_plant) {
@@ -90,6 +92,13 @@ class AccountReportController extends Controller
             });
         }
 
+        //ค้นหาจาก exgroup plant_id
+        if ($search_bu) {
+            $query->whereHas('exgroup', function ($q) use ($search_bu) {
+                $q->where('plantid', $search_bu);
+            });
+        }
+
         //ค้นหาสถานที่ (booking)
         if ($bookIds !== null) {
             $query->whereIn('bookid', $bookIds);
@@ -106,7 +115,11 @@ class AccountReportController extends Controller
         $search_plant = $request->input('search_plant');
         $search_department = $request->input('search_department');
         $search_empid = $request->input('search_empid');
+        $search_bu = $request->input('bu');
+
         $results = collect();
+
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
 
         return view('back.account.allowance_summary', compact(
             'results',
@@ -115,7 +128,9 @@ class AccountReportController extends Controller
             'search_name',
             'search_plant',
             'search_department',
-            'search_empid'
+            'search_empid',
+            'search_bu',
+            'plants'
         ));
     }
 
@@ -128,7 +143,7 @@ class AccountReportController extends Controller
         $orderColumnName = $request->input('columns.' . $orderColumnIndex . '.name', 'id');
         $orderDir = $request->input('order.0.dir', 'desc');
 
-        if (!$request->anyFilled(['start_date', 'end_date', 'search_name', 'search_plant', 'search_department', 'search_empid'])) {
+        if (!$request->anyFilled(['start_date', 'end_date', 'search_name', 'search_plant', 'search_department', 'search_empid', 'search_bu'])) {
             return response()->json([
                 "draw"            => intval($draw),
                 "recordsTotal"    => 0,
