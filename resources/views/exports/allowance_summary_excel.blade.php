@@ -76,87 +76,153 @@
         </thead>
 
         <tbody>
-            @foreach ($expenses as $loop => $r)
+            @php
+                // รวมทั้งหมด
+                $grand_food = 0;
+                $grand_express = 0;
+                $grand_travel = 0;
+                $grand_total = 0;
+
+                // group ตามสถานที่ (เหมือนรายงานแรก)
+                $grouped = $expenses->groupBy(function ($r) {
+                    $locationId = optional($r->vbooking)->locationid;
+                    $locationBu = optional($r->vbooking)->locationbu;
+
+                    return $locationId == 12
+                        ? 'อื่นๆ'
+                        : ($locationBu ?:
+                            optional($r->vbooking)->display_location ?? 'ไม่ระบุสถานที่');
+                });
+
+                // เรียงชื่อกลุ่ม (อื่นๆ ไว้ท้าย)
+                $grouped = $grouped->sortKeysUsing(function ($a, $b) {
+                    if ($a === 'อื่นๆ') {
+                        return 1;
+                    }
+                    if ($b === 'อื่นๆ') {
+                        return -1;
+                    }
+                    return strnatcasecmp($a, $b);
+                });
+            @endphp
+
+            @foreach ($grouped as $groupName => $rows)
                 @php
-                    $currentGroupId = optional($r->finalApprove->exgroupRef)->id;
-                    $total_travel = $r->travelexpenses + $r->gasolinecost;
-
-                    if ($r->extype == 1) {
-                        $fullname = optional($r->user)->fullname ?? '-';
-                        $dept = optional($r->user)->dept ?? '-';
-                    } elseif (in_array($r->extype, [2, 3])) {
-                        $fullname = optional($r->groupSpecial)->fullname ?? '-';
-                        $dept = optional($r->groupSpecial)->position ?? '-';
-                    } else {
-                        $fullname = '-';
-                        $dept = '-';
-                    }
-
-                    // เลือก booking ตาม extype
-                    $booking = $r->extype == 2 ? $r->vbookingdrv : $r->vbooking;
-                    $startDate = optional($booking)->departure_date;
-                    $endDate = null;
-
-                    if ($r->extype == 2) {
-                        $lastLog = $r->logs->sortByDesc('id')->first();
-
-                        if ($lastLog && preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
-                            $endDate = $m[0]; // yyyy-mm-dd จาก remark
-                        } else {
-                            $endDate = optional($booking)->return_date; // fallback
-                        }
-                    } else {
-                        $endDate = optional($booking)->return_date;
-                    }
-
-                    $dayCount =
-                        $startDate && $endDate
-                            ? \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate), true) + 1
-                            : null;
+                    $sum_food = 0;
+                    $sum_express = 0;
+                    $sum_travel = 0;
+                    $sum_total = 0;
                 @endphp
 
-
-                {{-- @if ($lastGroupId !== null && $currentGroupId !== $lastGroupId)
-                    <tr class="group-spacer">
-                        <td colspan="15"></td>
-                    </tr>
-                @endif --}}
-
-                <tr>
-                    <td>
-                        {{ optional($r->finalApprove->exgroupRef)->paymentdate
-                            ? \Carbon\Carbon::parse($r->finalApprove->exgroupRef->paymentdate)->format('Y-m-d')
-                            : '-' }}
+                {{-- หัวกลุ่มสถานที่ --}}
+                <tr style="background-color:#f2f2f2;">
+                    <td colspan="15" class="text-left" style="font-weight:bold;">
+                        สถานที่ไปปฏิบัติงาน: {{ $groupName }}
                     </td>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ optional($r->vbooking)->display_location ?? '-' }}</td>
-                    <td>{{ $r->empid }}</td>
-                    <td class="text-left">{{ $fullname }}</td>
-                    <td>{{ $dept }}</td>
-                    <td>{{ optional($r->userhr)->JOBGRADE_TITLE ?? '-' }}</td>
-                    <td>
-                        {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('Y-m-d') : '-' }}
-                    </td>
-
-                    <td>
-                        {{ $endDate ? \Carbon\Carbon::parse($endDate)->format('Y-m-d') : '-' }}
-                    </td>
-                    <td>
-                        {{ $dayCount ?? '-' }}
-                    </td>
-                    <td class="text-right">{{ number_format(round($r->costoffood), 2) }}</td>
-                    <td class="text-right">{{ number_format(round($r->expresswaytoll), 2) }}</td>
-                    <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
-                    <td class="text-right text-bold"><strong>{{ number_format(round($r->totalprice), 2) }}</strong>
-                    </td>
-                    <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
                 </tr>
 
-                @php($lastGroupId = $currentGroupId)
+                @foreach ($rows as $idx => $r)
+                    @php
+                        $total_travel = ($r->travelexpenses ?? 0) + ($r->gasolinecost ?? 0);
+
+                        if ($r->extype == 1) {
+                            $fullname = optional($r->user)->fullname ?? '-';
+                            $dept = optional($r->user)->dept ?? '-';
+                        } elseif (in_array($r->extype, [2, 3])) {
+                            $fullname = optional($r->groupSpecial)->fullname ?? '-';
+                            $dept = optional($r->groupSpecial)->position ?? '-';
+                        } else {
+                            $fullname = '-';
+                            $dept = '-';
+                        }
+
+                        // booking + dayCount (คง logic เดิม)
+                        $booking = $r->extype == 2 ? $r->vbookingdrv : $r->vbooking;
+                        $startDate = optional($booking)->departure_date;
+                        $endDate = null;
+
+                        if ($r->extype == 2) {
+                            $lastLog = $r->logs->sortByDesc('id')->first();
+                            if ($lastLog && preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)) {
+                                $endDate = $m[0];
+                            } else {
+                                $endDate = optional($booking)->return_date;
+                            }
+                        } else {
+                            $endDate = optional($booking)->return_date;
+                        }
+
+                        $dayCount =
+                            $startDate && $endDate
+                                ? \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate), true) +
+                                    1
+                                : null;
+
+                        $food = $r->costoffood ?? 0;
+                        $express = $r->expresswaytoll ?? 0;
+                        $total = $r->totalprice ?? $food + $express + $total_travel;
+
+                        // sum ต่อสถานที่
+                        $sum_food += $food;
+                        $sum_express += $express;
+                        $sum_travel += $total_travel;
+                        $sum_total += $total;
+                    @endphp
+
+                    <tr>
+                        <td>
+                            {{ optional($r->finalApprove->exgroupRef)->paymentdate
+                                ? \Carbon\Carbon::parse($r->finalApprove->exgroupRef->paymentdate)->format('Y-m-d')
+                                : '-' }}
+                        </td>
+                        <td>{{ $idx + 1 }}</td>
+                        <td>{{ optional($r->vbooking)->display_location ?? '-' }}</td>
+                        <td>{{ $r->empid }}</td>
+                        <td class="text-left">{{ $fullname }}</td>
+                        <td>{{ $dept }}</td>
+                        <td>{{ optional($r->userhr)->JOBGRADE_TITLE ?? '-' }}</td>
+                        <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $dayCount ?? '-' }}</td>
+                        <td class="text-right">{{ number_format(round($food), 2) }}</td>
+                        <td class="text-right">{{ number_format(round($express), 2) }}</td>
+                        <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
+                        <td class="text-right"><strong>{{ number_format(round($total), 2) }}</strong></td>
+                        <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
+                    </tr>
+                @endforeach
+
+                {{-- รวมต่อสถานที่ --}}
+                <tr style="font-weight:bold;">
+                    <td colspan="10" class="text-left">
+                        รวมสถานที่ {{ $groupName }}
+                    </td>
+                    <td class="text-right">{{ number_format(round($sum_food), 2) }}</td>
+                    <td class="text-right">{{ number_format(round($sum_express), 2) }}</td>
+                    <td class="text-right">{{ number_format(round($sum_travel), 2) }}</td>
+                    <td class="text-right">{{ number_format(round($sum_total), 2) }}</td>
+                    <td></td>
+                </tr>
+
+                @php
+                    $grand_food += $sum_food;
+                    $grand_express += $sum_express;
+                    $grand_travel += $sum_travel;
+                    $grand_total += $sum_total;
+                @endphp
             @endforeach
 
-
+            {{-- รวมทั้งหมด --}}
+            <tr style="background-color:#C9DAF8; font-weight:bold;">
+                <td colspan="10" class="text-left"><strong>Total</strong></td>
+                <td class="text-right"><strong>{{ number_format(round($grand_food), 2) }}</strong></td>
+                <td class="text-right"><strong>{{ number_format(round($grand_express), 2) }}</strong></td>
+                <td class="text-right"><strong>{{ number_format(round($grand_travel), 2) }}</strong></td>
+                <td class="text-right"><strong>{{ number_format(round($grand_total), 2) }}</strong></td>
+                <td></td>
+            </tr>
         </tbody>
+
     </table>
 
 </body>

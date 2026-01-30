@@ -216,6 +216,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('reporthr',[ReportHRController::class,'index'])->name('reporthr');
             Route::post('/reporthr/data', [ReportHRController::class, 'data'])->name('reporthr.data');
 
+            Route::get('reporthrover',[ReportHRController::class,'reportover'])->name('reporthrover');
+
             // export
             Route::get('/reporthr/export', [ReportHRController::class, 'export'])->name('reporthr.export');
         });

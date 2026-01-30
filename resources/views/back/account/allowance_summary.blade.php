@@ -34,12 +34,12 @@
                 {{-- วันที่ และปุ่ม --}}
                 <div class="col-md-3">
                     <label class="form-label">วันที่เริ่มต้น</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ $start ?? '' }}"
+                    <input type="text" name="start_date" id="start_date" value="{{ $start ?? '' }}"
                         class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">วันที่สิ้นสุด</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ $end ?? '' }}" class="form-control">
+                    <input type="text" name="end_date" id="end_date" value="{{ $end ?? '' }}" class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">BU</label>
@@ -107,6 +107,19 @@
 @section('jscustom')
     <script>
         $(document).ready(function() {
+
+            $('#start_date').flatpickr({
+                 altInput: true,
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                monthSelectorType: 'static'
+            });
+            $('#end_date').flatpickr({
+                altInput: true,
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                monthSelectorType: 'static'
+            });
 
             var table = $('#reportTable').DataTable({
                 processing: true,

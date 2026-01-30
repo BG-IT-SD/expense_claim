@@ -236,4 +236,12 @@ class ReportHRController extends Controller
             $filename
         );
     }
+
+    public function reportover(Request $request){
+
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+        $statusList = searchStatus();
+
+        return view('back.hr.report.index_sevenday',compact('plants','statusList'));
+    }
 }

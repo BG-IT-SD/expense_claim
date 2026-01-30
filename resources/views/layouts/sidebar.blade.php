@@ -184,7 +184,7 @@
                                 <a href="{{ route('HR.reporthr') }}" class="menu-link">
                                     <div data-i18n="Report HR">Report HR</div>
                                 </a>
-                                <a href="{{ route('HR.reporthr') }}" class="menu-link">
+                                <a href="{{ route('HR.reporthrover') }}" class="menu-link">
                                     <div data-i18n="รายการเกิน 7 วัน">รายการเกิน 7 วัน</div>
                                 </a>
                             </li>
