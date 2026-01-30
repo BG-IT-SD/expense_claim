@@ -32,17 +32,28 @@
 
 
                 {{-- วันที่ และปุ่ม --}}
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">วันที่เริ่มต้น</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ $start ?? '' }}"
+                    <input type="text" name="start_date" id="start_date" value="{{ $start ?? '' }}"
                         class="form-control">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">วันที่สิ้นสุด</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ $end ?? '' }}" class="form-control">
+                    <input type="text" name="end_date" id="end_date" value="{{ $end ?? '' }}" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">BU</label>
+                    <select name="search_bu" id="search_bu" class="form-select">
+                        <option value="">-- เลือกBU --</option>
+                        @foreach ($plants as $plant)
+                            <option value="{{ $plant->id }}" @selected(request('bu') == $plant->id)>
+                                {{ $plant->plantname }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="col-md-4 text-end">
+                <div class="col-md-3 text-end">
                     <button type="button" id="searchButton" class="btn btn-primary">
                         <i class="mdi mdi-magnify"></i> ค้นหา
                     </button>
@@ -97,6 +108,19 @@
     <script>
         $(document).ready(function() {
 
+            $('#start_date').flatpickr({
+                 altInput: true,
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                monthSelectorType: 'static'
+            });
+            $('#end_date').flatpickr({
+                altInput: true,
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                monthSelectorType: 'static'
+            });
+
             var table = $('#reportTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -118,6 +142,7 @@
                         d.search_plant = $('#search_plant').val();
                         d.search_department = $('#search_department').val();
                         d.search_empid = $('#search_empid').val();
+                        d.search_bu = $('#search_bu').val();
                     }
                 },
 

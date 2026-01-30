@@ -59,6 +59,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $vAllemp = Valldataemp::where('CODEMPID', Auth::user()->empid)->first();
+            // CheckPlantCur
+            // CheckPlantCur
             // Set user level to session
             session(['level' => $vAllemp->NUMLVL]);
             // Store user login cookie for 2 days (2880 minutes)

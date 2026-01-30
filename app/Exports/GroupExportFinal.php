@@ -14,8 +14,9 @@ use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Events\AfterSheet; // ใช้ได้ถ้าจะไปตั้ง merge/ความสูงเพิ่มเติม
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Maatwebsite\Excel\Concerns\WithEvents;
 
-class GroupExportFinal implements FromView, WithStyles, WithDrawings,WithColumnFormatting
+class GroupExportFinal implements FromView, WithStyles, WithDrawings, WithColumnFormatting, WithEvents
 {
     protected $id;
 
@@ -272,5 +273,21 @@ class GroupExportFinal implements FromView, WithStyles, WithDrawings,WithColumnF
         $rows = $headerTop + $headerTable + $count + ($groupCount * 2) + 1;
 
         return $rows;
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+
+                $sheet = $event->sheet->getDelegate();
+
+                // ให้หัวบน (1-5) ติดทุกหน้าตอน Print
+                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 5);
+
+                // ถ้าจะเอาแค่หัวตารางจริงแถว 5:
+                // $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(5, 5);
+            },
+        ];
     }
 }
