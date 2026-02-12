@@ -216,7 +216,10 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             Route::get('reporthr',[ReportHRController::class,'index'])->name('reporthr');
             Route::post('/reporthr/data', [ReportHRController::class, 'data'])->name('reporthr.data');
 
-            Route::get('reporthrover',[ReportHRController::class,'reportover'])->name('reporthrover');
+            // Route::get('reporthrover',[ReportHRController::class,'reportover'])->name('reporthrover');
+            Route::get('reporthrover', [ReportHRController::class, 'reportover'])->name('reporthrover');
+            Route::get('/reporthr/overdata', [ReportHRController::class, 'overdata'])->name('reporthr.overdata');
+            Route::get('/reporthr/overexport', [ReportHRController::class, 'overexport'])->name('reporthr.overexport');
 
             // export
             Route::get('/reporthr/export', [ReportHRController::class, 'export'])->name('reporthr.export');
