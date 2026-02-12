@@ -168,12 +168,27 @@ class AllowanceSummaryExport implements FromView, WithStyles, WithColumnFormatti
         ];
     }
 
-    public function registerEvents(): array
+    // public function registerEvents(): array
+    // {
+    //     return [
+    //         AfterSheet::class => function (AfterSheet $event) {
+    //             // ให้แถวหัวตาราง (row 2) ติดทุกหน้าตอน Print
+    //             $event->sheet->getDelegate()->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(2, 2);
+    //         },
+    //     ];
+    // }
+     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                // ให้แถวหัวตาราง (row 2) ติดทุกหน้าตอน Print
-                $event->sheet->getDelegate()->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(2, 2);
+
+                $sheet = $event->sheet->getDelegate();
+
+                // ให้หัวบน (1-5) ติดทุกหน้าตอน Print
+                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 2);
+
+                // ถ้าจะเอาแค่หัวตารางจริงแถว 5:
+                // $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(5, 5);
             },
         ];
     }

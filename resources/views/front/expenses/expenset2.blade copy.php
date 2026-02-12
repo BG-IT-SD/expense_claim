@@ -34,27 +34,35 @@
                     $to = $dayFood->copy()->setTime(23, 59);
                 }
 
-                // แปลงเวลาเป็นตัวเลขทศนิยมเพื่อให้เปรียบเทียบง่าย
-                $fHour = $from->hour + $from->minute / 60;
-                $tHour = $to->hour + $to->minute / 60;
-
-                // มื้อเช้า: ออกปฏิบัติงานก่อน 08.00
-                if ($fHour < 8) {
+                // ---- มื้อเช้า: เริ่มก่อน 08:00 (ใช้ logic เดิม) ----
+                if ($from->hour < 8 || ($to->hour > 6 && $from->hour < 8)) {
                     $mealchecked_1 = 'checked';
                 }
 
-                // มื้อกลางวัน: เริ่มก่อนหรือเท่ากับ 12.00 และ สิ้นสุดหลัง 13.00
-                if ($fHour <= 12 && $tHour > 13) {
-                    $mealchecked_2 = 'checked';
-                }
+                // ---- มื้อกลางวัน ----
+                // if ($isLastDay) {
+                    // ใช้สูตรใหม่เฉพาะวันสุดท้าย:
+                    // ออก 08:00–12:00 และถึง/ปฏิบัติงาน 13:00–17:00
+                //     $lunchStartHour = $from->hour;
+                //     $lunchEndHour = $to->hour;
 
-                // มื้อเย็น: ปฏิบัติงานถึงหลัง 17.00
-                if ($tHour > 17) {
+                //     if ($lunchStartHour >= 8 && $lunchStartHour < 12 && $lunchEndHour >= 13 && $lunchEndHour <= 17) {
+                //         $mealchecked_2 = 'checked';
+                //     }
+                // } else {
+                    // วันอื่น ๆ ใช้สูตรเดิม (เต็มวัน)
+                    if ($from->hour < 17 && $to->hour > 8) {
+                        $mealchecked_2 = 'checked';
+                    }
+                // }
+
+                // ---- มื้อเย็น: ถ้าเดินทางกินเวลาเข้าไปเกิน 17:00 ----
+                if ($from->hour < 23 && $to->hour > 17) {
                     $mealchecked_3 = 'checked';
                 }
 
-                // มื้อดึก: ปฏิบัติงานถึงหลัง 21.00
-                if ($tHour > 21) {
+                // ---- มื้อดึก: ถ้ามีสิ้นสุดหลัง 21:00 ----
+                if ($to->hour > 21) {
                     $mealchecked_4 = 'checked';
                 }
             @endphp
