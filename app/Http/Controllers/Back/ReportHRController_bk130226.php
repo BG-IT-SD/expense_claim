@@ -168,7 +168,7 @@ class ReportHRController extends Controller
                 // $carStatus = optional($e->vbookingreport)->car_status;
                 $reports = $e->vbookingreport ?? collect();
 
-                // เลือก record ให้ตรง empid ของ expense
+                // ✅ เลือก record ให้ตรง empid ของ expense
                 // 1) ถ้า empid เป็น passenger ให้จับ passenger_empid ก่อน
                 // 2) ถ้าไม่เจอ ค่อยจับ booked_by (กรณีคนขอ)
                 // 3) ถ้ายังไม่เจอ ใช้อันแรกกันพัง
@@ -212,7 +212,7 @@ class ReportHRController extends Controller
 
                     'bookid'         => $e->bookid ?? '-',
 
-                    //ประเภทรถ + ใส่วงเล็บปิด
+                    //  ประเภทรถ + ใส่วงเล็บปิด
                     'cartype'        => $carTitle
                         ? $carTitle . (filled($carStatus) ? ' (' . $carStatus . ')' : '')
                         : '-',
@@ -300,33 +300,33 @@ class ReportHRController extends Controller
      * - default end   = วันนี้
      * - clamp start ไม่ให้เกิน 30 วันย้อนหลัง
      */
-    // private function resolveDateRange(Request $request): array
-    // {
-    //     $today = Carbon::today();
+    private function resolveDateRange(Request $request): array
+    {
+        $today = Carbon::today();
 
-    //     // ✅ end = วันนี้ - 7 (เส้นตาย) ถ้า user ไม่ส่งมา
-    //     $end = $request->filled('end_exdate')
-    //         ? Carbon::parse($request->input('end_exdate'))
-    //         : $today->copy()->subDays(7);
+        // ✅ end = วันนี้ - 7 (เส้นตาย) ถ้า user ไม่ส่งมา
+        $end = $request->filled('end_exdate')
+            ? Carbon::parse($request->input('end_exdate'))
+            : $today->copy()->subDays(7);
 
-    //     // ✅ start = end - 30 ถ้า user ไม่ส่งมา
-    //     $start = $request->filled('exdate')
-    //         ? Carbon::parse($request->input('exdate'))
-    //         : $end->copy()->subDays(30);
+        // ✅ start = end - 30 ถ้า user ไม่ส่งมา
+        $start = $request->filled('exdate')
+            ? Carbon::parse($request->input('exdate'))
+            : $end->copy()->subDays(30);
 
-    //     // ✅ clamp: start ต้องไม่เก่ากว่า end-30
-    //     $min = $end->copy()->subDays(30);
-    //     if ($start->lt($min)) {
-    //         $start = $min;
-    //     }
+        // ✅ clamp: start ต้องไม่เก่ากว่า end-30
+        $min = $end->copy()->subDays(30);
+        if ($start->lt($min)) {
+            $start = $min;
+        }
 
-    //     // กัน user ใส่ end < start
-    //     if ($end->lt($start)) {
-    //         $end = $start->copy();
-    //     }
+        // กัน user ใส่ end < start
+        if ($end->lt($start)) {
+            $end = $start->copy();
+        }
 
-    //     return [$start->startOfDay(), $end->endOfDay()];
-    // }
+        return [$start->startOfDay(), $end->endOfDay()];
+    }
 
 
     /**
@@ -459,34 +459,6 @@ class ReportHRController extends Controller
 
     //     return $rows->values();
     // }
-
-        private function resolveDateRange(Request $request): array
-    {
-        $today = Carbon::today();
-
-        // ✅ end = วันนี้ - 7 (เส้นตาย) ถ้า user ไม่ส่งมา
-        $end = $request->filled('end_exdate')
-            ? Carbon::parse($request->input('end_exdate'))
-            : $today->copy()->subDays(7);
-
-        // ✅ start = end - 30 ถ้า user ไม่ส่งมา
-        $start = $request->filled('exdate')
-            ? Carbon::parse($request->input('exdate'))
-            : $end->copy()->subDays(30);
-
-        // ✅ clamp: start ต้องไม่เก่ากว่า end-30
-        $min = $end->copy()->subDays(30);
-        if ($start->lt($min)) {
-            $start = $min;
-        }
-
-        // กัน user ใส่ end < start
-        if ($end->lt($start)) {
-            $end = $start->copy();
-        }
-
-        return [$start->startOfDay(), $end->endOfDay()];
-    }
 
     private function buildUnclaimedRows(Request $request)
     {

@@ -109,9 +109,14 @@ class Expense extends Model
         return $this->hasOne(Vbookingalldrv::class, 'id', 'bookid');
     }
 
+    // public function vbookingreport()
+    // {
+    //     return $this->hasOne(BookingReport::class, 'id', 'bookid');
+    // }
     public function vbookingreport()
     {
-        return $this->hasOne(BookingReport::class, 'id', 'bookid');
+        // ตาราง view มีคอลัมน์ id = booking_id
+        return $this->hasMany(BookingReport::class, 'id', 'bookid');
     }
 
     public function approval()

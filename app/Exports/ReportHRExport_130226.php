@@ -61,8 +61,7 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
                 'userhr:CODEMPID,DEPT,JOBGRADE_TITLE,NUMBANK',
                 'vbooking:id,departure_date,return_date',
                 'vbookingdrv:id,departure_date,return_date',
-                // 'vbookingreport:id,bu,title,car_status,passengers,person_type,driver_name,departure_time,return_time,location_name,locationid,locationbu',
-                'vbookingreport:id,passenger_empid,booked_by,person_type,passengers,title,car_status,driver_name,departure_time,return_time,location_name,locationid,locationbu,bu',
+                'vbookingreport:id,bu,title,car_status,passengers,person_type,driver_name,departure_time,return_time,location_name,locationid,locationbu',
                 'exgroupData:id,paymentdate',
             ])
             ->whereIn('extype', [1, 2, 3])
@@ -80,22 +79,9 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
         }
 
         // Filter statusapprove
-        // if ($this->request->filled('status')) {
-        //     $status = (int) $this->request->status;
-        //     $query->whereHas('approves', fn($q) => $q->where('statusapprove', $status));
-        // }
         if ($this->request->filled('status')) {
             $status = (int) $this->request->status;
-
-            $query->whereHas('approves', function ($q) use ($status) {
-                $q->where('statusapprove', $status)
-                    ->whereRaw('approve.id = (
-                SELECT MAX(a2.id)
-                FROM approve a2
-                WHERE a2.exid = approve.exid
-                  AND a2.deleted = 0
-          )');
-            });
+            $query->whereHas('approves', fn($q) => $q->where('statusapprove', $status));
         }
 
         return $query->orderByDesc('id');
@@ -153,48 +139,17 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
 
         $booking = $e->extype == 2 ? $e->vbookingdrv : $e->vbooking;
 
-        $reports = $e->vbookingreport ?? collect();
-
-        $reportRow =
-            $reports->firstWhere('passenger_empid', (string)$e->empid)
-            ?? $reports->firstWhere('booked_by', (string)$e->empid)
-            ?? $reports->first();
-
-
-        // $carTitle  = optional($e->vbookingreport)->title;
-        // $carStatus = optional($e->vbookingreport)->car_status;
-        // $cartype = $carTitle
-        //     ? $carTitle . (filled($carStatus) ? ' (' . $carStatus . ')' : '')
-        //     : '-';
-
-        // $from = ($e->departurefrom == 2)
-        //     ? ($e->map_a_name ?? '-')
-        //     : (optional($e->vbookingreport)->bu ?? '-');
-
-        // $to = optional($e->vbookingreport)->location_name ?? '-';
-
-        $carTitle  = optional($reportRow)->title;
-        $carStatus = optional($reportRow)->car_status;
-
+        $carTitle  = optional($e->vbookingreport)->title;
+        $carStatus = optional($e->vbookingreport)->car_status;
         $cartype = $carTitle
-            ? $carTitle . (filled($carStatus) ? " ({$carStatus})" : '')
+            ? $carTitle . (filled($carStatus) ? ' (' . $carStatus . ')' : '')
             : '-';
-
-        $passengers = (int) (optional($reportRow)->passengers ?? 0);
-        $personType = optional($reportRow)->person_type ?? '-';
-
-        $driver = optional($reportRow)->driver_name ?? $fullname;
 
         $from = ($e->departurefrom == 2)
             ? ($e->map_a_name ?? '-')
-            : (optional($reportRow)->bu ?? '-');
+            : (optional($e->vbookingreport)->bu ?? '-');
 
-        $to = optional($reportRow)->display_location
-            ?? (optional($reportRow)->location_name ?? '-');
-
-        $departureTime = $e->departuretime ?? (optional($reportRow)->departure_time ?? '-');
-        $returnTime    = $e->returntime    ?? (optional($reportRow)->return_time ?? '-');
-
+        $to = optional($e->vbookingreport)->location_name ?? '-';
 
         // $distance1 = (float) ($e->totaldistance ?? 0);
         // $distance2 = (float) ($e->distancemore ?? 0);
@@ -228,8 +183,8 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
         $days = ($startDate && $endDate)
             ? Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate), true) + 1
             : 0;
-        // $departureTime = $e->departuretime ?? (optional($e->vbookingreport)->departure_time ?? '-');
-        // $returnTime    = $e->returntime ?? (optional($e->vbookingreport)->return_time ?? '-');
+        $departureTime = $e->departuretime ?? (optional($e->vbookingreport)->departure_time ?? '-');
+        $returnTime    = $e->returntime ?? (optional($e->vbookingreport)->return_time ?? '-');
 
         $approves = $e->approves ?? collect();
         $latest   = $approves->sortByDesc('id')->first();
@@ -264,8 +219,6 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
 
         $paymentDate = optional($e->exgroupData)->paymentdate ?? '-';
 
-
-
         return [
             $company,
             $e->empid ?? '-',
@@ -275,14 +228,9 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
             optional($e->userhr)->NUMBANK ?? '-',
             $e->bookid ?? '-',
             $cartype,
-            // (int) (optional($e->vbookingreport)->passengers ?? 0),
-            // optional($e->vbookingreport)->person_type ?? '-',
-            // optional($e->vbookingreport)->driver_name ?? $fullname,
-
-            $passengers,
-            $personType,
-            $driver,
-
+            (int) (optional($e->vbookingreport)->passengers ?? 0),
+            optional($e->vbookingreport)->person_type ?? '-',
+            optional($e->vbookingreport)->driver_name ?? $fullname,
             $from,
             $to,
 
