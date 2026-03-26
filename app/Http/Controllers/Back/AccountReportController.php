@@ -232,7 +232,12 @@ class AccountReportController extends Controller
                 'expresswaytoll' => number_format(round($row->expresswaytoll), 2),
                 'travel_cost' => number_format(round($total_travel), 2),
                 'totalprice' => number_format(round($row->totalprice), 2),
-                'user_company' => optional($row->finalApprove->exgroupRef)->plantname ?? '-'
+                'user_company' => optional($row->finalApprove->exgroupRef)->plantname ?? '-',
+
+                 'objname' => optional($row->vbooking)->objname ?? '-',
+                 'remark' => optional($row->vbooking)->remark ?? '-',
+
+
             ];
         }
 

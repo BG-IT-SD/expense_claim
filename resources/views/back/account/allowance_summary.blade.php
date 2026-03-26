@@ -93,6 +93,8 @@
                             <th>จำนวนเงินเดินทาง</th>
                             <th>Total</th>
                             <th>ชื่อบริษัท</th>
+                            <th>วัตถุประสงค์</th>
+                            <th>หมายเหตุ</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
@@ -239,6 +241,18 @@
                     {
                         data: 'user_company',
                         name: 'user_company',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'objname',
+                        name: 'objname',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'remark',
+                        name: 'remark',
                         orderable: false,
                         searchable: false
                     }

@@ -221,7 +221,7 @@
             <div class="form-floating form-floating-outline">
                 <input type="text" id="departuretime" name="departuretime" placeholder="06:00:00" class="form-control"
                     required />
-                <label for="departuretime">เวลาที่เริ่มเดินทางจริง</label>
+                <label for="departuretime">เวลาที่ออกปฏิบัติงานจริง</label>
             </div>
         </div>
         <div class="col-sm-6">
@@ -249,7 +249,7 @@
             <div class="form-floating form-floating-outline">
                 <input type="text" id="returntime" name="returntime" placeholder="20:00:00" class="form-control"
                     required />
-                <label for="returntime">เวลาที่ถึงจริง</label>
+                <label for="returntime">เวลาที่เดินทางกลับจริง</label>
             </div>
         </div>
     </div>
@@ -259,24 +259,31 @@
     </div>
     <div class="row g-4">
         <div class="col-sm-12">
-            @foreach ($reasons as $key => $label)
+            {{-- @foreach ($reasons as $key => $label)
                 <label class="form-check-inline me-3">
                     <input class="form-check-input" type="radio" name="purpose" value="{{ $label }}"
                         {{ $booking->objname == $label ? 'checked disabled' : 'disabled' }}>
                     {{ $label }}
                 </label>
+            @endforeach --}}
+              @foreach ($objectdata as $key => $label)
+                <label class="form-check-inline me-3">
+                    <input class="form-check-input" type="radio" name="purpose" value="{{ $label->id }}"
+                        {{ $booking->objid == $label->id ? 'checked disabled' : 'disabled' }}>
+                    {{ $label->objt_name }}
+                </label>
             @endforeach
 
 
         </div>
-        @if ($booking->objid == 7)
+        {{-- @if ($booking->objid == 7) --}}
             <div class="col-sm-12">
                 <div class="form-floating form-floating-outline mb-4">
                     <textarea class="form-control h-px-100" id="exampleFormControlTextarea1" disabled>{{ $booking->remark }}</textarea>
                     <label for="exampleFormControlTextarea1">อื่่นๆ</label>
                 </div>
             </div>
-        @endif
+        {{-- @endif --}}
         <div class="col-sm-12">
                 <div class="form-floating form-floating-outline mb-4">
                     <textarea class="form-control h-px-100" id="remarknew" name="remarknew"></textarea>
