@@ -31,7 +31,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Models\MessageAlert;
 use App\Models\Approvespecial;
-
+use App\Models\Objectdata;
 
 class ExpenseController extends Controller
 {
@@ -213,7 +213,7 @@ class ExpenseController extends Controller
         // Databooking
         $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
         $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
-        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+
 
         if ($booking->locationid != 12) {
             $startplant = $PlantStart;
@@ -456,9 +456,17 @@ class ExpenseController extends Controller
             ->get();
         // dd($specialApprovers);
 
+        // objectdata
+        $objectdata = Objectdata::where('status', 1)
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers','objectdata']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));

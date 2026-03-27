@@ -60,6 +60,7 @@
                                             {{-- <th>ลำดับ</th> --}}
                                             <th>EXID</th>
                                             <th>สถานที่ไปปฏิบัติงาน</th>
+                                            {{-- <th>วัตถุประสงค์</th> --}}
                                             <th>บริษัท</th>
                                             <th>รหัสพนักงาน</th>
                                             <th>ชื่อ – นามสกุล</th>
@@ -159,6 +160,20 @@
                                                     <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
                                                 </td>
                                                 <td>{{ $expense->vbooking->display_location }}</td>
+                                                {{-- <td class="text-left align-top"
+                                                    style="min-width: 300px; padding: 8px 12px;">
+                                                    <div style="font-weight: 500; color: #333; line-height: 1.4;">
+                                                        {{ $booking->objname ?? '-' }}
+                                                    </div>
+
+                                                    @if (!empty(trim($booking->remark)))
+                                                        <div
+                                                            style="font-size: 0.875rem; color: #666; margin-top: 4px; line-height: 1.5;">
+                                                            <strong style="color: #444;">หมายเหตุ:</strong>
+                                                            {{ $booking->remark }}
+                                                        </div>
+                                                    @endif
+                                                </td> --}}
                                                 <td>{{ BuEmp($expense->empid) }}</td>
                                                 <td>{{ $expense->empid }}</td>
                                                 <td class="text-start">{{ $fullname }}
@@ -192,7 +207,7 @@
                                         @endforeach
 
                                         <tr class="table-warning fw-bold">
-                                            <td colspan="10">รวม</td>
+                                            <td colspan="11">รวม</td>
                                             <td>{{ number_format($sum_food, 2) }}
 
                                             </td>

@@ -137,7 +137,7 @@ class AllowanceSummaryExport implements FromView, WithStyles, WithColumnFormatti
     public function styles(Worksheet $sheet)
     {
         return [
-            'A2:O2' => [
+            'A2:Q2' => [
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,

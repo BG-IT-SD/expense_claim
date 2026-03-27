@@ -72,6 +72,9 @@
                 <th style="width: 120px;">จำนวนเงินเดินทาง</th>
                 <th style="width: 150px;">Total</th>
                 <th style="width: 120px;">ชื่อบริษัท</th>
+
+                <th style="width: 120px;">วัตถุประสงค์</th>
+                <th style="width: 120px;">หมายเหตุ</th>
             </tr>
         </thead>
 
@@ -189,6 +192,9 @@
                         <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
                         <td class="text-right"><strong>{{ number_format(round($total), 2) }}</strong></td>
                         <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
+
+                        <td>{{ optional($r->vbooking)->objname ?? '-' }}</td>
+                        <td>{{ optional($r->vbooking)->remark ?? '-' }}</td>
                     </tr>
                 @endforeach
 
