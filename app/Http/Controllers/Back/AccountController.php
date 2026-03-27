@@ -85,6 +85,8 @@ class AccountController extends Controller
 
     public function view($id)
     {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
         $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr'])
             ->where('exgroup', $id)
             ->get();

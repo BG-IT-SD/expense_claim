@@ -19,6 +19,7 @@
         <tr style="background-color: #D9D9D9; text-align: center; font-weight: bold; border: 1px solid #000;">
             <th style="width: 40px;">ลำดับ</th>
             <th style="width: 80px;">สถานที่ไป<br>ปฏิบัติงาน</th>
+            <th style="width: 150px;">วัตถุประสงค์</th>
             <th style="width: 80px;">บริษัท</th>
             <th style="width: 120px;">รหัสพนักงาน</th>
             <th style="width: 180px;">ชื่อ – นามสกุล</th>
@@ -70,7 +71,7 @@
             @endphp
 
             <tr style="background-color:#f2f2f2;">
-                <td colspan="17" style="border:1px solid #000;"><strong>สถานที่ไปปฏิบัติงาน:
+                <td colspan="18" style="border:1px solid #000;"><strong>สถานที่ไปปฏิบัติงาน:
                         {{ $groupName }}</strong></td>
             </tr>
 
@@ -126,6 +127,11 @@
                     <td style="text-align: center;border: 1px solid #000">{{ $no++ }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ $expense->vbooking->display_location }}
                     </td>
+                     <td style="text-align: center;border: 1px solid #000">
+                        {{ $expense->vbooking->objname ? $expense->vbooking->objname: 'ไม่พบข้อมูล' }}
+                        <br>
+                        หมายเหตุ: {{$expense->vbooking->remark ? $expense->vbooking->remark: ' '}}
+                    </td>
                     <td style="text-align: center;border: 1px solid #000">{{ BuEmp($expense->empid) }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ $expense->empid }}</td>
                     <td style="text-align: center;border: 1px solid #000">{{ $fullname }}</td>
@@ -152,7 +158,7 @@
 
             {{-- รวมต่อสถานที่ --}}
             <tr style="font-weight:bold;">
-                <td colspan="11" style="text-align: center; vertical-align: middle; border:1px solid #000;">
+                <td colspan="12" style="text-align: center; vertical-align: middle; border:1px solid #000;">
                     <strong> รวมสถานที่ {{ $groupName }} </strong>
                 </td>
                 <td style="text-align: right; border:1px solid #000;">
@@ -181,7 +187,7 @@
 
         {{-- รวมทั้งหมด --}}
         <tr class="border: 1px solid #000;" style="background-color:#C9DAF8; font-weight:bold;">
-            <td colspan="11"
+            <td colspan="12"
                 style="text-align: center; vertical-align: middle; text-decoration: underline; border: 1px solid #000;">
                 <strong>Total</strong>
             </td>

@@ -111,6 +111,7 @@
                 <tr style="background-color: #D9D9D9; text-align: center;">
                     <th style="width: 40px;">ลำดับ</th>
                     <th style="width: 80px;">สถานที่ไป<br>ปฏิบัติงาน</th>
+                    <th style="width: 150px;">วัตถุประสงค์</th>
                     <th style="width: 80px;">บริษัท</th>
                     <th style="width: 120px;">รหัสพนักงาน</th>
                     <th style="width: 180px;">ชื่อ – นามสกุล</th>
@@ -136,7 +137,7 @@
 
                     {{-- หัวสถานที่ --}}
                     <tr style="background-color: #f2f2f2;">
-                        <td colspan="17" style="border: 1px solid #000;">
+                        <td colspan="18" style="border: 1px solid #000;">
                             <b>สถานที่ไปปฏิบัติงาน: {{ $groupName }}</b>
                         </td>
                     </tr>
@@ -195,6 +196,11 @@
                             <td style="text-align: center;">{{ $no++ }}</td>
                             <td style="text-align: center;  word-break: break-word;">
                                 {{ $expense->vbooking->display_location }}</td>
+                            <td style="text-align: center;  word-break: break-word;">
+                                {{ $expense->vbooking->objname ? $expense->vbooking->objname : 'ไม่พบข้อมูล' }}
+                                <br>
+                                หมายเหตุ: {{ $expense->vbooking->remark ? $expense->vbooking->remark : ' ' }}
+                            </td>
                             <td style="text-align: center;">{{ BuEmp($expense->empid) }}</td>
                             <td style="text-align: center;">{{ $expense->empid }}</td>
                             <td style="text-align: center;">{{ $fullname }}</td>
@@ -218,7 +224,7 @@
 
                     {{-- รวมสถานที่ --}}
                     <tr style="background-color:#E8E8E8; font-weight: bold;">
-                        <td colspan="11" style="text-align: center;">
+                        <td colspan="12" style="text-align: center;">
                             รวมสถานที่ {{ $groupName }}
                         </td>
                         <td style="text-align: right;">{{ number_format(round($sum_food), 2) }}</td>
@@ -241,7 +247,7 @@
 
                 {{-- รวมทั้งหมด --}}
                 <tr style="background-color:#C9DAF8; font-weight: bold;">
-                    <td colspan="11" style="text-align: center; text-decoration: underline;">
+                    <td colspan="12" style="text-align: center; text-decoration: underline;">
                         <b>Total</b>
                     </td>
                     <td style="text-align: right; text-decoration: underline;">

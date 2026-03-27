@@ -16,6 +16,8 @@ class ExportController extends Controller
 {
     public function exportGroupPdf($id)
     {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
         $exgroup = Exgroup::findOrFail($id);
         $expenses = Expense::with(['vbooking', 'user', 'latestApprove']) // หรือ relation ที่คุณใช้
             ->whereHas('latestApprove', function ($query) {
@@ -44,6 +46,8 @@ class ExportController extends Controller
 
     public function exportGroupPdfFinal($id)
     {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
         $exgroup = Exgroup::findOrFail($id);
         $expenses = Expense::with(['vbooking', 'user', 'latestApprove']) // หรือ relation ที่คุณใช้
             ->whereHas('latestApprove', function ($query) {
@@ -77,12 +81,16 @@ class ExportController extends Controller
 
     public function exportGroupExcel($id)
     {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
         $year = date('Y');
         return Excel::download(new GroupExport($id), "EXGROUP_{$id}_{$year}.xlsx");
     }
 
     public function exportGroupExcelFinal($id)
     {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
         $year = date('Y');
         return Excel::download(new GroupExportFinal($id), "EXGROUP_{$id}_{$year}.xlsx");
     }

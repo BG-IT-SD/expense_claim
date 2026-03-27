@@ -147,7 +147,7 @@ class GroupExportFinal implements FromView, WithStyles, WithDrawings, WithColumn
     {
         // style header เดิมของคุณ
         $styles = [
-            'A5:Q5' => [
+            'A5:R5' => [
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
