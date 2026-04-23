@@ -30,6 +30,7 @@ use App\Helpers\MailHelper;
 use App\Models\Approvespecial;
 use App\Models\FuelPrice91;
 use App\Models\MessageAlert;
+use App\Models\Objectdata;
 use App\Models\Vbookingall;
 
 class TechClaimController extends Controller
@@ -410,8 +411,15 @@ class TechClaimController extends Controller
                         ->orderBy('id')
                         ->get();
 
+        // objectdata
+        $objectdata = Objectdata::where('status', 1)
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
+
         return view('front.techclaim.create', compact(
             'booking',
+            'objectdata',
             'empid',
             'empemail',
             'empfullname',
