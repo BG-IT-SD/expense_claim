@@ -32,9 +32,14 @@ class DriverClaimController extends Controller
     public function history(Request $request)
     {
 
+        $startDate = "";
+        $endDate = "";
         $exid = $request->filled('exid')
             ? ltrim($request->exid, 'EX')
             : null;
+
+        $startDate = now()->startOfMonth()->toDateString();
+        $endDate = now()->endOfMonth()->toDateString();
 
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
             ->whereHas('latestApprove', function ($query) use ($request) {
@@ -58,6 +63,14 @@ class DriverClaimController extends Controller
             ->whereIn('extype', [2])
             ->get();
 
+        $expenses = $expenses->filter(function ($exp) use ($startDate, $endDate) {
+            $departure = optional($exp->vbooking)->departure_date;
+
+            return $departure &&
+                $departure >= $startDate &&
+                $departure <= $endDate;
+        })->values();
+
         // Status
         $status = searchStatus();
         $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
@@ -65,6 +78,7 @@ class DriverClaimController extends Controller
         $page = 'DriverClaim.show';
         return view('back.hr.historydv', compact('expenses', 'page', 'status', 'drivers'));
     }
+
 
     /**
      * Show the form for creating a new resource.

@@ -11,3 +11,5 @@ Artisan::command('inspire', function () {
 
 // Schedule::command('fuel:update')->dailyAt('05:30');
 Schedule::command('fuel:update')->everyMinute();
+// update bu
+Schedule::command('app:update-user-daily')->everyMinute();

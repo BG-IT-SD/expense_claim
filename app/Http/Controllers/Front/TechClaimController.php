@@ -89,6 +89,14 @@ class TechClaimController extends Controller
     public function history(Request $request)
     {
 
+        $startDate = $request->filled('exdate')
+            ? $request->exdate
+            : now()->startOfMonth()->toDateString();
+
+        $endDate = $request->filled('end_exdate')
+            ? $request->end_exdate
+            : now()->endOfMonth()->toDateString();
+
         $exid = $request->filled('exid')
             ? ltrim($request->exid, 'EX')
             : null;
@@ -96,13 +104,11 @@ class TechClaimController extends Controller
         $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
             ->when(
                 $request->filled('exid'),
-                fn($q) =>
-                $q->where('id', $exid)
+                fn($q) => $q->where('id', $exid)
             )
             ->when(
                 $request->filled('bookid'),
-                fn($q) =>
-                $q->where('bookid', $request->bookid)
+                fn($q) => $q->where('bookid', $request->bookid)
             )
             ->where('extype', 3)
             ->whereHas('latestApprove', function ($query) {
@@ -110,18 +116,71 @@ class TechClaimController extends Controller
             })
             ->get();
 
-        if ($request->filled('exdate') && $request->filled('end_exdate')) {
-            $expenses = $expenses->filter(function ($exp) use ($request) {
-                $departure = optional($exp->vbooking)->departure_date;
 
-                return $departure &&
-                    $departure >= $request->exdate &&
-                    $departure <= $request->end_exdate;
-            })->values();
-        }
+        $expenses = $expenses->filter(function ($exp) use ($startDate, $endDate) {
+            $departure = optional($exp->vbooking)->departure_date;
+
+            return $departure &&
+                $departure >= $startDate &&
+                $departure <= $endDate;
+        })->values();
 
         return view('front.techclaim.history', compact('expenses'));
     }
+
+    // public function history(Request $request)
+    // {
+
+    // $startDate = $request->filled('exdate')
+    //     ? $request->exdate
+    //     : now()->startOfMonth()->toDateString(); // วันแรกของเดือนนี้
+
+    // $endDate = $request->filled('end_exdate')
+    //     ? $request->end_exdate
+    //     : now()->endOfMonth()->toDateString(); // วันสุดท้ายของเดือนนี้
+
+
+    //     $exid = $request->filled('exid')
+    //         ? ltrim($request->exid, 'EX')
+    //         : null;
+
+    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+    //         ->when(
+    //             $request->filled('exid'),
+    //             fn($q) =>
+    //             $q->where('id', $exid)
+    //         )
+    //         ->when(
+    //             $request->filled('bookid'),
+    //             fn($q) =>
+    //             $q->where('bookid', $request->bookid)
+    //         )
+    //         ->where('extype', 3)
+    //         ->whereHas('latestApprove', function ($query) {
+    //             $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
+    //         })
+    //         ->get();
+
+    //     if ($request->filled('exdate') && $request->filled('end_exdate')) {
+    //         $expenses = $expenses->filter(function ($exp) use ($request,$startDate,$endDate) {
+    //             $departure = optional($exp->vbooking)->departure_date;
+
+    //             return $departure &&
+    //                 $departure >= $startDate &&
+    //                 $departure <= $endDate;
+    //         })->values();
+    //     }else{
+    //         $expenses = $expenses->filter(function ($exp) use ($request,$startDate,$endDate) {
+    //             $departure = optional($exp->vbooking)->departure_date;
+
+    //             return $departure &&
+    //                 $departure >= $startDate &&
+    //                 $departure <= $endDate;
+    //         })->values();
+    //     }
+
+    //     return view('front.techclaim.history', compact('expenses'));
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -407,9 +466,9 @@ class TechClaimController extends Controller
 
         //  $specialApprovers = "";
         $specialApprovers = Approvespecial::where('status', 1)
-                        ->where('deleted', 0)
-                        ->orderBy('id')
-                        ->get();
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
 
         // objectdata
         $objectdata = Objectdata::where('status', 1)
