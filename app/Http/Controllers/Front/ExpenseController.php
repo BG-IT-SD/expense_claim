@@ -376,7 +376,7 @@ class ExpenseController extends Controller
 
             // ตรวจสอบ ผู้ร่วมเดินทาง
             if ($empid == $booking->passenger_empid) {
-                if ($booking->passenger_empid == $booking->booking_emp_id) {
+                if ($empid == $booking->booking_emp_id) {
                     $passengertype = 0;
                 } else {
                     $passengertype = 1;

@@ -8,7 +8,7 @@
                 <div class="card">
                     <div class="card-header row">
                         <div class="col-md-6">
-                            <h5>รายชื่อ HR ในกลุ่ม </h5>
+                            <h5>รายชื่อ AC ในกลุ่ม </h5>
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-sm btn-primary"
