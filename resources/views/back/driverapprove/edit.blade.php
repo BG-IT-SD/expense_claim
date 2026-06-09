@@ -31,6 +31,7 @@
                                         <input type="hidden" id="head_id" name="head_id">
                                         <input type="hidden" name="groupid" id="groupid" value="{{ $approveStaff->group }}">
                                         <input type="hidden" name="step" id="step" value="{{ $approveStaff->step }}">
+                                        <input type="hidden" name="extype" id="extype" value="{{ $approveStaff->extype }}">
                                     </div>
                                 </div>
 
