@@ -163,7 +163,7 @@
     <script src="{{ asset('template/assets/js/main.js') }}"></script>
    <!-- Loading Page -->
    {{-- <script src="{{ url('/secure-js/js/app-loading-screen.js') }}"></script> --}}
-   <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js//app-loading-screen.js']) }}"></script>
+   <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/app-loading-screen.js']) }}"></script>
 
     <!-- Page JS -->
     {{-- <script src="template/assets/js/dashboards-analytics.js"></script> --}}
