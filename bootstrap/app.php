@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckModuleAccess;
+use App\Http\Middleware\EnsureAdminAllSystems;
 use App\Http\Middleware\RememberLogin;
 use App\Http\Middleware\MaintenanceMode;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'remember.login' => RememberLogin::class,
             'check.module.access' => CheckModuleAccess::class,
+            'admin.all-systems' => EnsureAdminAllSystems::class,
 
         ]);
         //  $middleware->append(MaintenanceMode::class);

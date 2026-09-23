@@ -244,6 +244,25 @@
             </li>
         @endif
 
+        @php
+            $canResendMail = \App\Models\UserRole::query()
+                ->where('userid', \Illuminate\Support\Facades\Auth::id())
+                ->where('status', 1)
+                ->where('deleted', 0)
+                ->whereHas('module', fn ($query) => $query->where('modulename', 'AllSystems'))
+                ->whereHas('role', fn ($query) => $query->where('rolename', 'Admin'))
+                ->exists();
+        @endphp
+
+        @if ($canResendMail)
+            <li class="menu-item {{ request()->routeIs('tools.resendMail.*') ? 'active' : '' }}">
+                <a href="{{ route('tools.resendMail.show') }}" class="menu-link">
+                    <i class="menu-icon tf-icons mdi mdi-email-sync-outline"></i>
+                    <div data-i18n="ส่งอีเมลอนุมัติซ้ำ">ส่งอีเมลอนุมัติซ้ำ</div>
+                </a>
+            </li>
+        @endif
+
         @if (isset($userModuleRoles['AllSystems']) ||
                 (isset($userModuleRoles['User']) &&
                     collect($userModuleRoles['User'])->flatten()->intersect(['Staff', 'Admin', 'SuperAdmin'])->isNotEmpty()))

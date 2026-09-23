@@ -375,9 +375,11 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     Route::post('/approve/confirmgrp/{id}', [ApproveController::class, 'confirmgroup'])->name('approve.confirmgroup');
     Route::post('approve/hr-reject',[ApproveController::class,'hrrject'])->name('approve.');
 
-    // == หน้าสำหรับยิง Mail ทดสอบ ==
-    Route::get('/admin/resend-mail', [ResendMailController::class, 'showForm'])->name('tools.resendMail.show');
-    Route::post('/admin/resend-mail', [ResendMailController::class, 'sendMail'])->name('tools.resendMail.send');
+    Route::middleware('admin.all-systems')->group(function () {
+        Route::get('/admin/resend-mail', [ResendMailController::class, 'showForm'])->name('tools.resendMail.show');
+        Route::get('/admin/resend-mail/{approve}/preview', [ResendMailController::class, 'preview'])->name('tools.resendMail.preview');
+        Route::post('/admin/resend-mail', [ResendMailController::class, 'sendMail'])->name('tools.resendMail.send');
+    });
 });
 
 // อนุมัติผ่านลิงก์ (ไม่ควบคุมสิทธิ์, แต่อิงจาก token)
