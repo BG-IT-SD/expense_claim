@@ -36,3 +36,9 @@ RUN sed -ri \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+COPY docker-entrypoint.sh /usr/local/bin/expense-claim-entrypoint
+RUN chmod +x /usr/local/bin/expense-claim-entrypoint
+
+ENTRYPOINT ["expense-claim-entrypoint"]
+CMD ["apache2-foreground"]
