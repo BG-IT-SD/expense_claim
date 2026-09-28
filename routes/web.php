@@ -22,6 +22,7 @@ use App\Http\Controllers\Back\ReportHRController;
 use App\Http\Controllers\Back\ResendMailController;
 use App\Http\Controllers\Back\RoleController;
 use App\Http\Controllers\Back\SettingSpecialApproveController;
+use App\Http\Controllers\Back\TechApprovalGroupController;
 use App\Http\Controllers\Back\TypegroupController;
 use App\Http\Controllers\Back\UserController;
 use App\Http\Controllers\Back\UserroleController;
@@ -356,6 +357,13 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
             });
 
             Route::resource('DriverApprove', ApporveDriverController::class);
+
+            Route::prefix('TechApprove')->name('TechApprove.')->group(function () {
+                Route::get('/', [TechApprovalGroupController::class, 'index'])->name('index');
+                Route::post('/approvers', [TechApprovalGroupController::class, 'saveApprovers'])->name('approvers.save');
+                Route::post('/technicians', [TechApprovalGroupController::class, 'assignTechnicians'])->name('technicians.assign');
+                Route::get('/employees', [TechApprovalGroupController::class, 'searchEmployees'])->name('employees.search');
+            });
         });
 
     Route::get('/download-sample', function () {

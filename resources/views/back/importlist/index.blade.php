@@ -10,7 +10,7 @@
                     </div>
                     <div class="card-body">
 
-                        <form action="#" method="GET" id="frmSearch">
+                        <form action="{{ route('importlist.index') }}" method="GET" id="frmSearch">
                             {{-- @csrf --}}
                             <div class="row g-3">
 
@@ -22,7 +22,7 @@
                                             <select name="groups" id="groups" class="form-control">
                                                 <option value="">select</option>
                                                 @foreach ($typegroups as $typegroup)
-                                                    <option value="{{ $typegroup->id }}">{{ $typegroup->groupname }}
+                                                    <option value="{{ $typegroup->id }}" @selected((string) request('groups') === (string) $typegroup->id)>{{ $typegroup->groupname }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -79,7 +79,7 @@
                                         <td>{{ $groupspecial->id }}</td>
                                         <td>{{ $groupspecial->empid }}</td>
                                         <td>{{ $groupspecial->fullname }}</td>
-                                        <td>{{ $groupspecial->Typegroup->groupname }}</td>
+                                        <td>{{ $groupspecial->Typegroup?->groupname ?? '-' }}</td>
                                         <td>
                                             {!! $groupspecial->status == 1
                                                 ? '<span class="badge rounded-pill bg-success">Active</span>'

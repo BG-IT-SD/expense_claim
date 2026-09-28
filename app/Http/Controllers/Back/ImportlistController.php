@@ -13,13 +13,20 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class ImportlistController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $typegroups = Typegroup::where([
             ['deleted', '=', '0'],
             ['status', '=', '1']
         ])->get();
-        $groupspecials = GroupSpecial::with('Typegroup')->where('deleted', '0')->get();
+
+        $groupspecials = GroupSpecial::with('Typegroup')
+            ->where('deleted', 0)
+            ->when($request->filled('groups'), function ($query) use ($request) {
+                $query->where('typeid', $request->integer('groups'));
+            })
+            ->get();
+
         return view('back.importlist.index',compact('typegroups','groupspecials'));
     }
 

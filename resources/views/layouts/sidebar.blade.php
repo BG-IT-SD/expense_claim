@@ -305,6 +305,7 @@
                     'MessageAlert.index',
                     'SpecialApprove.index',
                     'DriverApprove.*',
+                    'TechApprove.*',
                 ])
                     ? 'active open'
                     : '' }}">
@@ -359,6 +360,12 @@
                     <li class="menu-item {{ request()->routeIs('DriverApprove.*') ? 'active' : '' }}">
                         <a href="{{ route('DriverApprove.index') }}" class="menu-link">
                             <div data-i18n="สายอนุมัติ พขร.">สายอนุมัติ พขร.</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->routeIs('TechApprove.*') ? 'active' : '' }}">
+                        <a href="{{ route('TechApprove.index') }}" class="menu-link">
+                            <div data-i18n="กลุ่มอนุมัติช่าง">กลุ่มอนุมัติช่าง</div>
                         </a>
                     </li>
 
