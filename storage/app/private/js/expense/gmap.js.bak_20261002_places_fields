@@ -16,14 +16,8 @@ window.initMap = function () {
   const originInput = document.getElementById("origin");
   const destinationInput = document.getElementById("destination");
 
-  const placeFields = ["name", "formatted_address", "geometry"];
-
-  autocompleteOrigin = new google.maps.places.Autocomplete(originInput, {
-    fields: placeFields,
-  });
-  autocompleteDestination = new google.maps.places.Autocomplete(destinationInput, {
-    fields: placeFields,
-  });
+  autocompleteOrigin = new google.maps.places.Autocomplete(originInput);
+  autocompleteDestination = new google.maps.places.Autocomplete(destinationInput);
 
   autocompleteOrigin.setComponentRestrictions({ country: ["th"] });
   autocompleteDestination.setComponentRestrictions({ country: ["th"] });
