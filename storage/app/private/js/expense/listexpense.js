@@ -1,83 +1,51 @@
-(function ($) {
-  function getCsrfToken() {
-    var token = document.querySelector('meta[name="csrf-token"]');
-    return token ? token.getAttribute('content') : '';
-  }
+$ (document).ready (function () {
+  $ ('#ExpenseList').DataTable ({
+    processing: true,
+    order: [[2, 'desc']],
+    lengthMenu: [5, 10, 25, 50, 75, 100],
+  });
 
-  function initExpenseTable() {
-    var $table = $('#ExpenseList');
+  $ ('#exdate').flatpickr ({
+    monthSelectorType: 'static',
+  });
 
-    if (!$table.length || !$.fn.DataTable || $.fn.DataTable.isDataTable($table[0])) {
-      return;
-    }
+  $ ('#end_exdate').flatpickr ({
+    monthSelectorType: 'static',
+  });
 
-    $table.DataTable({
-      order: [],
-      responsive: true,
-      pageLength: 10,
-      language: {
-        search: '',
-        searchPlaceholder: 'Search...'
-      }
-    });
-  }
 
-  window.cancelExpense = function (id) {
-    if (!id) {
-      return;
-    }
+});
 
+function cancelExpense(expenseId) {
     Swal.fire({
-      title: 'Confirm cancel?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel',
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-outline-secondary'
-      },
-      buttonsStyling: false
-    }).then(function (result) {
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      $.ajax({
-        url: window.location.origin + '/Expense/' + id,
-        type: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': getCsrfToken()
-        },
-        success: function (response) {
-          Swal.fire({
-            title: response.message || 'Success',
-            icon: response.status === 'success' ? 'success' : 'error',
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            },
-            buttonsStyling: false
-          }).then(function () {
-            window.location.reload();
-          });
-        },
-        error: function (xhr) {
-          var message = xhr.responseJSON && xhr.responseJSON.message
-            ? xhr.responseJSON.message
-            : 'Unable to cancel expense.';
-
-          Swal.fire({
-            title: message,
-            icon: 'error',
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            },
-            buttonsStyling: false
-          });
+        title: 'คุณแน่ใจหรือไม่?',
+        text: 'ต้องการยกเลิกรายการเบิกนี้หรือไม่',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ใช่, ยกเลิก!',
+        cancelButtonText: 'ไม่ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/Expense/' + expenseId,
+                type: 'POST',
+                data: {
+                    _method: 'DELETE',
+                    _token: $ ('meta[name="csrf-token"]').attr ('content'),
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        Swal.fire('สำเร็จ', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('ไม่สำเร็จ', response.message, 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('ผิดพลาด', 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', 'error');
+                }
+            });
         }
-      });
     });
-  };
-
-  $(initExpenseTable);
-})(jQuery);
+}

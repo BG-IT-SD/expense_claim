@@ -1,21 +1,17 @@
-(function ($) {
-  function initExpenseTable() {
-    var $table = $('#ExpenseList');
-
-    if (!$table.length || !$.fn.DataTable || $.fn.DataTable.isDataTable($table[0])) {
-      return;
-    }
-
-    $table.DataTable({
-      order: [],
-      responsive: true,
-      pageLength: 10,
-      language: {
-        search: '',
-        searchPlaceholder: 'Search...'
-      }
+$(document).ready(function() {
+    $('#ExpenseList').DataTable({
+        processing: true,
+        order: [
+            [2, 'desc']
+        ],
+        lengthMenu: [5, 10, 25, 50, 75, 100],
     });
-  }
 
-  $(initExpenseTable);
-})(jQuery);
+    $ ('#exdate').flatpickr ({
+        monthSelectorType: 'static',
+    });
+
+    $ ('#end_exdate').flatpickr ({
+        monthSelectorType: 'static',
+    });
+});
