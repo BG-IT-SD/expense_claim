@@ -39,4 +39,16 @@ return [
         'key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    'map_provider' => env('MAP_PROVIDER', 'google'),
+
+    'openrouteservice' => [
+        'key' => env('ORS_API_KEY'),
+        'base_url' => env('ORS_BASE_URL', 'https://api.heigit.org'),
+    ],
+
+    'geoapify' => [
+        'key' => env('GEOAPIFY_API_KEY'),
+        'base_url' => env('GEOAPIFY_BASE_URL', 'https://api.geoapify.com'),
+    ],
+
 ];

@@ -199,6 +199,9 @@
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/pickr/pickr-themes.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/dropzone/dropzone.css') }}" />
+    @if (($booking->type_reserve ?? null) == 4 && config('services.map_provider', 'google') === 'open')
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @endif
 @endsection
 
 
@@ -228,17 +231,19 @@
     <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/multi-step.js']) }}"></script>
 
     @if ($booking->type_reserve == 4)
-        <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/gmap.js']) }}"></script>
-
-
-        <!--Google Maps API -->
-
-        <script async
-            src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap&libraries=places&v=weekly&language=th">
-        </script>
-        {{--
-<script async
-src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap&libraries=maps,marker,places&v=weekly&language=th&elements=1">
-</script> --}}
+        @if (config('services.map_provider', 'google') === 'open')
+            <script>
+                window.orsAutocompleteUrl = "{{ route('ors.autocomplete') }}";
+                window.orsRouteLinkUrl = "{{ route('ors.route-link') }}";
+                window.orsDirectionsUrl = "{{ route('ors.directions') }}";
+            </script>
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/gmap.js', 'v' => '20261012_open_provider']) }}"></script>
+        @else
+            <script src="{{ URL::signedRoute('secure.js', ['filename' => 'js/expense/gmap-google.js', 'v' => '20261028_place_fields']) }}"></script>
+            <script async
+                src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap&libraries=places&v=weekly&language=th">
+            </script>
+        @endif
     @endif
 @endsection

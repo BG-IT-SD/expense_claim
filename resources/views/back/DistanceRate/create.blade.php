@@ -46,7 +46,7 @@
                                                 <option value="">เลือก Plant</option>
                                                 @foreach ($plants as $plant)
                                                     <option value="{{ $plant->id }}"  {{ isset($DistanceRate) && $DistanceRate->startplant == $plant->id ? 'selected' : '' }}>
-                                                        {{ $plant->plantname }}
+                                                        {{ $plant->display_name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -64,7 +64,7 @@
                                                 <option value="">เลือก Plant</option>
                                                 @foreach ($plants as $plant)
                                                     <option value="{{ $plant->id }}" {{ isset($DistanceRate) && $DistanceRate->endplant == $plant->id ? 'selected' : '' }}>
-                                                        {{ $plant->plantname }}
+                                                        {{ $plant->display_name }}
                                                     </option>
                                                 @endforeach
                                             </select>

@@ -1,0 +1,552 @@
+@extends('layouts.template')
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        {{-- Search --}}
+        @if (now()->lessThan($approve->token_expires_at))
+            <div class="row">
+                <!-- Basic Layout -->
+                <div class="col-xxl-12">
+                    @if (session('message'))
+                        {{-- alert --}}
+                        <div class="alert alert-{{ session('class') }} alert-dismissible h4" role="alert">
+                            <span class="mdi mdi-bell"></span> {{ session('message') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {{--  alert --}}
+                    @endif
+                    <div class="card mb-4">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span> รายการขออนุมัติกลุ่ม:
+                                {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }} [
+                                {{ $exgroup->plantname }} ]</h3>
+                        </div>
+                        <div class="card-body row">
+                            <div class="table-responsive text-nowrap">
+                                <table class="table table-bordered text-center lock-table">
+                                    <thead class="table-secondary">
+                                        <tr>
+                                            <th class="sticky-col">Action</th>
+                                            <th>ลำดับ</th>
+                                            <th>EXID</th>
+                                            <th>สถานที่ไปปฏิบัติงาน</th>
+                                            <th>บริษัท</th>
+                                            <th>รหัสพนักงาน</th>
+                                            <th>ชื่อ – นามสกุล</th>
+                                            <th>หน่วยงาน</th>
+                                            <th>ระดับ</th>
+                                            <th>เลขบัญชี</th>
+                                            <th>จากวันที่</th>
+                                            <th>ถึงวันที่</th>
+                                            <th>จำนวนวัน</th>
+                                            <th>1. ค่าเบี้ยเลี้ยง / อาหาร</th>
+                                            <th>2. ค่าน้ำมัน</th>
+                                            <th>3. ค่าทางด่วน</th>
+                                            <th>4. ค่ารถโดยสารสาธารณะ</th>
+                                            <th>5. ค่าใช้จ่ายอื่นๆ</th>
+                                            <th>Total (1+2+3)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $sum_food = 0;
+                                            $sum_gas = 0;
+                                            $sum_express = 0;
+                                            $sum_publictransport = 0;
+                                            $sum_other = 0;
+                                            $sum_total = 0;
+                                        @endphp
+
+                                        @foreach ($expenses as $i => $expense)
+                                            @php
+                                                $booking =
+                                                    $expense->extype == 2 ? $expense->vbookingdrv : $expense->vbooking;
+
+                                                $startDate = optional($booking)->departure_date;
+                                                $endDate = null;
+
+                                                // --- หาวันสิ้นสุด ---
+                                                if ($expense->extype == 2) {
+                                                    $lastLog = $expense->logs->sortByDesc('id')->first();
+
+                                                    if (
+                                                        $lastLog &&
+                                                        preg_match('/\d{4}-\d{2}-\d{2}/', $lastLog->remark, $m)
+                                                    ) {
+                                                        $endDate = $m[0]; // yyyy-mm-dd จาก remark เช่น 2025-12-16
+                                                    } else {
+                                                        $endDate = optional($booking)->return_date; // ✅ fallback ที่ถูกต้อง
+                                                    }
+                                                } else {
+                                                    $endDate = optional($booking)->return_date;
+                                                }
+
+                                                $fullname =
+                                                    $expense->extype == 2 || $expense->extype == 3
+                                                        ? $expense->tech->fullname
+                                                        : $expense->user->fullname;
+
+                                                // --- จำนวนวัน (กันติดลบ + รวมวันแรก) ---
+                                                $days =
+                                                    $startDate && $endDate
+                                                        ? \Carbon\Carbon::parse($startDate)->diffInDays(
+                                                                \Carbon\Carbon::parse($endDate),
+                                                                true,
+                                                            ) + 1
+                                                        : 0;
+
+                                                // --- ค่าตัวเงิน ---
+                                                $food = $expense->costoffood ?? 0;
+                                                $gas = $expense->gasolinecost ?? 0;
+                                                $express = $expense->expresswaytoll ?? 0;
+                                                $publictransport = $expense->publictransportfare ?? 0;
+                                                $other = $expense->otherexpenses ?? 0;
+                                                $total = $food + $gas + $express + $publictransport + $other;
+
+                                                $sum_food += $food;
+                                                $sum_gas += $gas;
+                                                $sum_express += $express;
+                                                $sum_publictransport += $publictransport;
+                                                $sum_other += $other;
+                                                $sum_total += $total;
+                                                $sumtotalother = $sum_express + $sum_publictransport + $sum_other;
+                                            @endphp
+
+
+                                            <tr>
+                                                <td class="sticky-col">
+                                                    @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
+                                                        <select class="status-dropdown action-select" name="statsapprove[]"
+                                                            data-id = "{{ $expense->id }}" style="width: 110px;">
+                                                            <option value="1" data-color="bg-success">Approve</option>
+                                                            {{-- <option value="9" data-color="bg-warning">Hold</option> --}}
+                                                            <option value="2" data-color="bg-danger">Reject</option>
+                                                        </select>
+                                                        <div class="reasonarea" data-id="{{ $expense->id }}"
+                                                            style="display: {{ $expense->reason ? 'block' : 'none' }};">
+                                                            <hr>
+                                                            <button type="button" class="btn btn-sm btn-secondary"
+                                                                title="{{ $expense->reason ?? 'ดูเหตุผล' }}">
+                                                                เหตุผล
+                                                            </button>
+                                                            <input type="hidden" name="txtreason[]"
+                                                                data-id="{{ $expense->id }}" class="txtreason"
+                                                                value="{{ $expense->reason ?? '' }}">
+                                                        </div>
+                                                    @else
+                                                        @if ($type == 4)
+                                                            {!! status_approve_badge(1, $type) !!}
+                                                        @endif
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    {{ $i + 1 }}
+                                                    <input type="hidden" name="expense_id[]" value="{{ $expense->id }}">
+
+                                                </td>
+                                                <td> {{ 'EX' . $expense->id }}
+                                                    @if ($expense->extype == 2)
+                                                        <a href="{{ route($page, ['id' => $expense->id, 'type' => 0]) }}"
+                                                            target="_blank" class="btn btn-sm btn-info">
+                                                            <span class="mdi mdi-eye-arrow-right-outline"></span>
+                                                            View
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                            target="_blank" class="btn btn-sm btn-info">
+                                                            <span class="mdi mdi-eye-arrow-right-outline"></span>
+                                                            View
+                                                        </a>
+                                                    @endif
+                                                    {{-- <a href="{{ route('HR.view', ['id' => $expense->id, 'type' => '0']) }}"
+                                                        target="_blank" class="btn btn-sm btn-info"><span
+                                                            class="mdi mdi-eye-arrow-right-outline"></span> View</a> --}}
+
+                                                    @if ($exgroup->typeapprove == 4 && $exgroup->statusapprove == 0)
+                                                        {{-- <a href="{{ route('HR.aftedit', $expense->id) }}"
+                                                            class="btn btn-sm btn-warning"><span
+                                                                class="mdi mdi-edit"></span> Edit</a> --}}
+                                                        @if ($expense->extype != 2)
+                                                            <a href="{{ route('HR.aftedit', [$expense->id, 1, 1]) }}"
+                                                                class="btn btn-sm btn-warning">
+                                                                <span class="mdi mdi-edit"></span> Edit
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                </td>
+                                                <td>{{ $expense->vbooking->display_location }}</td>
+                                                <td>{{ BuEmp($expense->empid) }}</td>
+                                                <td>{{ $expense->empid }}</td>
+                                                <td class="text-start">{{ $fullname }}</td>
+                                                <td>{{ $expense->userhr->DEPT ?? '-' }}</td>
+                                                <td>{{ $expense->userhr->JOBGRADE_TITLE ?? '-' }}</td>
+                                                <td>{{ $expense->userhr->NUMBANK ?? '-' }}</td>
+                                               <td>{{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : '-' }}</td>
+                                                <td>{{ $endDate ? \Carbon\Carbon::parse($endDate)->format('d/m/Y') : '-' }}</td>
+
+
+                                                <td>{{ $days ?: '-' }}</td>
+                                                <td>{{ number_format($food, 2) }}</td>
+                                                <td>{{ number_format($gas, 2) }}</td>
+                                                <td>{{ number_format($express, 2) }}</td>
+                                                <td>{{ number_format($publictransport, 2) }}</td>
+                                                <td>{{ number_format($other, 2) }}</td>
+                                                <td>{{ number_format(round($total), 2) }}</td>
+                                            </tr>
+                                        @endforeach
+
+                                        <tr class="table-warning fw-bold">
+                                            <td colspan="13">รวม</td>
+                                            <td>{{ number_format($sum_food, 2) }}
+                                            </td>
+                                            <td>{{ number_format($sum_gas, 2) }}
+                                            </td>
+                                            <td>{{ number_format($sum_express, 2) }}
+                                            </td>
+                                            <td>{{ number_format($sum_publictransport, 2) }}
+                                            </td>
+                                            <td>{{ number_format($sum_other, 2) }}
+                                            </td>
+                                            <td>
+                                                {{ number_format(round($sum_total), 2) }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-sm-12 mt-3 mb-3">
+                                <table class="table table-bordered text-center">
+                                    <thead>
+                                        <tr class="table-info">
+                                            <th>
+                                                <h6>รายละเอียด</h6>
+                                            </th>
+                                            <th>
+                                                <h6>จำนวนเงินขอเบิก / บาท</h6>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>ค่าอาหาร</td>
+                                            <td>
+                                                <span class="btn rounded-pill btn-primary waves-effect waves-light">
+                                                    {{ number_format($exgroup->totalfood, 2) }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ค่าเดินทาง และ อื่นๆ</td>
+                                            <td>
+                                                <span
+                                                    class="btn rounded-pill btn-primary waves-effect waves-light totaltravel">{{ number_format($exgroup->totalother, 2) }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ค่าน้ำมัน</td>
+                                            <td>
+                                                <span
+                                                    class="btn rounded-pill btn-primary waves-effect waves-light gasolinecost">{{ number_format($exgroup->totalfuel, 2) }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>รวม</td>
+                                            <td>
+                                                <span
+                                                    class="btn rounded-pill btn-success waves-effect waves-light totalExpense">
+                                                    {{ number_format(round($exgroup->total), 2) }}</span>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-xxl-12">
+                    <div class="card mb-4">
+                        <div class="card-body row">
+                            @if ($approve->typeapprove == 4)
+                                <div class="col-sm-6 mb-3">
+                                    <h4><strong>ผู้ตรวจสอบ:</strong> {{ $exgroup->checkempid ?? '-' }}</h4>
+
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <h4> {{ $exgroup->user->fullname ?? '' }}</h4>
+
+                                </div>
+                            @endif
+
+                            <div class="col-sm-6 mb-3">
+                                <h4><strong>สถานะ:</strong> {!! status_approve_badge($approve->statusapprove, $approve->typeapprove) !!}</h4>
+
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <h4><strong>ประเภท:</strong> {!! type_approve_text($approve->typeapprove) !!}</h4>
+
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <h4><strong>ผู้อนุมัติ:</strong> {{ $approve->empid . ' | ' . $approve->approvename }}</h4>
+
+                            </div>
+                            @if ($approve->typeapprove == 4)
+                                <div class="col-sm-6 mb-3">
+                                    <h4><strong>ผู้อนุมัติขั้นถัดไป:</strong> {{ $nextempid . ' | ' . $nextfullname }}</h4>
+                                </div>
+                            @endif
+                            @if ($approve->statusapprove == 0)
+                                <hr>
+                                <div class="col-sm-12 mb-3 text-center">
+
+                                    <form id="approveForm" method="POST"
+                                        action="{{ route('approve.confirmgroup', $exgroup->id) }}">
+                                        @csrf
+                                        <div id="reject-reason-box" class="mb-3" style="display: none;">
+                                            <label for="reason" class="form-label">
+                                                <h3>เหตุผลที่ไม่อนุมัติ</h3>
+                                            </label>
+                                            <textarea name="reason" id="reason" class="form-control" rows="3"></textarea>
+
+                                        </div>
+                                        <input type="hidden" id="typeapprove" name="typeapprove"
+                                            value="{{ $approve->typeapprove }}">
+                                        <input type="hidden" name="approveempid" id="approveempid"
+                                            value="{{ $approve->empid }}">
+                                        <input type="hidden" name="approvename" id="approvename"
+                                            value="{{ $approve->approvename }}">
+
+                                        <input type="hidden" name="nextempid" id="nextempid" value="{{ $nextempid }}">
+                                        <input type="hidden" name="nextfullname" id="nextfullname"
+                                            value="{{ $nextfullname }}">
+                                        <input type="hidden" name="nextemail" id="nextemail"
+                                            value="{{ $nextemail }}">
+
+                                        <input type="hidden" name="expenseidgroup" id="expenseidgroup"
+                                            value="{{ 'EXGROUP-' . $exgroup->id }}">
+                                        <input type="hidden" name="groupdate" id="groupdate"
+                                            value="{{ $exgroup->groupdate }}">
+
+
+                                        <button type="button" name="action" value="approve" class="btn btn-success"
+                                            id="btnApprove">
+                                            <span class="mdi mdi-check-circle"></span> อนุมัติ</button>
+                                        <button type="submit" name="action" value="reject" class="btn btn-danger"
+                                            id="btnReject">
+                                            <span class="mdi mdi-close-circle-outline"></span> ไม่อนุมัติ</button>
+
+                                        <input type="hidden" name="action" id="actionInput" value="">
+                                    </form>
+                                </div>
+                            @endif
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="alert alert-warning mt-3">
+                ไม่สามารถดำเนินการได้ (อาจหมดอายุหรือตอบกลับไปแล้ว)
+            </div>
+        @endif
+    </div>
+@endsection
+@section('jscustom')
+    <script>
+        const pageTypeApprove = @json($approve->typeapprove);
+
+        $(document).ready(function() {
+            let isSubmitting = false;
+
+            // เมื่อกดปุ่ม "อนุมัติ"
+            $('#btnApprove').click(function(e) {
+                if (isSubmitting) return; // ป้องกันกดรัว
+
+                Swal.fire({
+                    icon: 'question',
+                    title: 'ยืนยันการอนุมัติ',
+                    text: 'คุณต้องการอนุมัติรายการนี้ใช่หรือไม่?',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, อนุมัติ',
+                    cancelButtonText: 'ยกเลิก',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isSubmitting = true;
+
+                        $('#actionInput').val('approve');
+                        $('#btnApprove, #btnReject').prop('disabled', true); // ปิดทั้ง 2 ปุ่ม
+                        $('#approveForm').submit();
+                    }
+                });
+            });
+
+            // เมื่อกดปุ่ม "ไม่อนุมัติ"
+            $('#btnReject').click(function(e) {
+                if (isSubmitting) return; // ป้องกันกดรัว
+
+                const reason = $('#reason').val().trim();
+                $('#reject-reason-box').show();
+
+                if (reason === '') {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณากรอกเหตุผล',
+                        text: 'คุณต้องระบุเหตุผลก่อนจะไม่อนุมัติรายการนี้',
+                        confirmButtonText: 'ตกลง',
+                    });
+
+                    $('#reason').focus();
+                } else {
+                    isSubmitting = true;
+
+                    $('#actionInput').val('reject');
+                    $('#btnApprove, #btnReject').prop('disabled', true);
+                    $('#approveForm').submit();
+                }
+            });
+
+            $('.status-dropdown').select2({
+                templateResult: function(data) {
+                    if (!data.id) return data.text;
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+
+                    if ($(data.element).data('color')) {
+                        $result.addClass(
+                            $(data.element).data('color') + ' text-white px-2 rounded'
+                        );
+                    }
+
+                    return $result;
+                },
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+
+                    var $result = $('<span></span>');
+                    $result.text(data.text);
+
+                    if ($(data.element).data('color')) {
+                        $result.addClass(
+                            $(data.element).data('color') + ' text-white px-2 rounded'
+                        );
+                    }
+
+                    return $result;
+                },
+            });
+
+            $('.action-select').on('change', function() {
+                const action = $(this).val();
+                const rowId = $(this).data('id');
+                const $select = $(this);
+
+                if (action === '9' || action === '2') {
+                    const label = action === '9' ? 'Hold' : 'Reject';
+
+                    Swal.fire({
+                        title: 'กรุณากรอกเหตุผล',
+                        input: 'textarea',
+                        inputLabel: 'เหตุผลที่เลือก ' + label,
+                        inputPlaceholder: 'พิมพ์เหตุผลที่นี่...',
+                        showCancelButton: true,
+                        confirmButtonText: 'ยืนยัน',
+                        cancelButtonText: 'ยกเลิก',
+                        inputValidator: value => {
+                            if (!value) return 'กรุณากรอกเหตุผลก่อน!';
+                        },
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const reason = result.value;
+
+                            const $rowBox = $('.reasonarea[data-id="' + rowId + '"]');
+                            const $input = $rowBox.find('.txtreason');
+                            const $btn = $rowBox.find('button');
+
+                            $input.val(reason);
+                            $btn
+                                .attr('title', reason)
+                                .attr('data-bs-original-title', reason)
+                                .tooltip('dispose')
+                                .tooltip();
+                            $rowBox.show();
+                            $.ajax({
+                                url: '/approve/hr-reject', // เปลี่ยนเป็น route ที่ใช้จริง
+                                type: 'POST',
+                                data: {
+                                    expense_id: rowId,
+                                    status: action, // 2 = reject, 9 = hold
+                                    reason: reason,
+                                    typeapprove: pageTypeApprove,
+                                },
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                        'content')
+                                },
+                                success: function(res) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'บันทึกข้อมูลเรียบร้อย',
+                                        timer: 1200,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        // รีหน้าใหม่หลังบันทึกเสร็จ
+                                        window.location.reload();
+                                    });
+                                },
+                                error: function(xhr) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'บันทึกไม่สำเร็จ',
+                                        text: xhr.responseJSON?.error ||
+                                            'กรุณาลองใหม่อีกครั้ง',
+                                    });
+
+                                    // ย้อน dropdown กลับไป Approve ถ้า error
+                                    $select.val('1').trigger('change');
+                                }
+                            });
+
+                        } else {
+                            $select.val('1').trigger('change'); // กลับไป Approve
+                        }
+                    });
+                } else {
+                    $select.val('1').trigger('change'); // กลับไป Approve
+                }
+            });
+        });
+    </script>
+@endsection
+@section('csscustom')
+    <style>
+        .lock-table {
+            border-collapse: collaps;
+            width: max-content;
+        }
+
+        .lock-table th,
+        .lock-table td {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 1;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ asset('template/assets/vendor/libs/select2/select2.css') }}" />
+@endsection
+@section('jsvendor')
+    <script src="{{ asset('template/assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
+    <script src="{{ asset('template/assets/vendor/libs/select2/select2.js') }}"></script>
+@endsection

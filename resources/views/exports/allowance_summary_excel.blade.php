@@ -120,7 +120,7 @@
                 {{-- หัวกลุ่มสถานที่ --}}
                 <tr style="background-color:#f2f2f2;">
                     <td colspan="15" class="text-left" style="font-weight:bold;">
-                        สถานที่ไปปฏิบัติงาน: {{ $groupName }}
+                        สถานที่ไปปฏิบัติงาน: {{ PlantDisplayName($groupName) }}
                     </td>
                 </tr>
 
@@ -191,7 +191,7 @@
                         <td class="text-right">{{ number_format(round($express), 2) }}</td>
                         <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
                         <td class="text-right"><strong>{{ number_format(round($total), 2) }}</strong></td>
-                        <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
+                        <td>{{ PlantDisplayName(optional($r->finalApprove->exgroupRef)->plantname) ?? '-' }}</td>
 
                         <td>{{ optional($r->vbooking)->objname ?? '-' }}</td>
                         <td>{{ optional($r->vbooking)->remark ?? '-' }}</td>
@@ -201,7 +201,7 @@
                 {{-- รวมต่อสถานที่ --}}
                 <tr style="font-weight:bold;">
                     <td colspan="10" class="text-left">
-                        รวมสถานที่ {{ $groupName }}
+                        รวมสถานที่ {{ PlantDisplayName($groupName) }}
                     </td>
                     <td class="text-right">{{ number_format(round($sum_food), 2) }}</td>
                     <td class="text-right">{{ number_format(round($sum_express), 2) }}</td>

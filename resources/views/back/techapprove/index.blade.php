@@ -221,7 +221,7 @@
                                             </td>
                                             <td>{{ $technician->empid }}</td>
                                             <td class="fw-medium">{{ $technician->fullname }}</td>
-                                            <td>{{ $technician->bu ?: '-' }}</td>
+                                            <td>{{ PlantDisplayName($technician->bu) ?: '-' }}</td>
                                             <td>
                                                 <div>{{ $technician->dept ?: '-' }}</div>
                                                 <small class="text-muted">{{ $technician->position ?: '-' }}</small>

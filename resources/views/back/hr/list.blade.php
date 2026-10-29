@@ -64,7 +64,7 @@
                                                 <option value="" disabled selected>-- เลือกBU --</option>
                                                 @foreach ($plants as $key => $plant)
                                                     <option value="{{ $plant->plantname }}">
-                                                        {{ $plant->plantname }}
+                                                        {{ $plant->display_name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -149,7 +149,7 @@
                                             @if ($expense->extype == 2 || $expense->extype == 3)
                                                 {{ $expense->empid . ' | ' . $expense->tech->fullname . ' | ' }}
                                             @else
-                                                {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . $expense->user->bu }}
+                                                {{ $expense->empid . ' | ' . $expense->user->fullname . ' | ' . PlantDisplayName($expense->user->bu) }}
                                             @endif
 
                                         </td>
@@ -157,7 +157,7 @@
                                             @if ($expense->extype == 2 || $expense->extype == 3)
                                                 {{ BuEmp($expense->empid) }}
                                             @else
-                                                {{ $expense->user->bu }}
+                                                {{ PlantDisplayName($expense->user->bu) }}
                                             @endif
                                         </td>
                                         <td>{{ $expense->vbooking->location_name }}</td>

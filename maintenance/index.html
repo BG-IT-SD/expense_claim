@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f4f7f6">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ปิดปรับปรุงระบบ | Expense Claim</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Leelawadee UI", Tahoma, "Noto Sans Thai", sans-serif;
+      color: #18332f;
+      background: #f4f7f6;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      background:
+        radial-gradient(ellipse at 14% 16%, rgba(137, 196, 178, .17), transparent 34%),
+        radial-gradient(ellipse at 87% 84%, rgba(220, 187, 126, .15), transparent 31%),
+        #f4f7f6;
+    }
+
+    .page {
+      width: min(100%, 900px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 22px 4px;
+      color: #28443e;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 12px;
+      color: #fff;
+      background: #1b6656;
+      box-shadow: 0 5px 13px rgba(27, 102, 86, .19);
+      font-size: 14px;
+      letter-spacing: .04em;
+    }
+
+    .card {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(230px, .9fr);
+      align-items: center;
+      min-height: 440px;
+      overflow: hidden;
+      border: 1px solid rgba(28, 69, 60, .08);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 24px 70px rgba(27, 58, 51, .09), 0 3px 10px rgba(27, 58, 51, .04);
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      padding: 58px 12px 58px 64px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 13px;
+      border: 1px solid #e8d9b8;
+      border-radius: 999px;
+      color: #705521;
+      background: #fbf6e9;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #c79032;
+      box-shadow: 0 0 0 4px rgba(199, 144, 50, .13);
+    }
+
+    h1 {
+      margin: 25px 0 14px;
+      color: #173b33;
+      font-size: clamp(30px, 4vw, 43px);
+      font-weight: 750;
+      letter-spacing: -.035em;
+      line-height: 1.25;
+    }
+
+    .description {
+      max-width: 440px;
+      margin: 0;
+      color: #657771;
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .note {
+      margin: 25px 0 0;
+      color: #89958f;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .ip-debug {
+      display: grid;
+      gap: 5px;
+      margin-top: 22px;
+      color: #89958f;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .ip-debug code {
+      color: #526860;
+      font-family: Consolas, "Courier New", monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-top: 28px;
+    }
+
+    .retry {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 19px;
+      border: 0;
+      border-radius: 12px;
+      color: #fff;
+      background: #1b6656;
+      box-shadow: 0 7px 15px rgba(27, 102, 86, .18);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+
+    .retry:hover { background: #155747; transform: translateY(-1px); }
+    .retry:focus-visible { outline: 3px solid #a9d5c9; outline-offset: 3px; }
+
+    .art {
+      position: relative;
+      display: grid;
+      min-height: 100%;
+      place-items: center;
+      overflow: hidden;
+      background: linear-gradient(145deg, #f2f8f5 4%, #e5f0eb 100%);
+    }
+
+    .art::before, .art::after {
+      position: absolute;
+      content: "";
+      border: 1px solid rgba(48, 112, 94, .1);
+      border-radius: 50%;
+    }
+
+    .art::before { width: 340px; height: 340px; }
+    .art::after { width: 250px; height: 250px; }
+
+    .illustration {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: 178px;
+      height: 178px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: 42px;
+      background: rgba(255, 255, 255, .72);
+      box-shadow: 0 18px 45px rgba(40, 86, 72, .13);
+      transform: rotate(-5deg);
+    }
+
+    .illustration svg { width: 112px; height: 112px; transform: rotate(5deg); }
+
+    .spark {
+      position: absolute;
+      z-index: 2;
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: 13px;
+      color: #8a6a30;
+      background: #fcf7ea;
+      box-shadow: 0 7px 18px rgba(76, 71, 51, .1);
+      font-size: 18px;
+    }
+
+    .spark.one { top: 25%; left: 20%; transform: rotate(-12deg); }
+    .spark.two { right: 17%; bottom: 25%; color: #327865; background: #eaf4ef; transform: rotate(12deg); }
+
+    footer {
+      padding: 18px 8px 0;
+      color: #98a39e;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 680px) {
+      body { padding: 22px 15px; }
+      .brand { margin-bottom: 16px; }
+      .card { grid-template-columns: 1fr; border-radius: 23px; }
+      .content { padding: 38px 28px 34px; }
+      .art { min-height: 190px; }
+      .art::before { width: 250px; height: 250px; }
+      .art::after { width: 180px; height: 180px; }
+      .illustration { width: 126px; height: 126px; border-radius: 31px; }
+      .illustration svg { width: 82px; height: 82px; }
+      .spark.one { top: 17%; left: 23%; }
+      .spark.two { right: 21%; bottom: 17%; }
+      h1 { margin-top: 21px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="brand" aria-label="Expense Claim">
+      <span class="brand-mark" aria-hidden="true">EC</span>
+      <span>Expense Claim</span>
+    </div>
+
+    <section class="card" aria-labelledby="page-title">
+      <div class="content">
+        <div class="status"><span class="status-dot" aria-hidden="true"></span>ปิดปรับปรุงชั่วคราว</div>
+        <h1 id="page-title">ขออภัยในความไม่สะดวก</h1>
+        <p class="description">ขณะนี้เรากำลังปรับปรุงระบบ Expense Claim เพื่อให้คุณกลับมาใช้งานได้ดียิ่งขึ้น กรุณากลับมาใหม่อีกครั้งในภายหลัง</p>
+        <p class="note">หากระบบกลับมาเปิดให้บริการแล้ว กดปุ่มด้านล่างเพื่อลองเข้าใช้งานอีกครั้ง</p>
+        <div class="ip-debug" aria-live="polite">
+          <span>IP ที่ Apache ใช้ตรวจสิทธิ์: <code id="remote-ip">กำลังตรวจสอบ…</code></span>
+          <span>Forwarded IP (ถ้ามี): <code id="forwarded-ip">กำลังตรวจสอบ…</code></span>
+        </div>
+        <div class="actions">
+          <button class="retry" type="button" onclick="window.location.reload()">
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 10m0-6v6h6m-5 3a8.1 8.1 0 0 0 14.9 4L21 14m0 6v-6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            ลองอีกครั้ง
+          </button>
+        </div>
+      </div>
+      <div class="art" aria-hidden="true">
+        <span class="spark one">✦</span>
+        <div class="illustration">
+          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M33 81.5V40.2c0-4 3.2-7.2 7.2-7.2h39.6c4 0 7.2 3.2 7.2 7.2v41.3" stroke="#41816D" stroke-width="4" stroke-linecap="round"/>
+            <path d="M43 47h34M43 58h22M43 69h16" stroke="#A2C6B8" stroke-width="4" stroke-linecap="round"/>
+            <path d="M25 84.5h70l-5.6 9.1a5 5 0 0 1-4.3 2.4H34.9a5 5 0 0 1-4.3-2.4L25 84.5Z" fill="#D8E9E1" stroke="#41816D" stroke-width="3" stroke-linejoin="round"/>
+            <path d="m73.7 72.7 5.8 5.8 13.2-14.1" stroke="#D6A84D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="87" cy="41" r="12" fill="#F8EFD9" stroke="#D6A84D" stroke-width="3"/>
+            <path d="M87 34v7l4.5 3" stroke="#A77D2F" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="spark two">✓</span>
+      </div>
+    </section>
+    <footer>ขอบคุณที่เข้าใจและขออภัยในความไม่สะดวก</footer>
+  </main>
+  <script>
+    (async () => {
+      const remoteIp = document.getElementById('remote-ip');
+      const forwardedIp = document.getElementById('forwarded-ip');
+
+      try {
+        const response = await fetch('/client-ip.php', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const details = await response.json();
+        const remoteAddress = details.remote_addr || 'ไม่พบข้อมูล';
+        const forwardedAddress = details.forwarded_for || 'ไม่มีค่า';
+
+        remoteIp.textContent = remoteAddress;
+        forwardedIp.textContent = forwardedAddress;
+        console.info('Maintenance IP diagnostics:', {
+          remote_addr_used_by_htaccess: remoteAddress,
+          x_forwarded_for: forwardedAddress,
+        });
+      } catch (error) {
+        remoteIp.textContent = 'อ่านค่าไม่ได้';
+        forwardedIp.textContent = 'อ่านค่าไม่ได้';
+        console.warn('Unable to read maintenance IP diagnostics:', error);
+      }
+    })();
+  </script>
+</body>
+</html>

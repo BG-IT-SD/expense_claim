@@ -7,9 +7,30 @@ use App\Models\Valldataemp;
 use App\Models\ActivityLog;
 use App\Models\Expense;
 use App\Models\Msbu;
+use App\Models\Plant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
+
+if (!function_exists('PlantDisplayName')) {
+    function PlantDisplayName($plantName)
+    {
+        if ($plantName === null || $plantName === '') {
+            return $plantName;
+        }
+
+        static $displayNames = null;
+
+        if ($displayNames === null) {
+            $displayNames = Plant::query()
+                ->where('deleted', 0)
+                ->get()
+                ->mapWithKeys(fn($plant) => [$plant->plantname => $plant->display_name]);
+        }
+
+        return $displayNames->get($plantName, $plantName);
+    }
+}
 
 if (!function_exists('status_approve_badge')) {
     function status_approve_badge($status, $type = null)
@@ -398,6 +419,8 @@ if (!function_exists('hasReclaimedExpense')) {
         return Expense::where('bookid', $bookid)
             ->where('empid', $empid)
             ->where('id', '>', $currentExpenseId)
+            ->where('status', 1)
+            ->where('deleted', 0)
             ->exists();
     }
 }

@@ -74,7 +74,7 @@
                                             <td class="text-nowrap">
                                                 {{ BuEmp($expense->empid) }}
                                             </td>
-                                            <td>{{ $expense->vbooking->locationbu }}</td>
+                                            <td>{{ PlantDisplayName($expense->vbooking->locationbu) }}</td>
                                             <td>{{ $expense->costoffood ?? 0 }}
                                                 <input type="hidden" name="costoffood[]"
                                                     value="{{ $expense->costoffood ?? 0 }}">

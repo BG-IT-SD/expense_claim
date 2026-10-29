@@ -86,7 +86,7 @@
                                 @foreach ($hrplants as $hrplant)
                                     <tr>
                                         <td>{{ $hrplant->id }}</td>
-                                        <td>{{ $hrplant->plant->plantname }}</td>
+                                        <td>{{ $hrplant->plant->display_name }}</td>
                                         <td>
                                             {!! $hrplant->status == 1
                                                 ? '<span class="badge rounded-pill bg-success">Active</span>'

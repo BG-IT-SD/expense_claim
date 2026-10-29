@@ -306,6 +306,7 @@
                     'SpecialApprove.index',
                     'DriverApprove.*',
                     'TechApprove.*',
+                    'MapSetting.*',
                 ])
                     ? 'active open'
                     : '' }}">
@@ -380,6 +381,14 @@
                             <div data-i18n="รายการอนุมัติ M3">รายการอนุมัติ M3</div>
                         </a>
                     </li>
+                    @if (isset($userModuleRoles['AllSystems']) &&
+                            collect($userModuleRoles['AllSystems'])->flatten()->contains('Admin'))
+                        <li class="menu-item {{ request()->routeIs('MapSetting.*') ? 'active' : '' }}">
+                            <a href="{{ route('MapSetting.index') }}" class="menu-link">
+                                <div data-i18n="Map Provider">Map Provider</div>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </li>
         @endif

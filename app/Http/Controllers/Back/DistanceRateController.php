@@ -21,11 +21,11 @@ class DistanceRateController extends Controller
         // dd($plants);
 
         $groupedPlants = collect($plants)->map(function ($plant) {
-            // รวม AGI/AY1/AY2 เข้า group เดียว
+            // รวม BGCI (พระนครศรีอยุธยา)/AY1/AY2 เข้า group เดียว
             if (in_array($plant->id, [4, 10, 11])) {
                 return (object)[
                     'id' => 'agi_group',
-                    'plantname' => 'AGI/AY1/AY2',
+                    'plantname' => 'BGCI (พระนครศรีอยุธยา)/AY1/AY2',
                 ];
             }
             return $plant;

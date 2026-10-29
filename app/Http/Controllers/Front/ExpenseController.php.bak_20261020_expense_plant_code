@@ -1,0 +1,1083 @@
+<?php
+
+namespace App\Http\Controllers\Front;
+
+use App\Helpers\MailHelper;
+use App\Http\Controllers\Controller;
+use App\Models\ApproveGroup;
+use App\Models\DistanceRate;
+use App\Models\Groupplant;
+use App\Models\GroupSpecial;
+use App\Models\Heademp;
+use App\Models\Plant;
+use App\Models\Valldataemp;
+use App\Models\Vbooking;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApproveNotification;
+use App\Mail\TestMail;
+use App\Models\Approve;
+use App\Models\Expense;
+use App\Models\ExpenseFile;
+use App\Models\ExpenseFood;
+use App\Models\Fuelprice;
+use App\Models\FuelPrice91;
+use App\Models\Vbookingall;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use App\Models\MessageAlert;
+use App\Models\Approvespecial;
+use App\Models\Objectdata;
+
+class ExpenseController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        // ข้อมูลจองรถตาม CODEMPID 7 วันย้อนหลัง
+        // create view ที่รวมเป็นผู้โดยสารด้วย
+        $empid = Auth::user()->empid;
+
+        $exid = $request->filled('exid')
+            ? ltrim($request->exid, 'EX')
+            : null;
+
+        $booking = Vbooking::with([
+            'expense' => function ($q) use ($request, $empid) {
+                $q->where('empid', $empid)
+                    ->where('status', 1)
+                    ->where('deleted', 0)
+                    ->with('latestApprove'); // include latest approve
+            }
+        ])
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('id', $request->bookid)
+            )
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('departure_date', '<=', $request->end_exdate)
+            )
+
+            ->where(function ($q) use ($empid) {
+                $q->where('booking_emp_id', $empid)
+                    ->orWhere('passenger_empid', $empid);
+            })
+            ->get()
+            ->unique('id')
+            ->values();
+
+        //กรอง exid จาก expense
+        if ($exid) {
+            $booking = $booking->filter(function ($b) use ($exid) {
+                return optional($b->expense)->id == $exid;
+            })->values();
+        }
+
+        // dd($booking);
+
+        // dd($booking[0]->expense->id ?? 'no expense');
+        return view('front.expenses.list', compact('booking'));
+    }
+
+    public function history(Request $request)
+    {
+        $currentEmpid = Auth::user()->empid;
+        $exid = $request->filled('exid')
+            ? ltrim($request->exid, 'EX')
+            : null;
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user'])
+            ->where('empid', $currentEmpid)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('bookid'),
+                fn($q) =>
+                $q->where('bookid', $request->bookid)
+            )
+            ->whereHas('latestApprove', function ($query) {
+                $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
+            })
+            ->OrderByDesc('id')
+            ->get();
+
+        if ($request->filled('exdate') && $request->filled('end_exdate')) {
+            $expenses = $expenses->filter(function ($exp) use ($request) {
+                $departure = optional($exp->vbooking)->departure_date;
+
+                return $departure &&
+                    $departure >= $request->exdate &&
+                    $departure <= $request->end_exdate;
+            })->values();
+        }
+
+        return view('front.expenses.history', compact('expenses'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create($id)
+    {
+        // $vhead = $this->getHeadEmp(66000510);
+        // dd($vhead) ;
+        // $booking = Vbooking::find($id);
+        // พยายามดึงจาก expense ก่อน
+        $expense = Expense::find($id);
+        // dd($expense);
+
+        if ($expense) {
+            // ดึง approve ล่าสุดของ exid นี้
+            $lastApprove = Approve::where('exid', $expense->id)->orderByDesc('id')->first();
+
+            // หากถูก reject ให้ใช้ Vbookingall
+            if ($lastApprove && $lastApprove->statusapprove == 2) {
+                $booking = Vbookingall::find($expense->bookid);
+            } else {
+                return redirect()->back()->with('error', 'สามารถเบิกอีกครั้งได้เฉพาะรายการที่ถูกปฏิเสธเท่านั้น');
+            }
+
+            $bookid = $expense->bookid;
+        } else {
+            // ยังไม่เคยเบิก → ใช้ Vbooking ปกติ
+            $bookid = $id;
+            $booking = Vbooking::find($bookid);
+        }
+
+        if (!$booking) {
+            return redirect()->back()->with('error', 'ไม่พบข้อมูลการจอง');
+        }
+
+        // dd($booking);
+        // $empid = Auth::user()->empid;
+        // $empemail = Auth::user()->email;
+        // $empfullname = Auth::user()->fullname;
+        $user = Auth::user();
+        $empid       = $user->empid;
+        $empemail    = $user->email;
+        $empfullname = $user->fullname;
+        // $booking->booking_emp_id ?? "";
+        // MailHelper::SendMail('kamolwan.b@bgiglass.com', 'Subject from API', 'Some body text', 'dddd');
+
+        $typegroup = 1;
+        $totalDistance = 0;
+        $startplant = "";
+        $endplant = "";
+        $PlantStart = $booking->bu;
+        // $bu = Auth::user()->bu;
+        $bu = $user->bu;
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // ession('level')
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+
+        // เช็คประเภทuser
+        $groupspecial = GroupSpecial::where('empid', $empid)->first();
+        // dd($groupspecial);
+        if ($groupspecial) {
+            if ($groupspecial->typeid == 1 || $groupspecial->typeid == 2) {
+                $typegroup = 2;
+            } else {
+                $typegroup = 3;
+            }
+        }
+
+        // dd($typegroup);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            // ->whereIn('id', [2, 4, 7, 9, 10, 11])
+            ->get();
+
+        // Databooking
+        $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
+        $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
+
+
+        if ($booking->locationid != 12) {
+            $startplant = $PlantStart;
+            $endplant = $booking->locationbu;
+            $totalDistance = $this->getDistance($startplant, $endplant);
+            // dd($totalDistance);
+        }
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+
+        // dd($groupplant->mealid);
+
+        $startDate = Carbon::parse($booking->departure_date);
+        $endDate = Carbon::parse($booking->return_date);
+        $startTime = Carbon::parse($booking->departure_time);
+        $endTime = Carbon::parse($booking->return_time);
+
+
+
+        // Loop by day (you can change the interval to '1 week', '1 month', etc.)
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+
+
+        // // หัวหน้างานอนุมัติ
+        // ดึง JSON จากลิงก์ API
+        // $response = $this->getHeadEmp($empid);
+
+        // if (!is_array($response) || ($response['code'] ?? null) !== 200) {
+        //     $headempid = "";
+        //     $headlevel = "";
+        //     $heademail = "";
+        //     $headname = "";
+        // } else {
+        //     $headempid = $response['head_emp_id'] ?? "";
+        //     $headlevel = LevelEmp($headempid);
+        //     $heademail = $response['head_email'] ?? "";
+        //     $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        // }
+
+        // New Head
+        $response = $this->getHeadEmp($empid);
+
+        // $headempid = "66000510";
+        // $headlevel = "10";
+        // $heademail = "suthida.s@bgiglass.com";
+        // $headname = "กมลวรรณ บรรชา";
+
+        // $loopCount = 0;
+        // $maxLoop = 5;
+
+        // while (is_array($response) && ($response['code'] ?? null) === 200 && $loopCount < $maxLoop) {
+        //     $currentEmpId = $response['head_emp_id'] ?? "";
+        //     $currentLevel = LevelEmp($currentEmpId);
+
+        //     if ($currentLevel <= 10) {
+        //         // เจอหัวหน้าที่ level <= 10 — เก็บข้อมูลและหยุด loop
+        //         $headempid = $currentEmpId;
+        //         $headlevel = $currentLevel;
+        //         $heademail = $response['head_email'] ?? "";
+        //         $headname = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+        //         break;
+        //     }
+
+        //     // หาหัวหน้าคนถัดไป
+        //     $response = $this->getHeadEmp($currentEmpId);
+        //     $loopCount++;
+        // }
+        // เกณฑ์
+        $minLevel = 10;
+        $maxLevel = 11;
+
+        // ค่าเริ่มต้น
+        $headempid = $headlevel = $heademail = $headname = '';
+
+        // เริ่มจากหัวหน้าของพนักงานคนนี้
+        $response = $this->getHeadEmp($empid);
+
+        $maxLoop = 10;        // กันลูปยาว
+        $visited = [];        // กัน cycle
+        $best    = null;      // เก็บตัวเลือกที่อยู่ในช่วง [8..10] และใกล้ 10 ที่สุด
+
+        while (is_array($response) && ($response['code'] ?? null) === 200 && $maxLoop-- > 0) {
+            $id = $response['head_emp_id'] ?? null;
+            if (!$id || in_array($id, $visited, true)) {
+                break; // ไม่มี/ซ้ำ -> หยุด
+            }
+            $visited[] = $id;
+
+            $level = (int) (LevelEmp($id) ?? 0);
+
+            // ถ้าได้ 10 พอดี ใช้เลยและหยุด
+            if ($level === $maxLevel) {
+                $headempid = $id;
+                $headlevel = $level;
+                $heademail = $response['head_email'] ?? '';
+                $headname  = trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? ''));
+                break;
+            }
+
+            // ถ้าอยู่ในช่วง [8..10] เก็บเป็นตัวเลือกที่ใกล้ 10 ที่สุด
+            if ($level >= $minLevel && $level <= $maxLevel) {
+                if (!$best || $level > $best['level']) {
+                    $best = [
+                        'empid' => $id,
+                        'level' => $level,
+                        'email' => $response['head_email'] ?? '',
+                        'name'  => trim(($response['name_head'] ?? '') . ' ' . ($response['surname_head'] ?? '')),
+                    ];
+                }
+            }
+
+            // ถ้าเกิน 10 ไม่เอา และหยุด (ไล่ต่อไปก็ยิ่งสูง)
+            if ($level > $maxLevel) {
+                break;
+            }
+
+            // ไปหัวหน้าถัดไป
+            $response = $this->getHeadEmp($id);
+        }
+
+        // ถ้าไม่เจอ 10 แต่มีตัวเลือกในช่วง [8..10] ให้ใช้ตัวที่ใกล้ 10 ที่สุด
+        if (empty($headempid) && $best) {
+            $headempid = $best['empid'];
+            $headlevel = $best['level'];
+            $heademail = $best['email'];
+            $headname  = $best['name'];
+        }
+
+
+        // New Head
+        //  dd($headempid);
+        // กลุ่มเลขา
+        $approve_g = ApproveGroup::where('empid', $empid)->count();
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
+
+        // น้ำมัน
+        $data_oil_price = '';
+        $data_message = '';
+        $travel_date = '';
+        $price_used_date = '';
+        $rate_id = '';
+        $bath_per_km = '';
+        $oilid = '';
+        $passengertype = 0;
+        if (($booking->type_reserve == 4)) {
+
+            // ตรวจสอบ ผู้ร่วมเดินทาง
+            if ($empid == $booking->passenger_empid) {
+                if ($empid == $booking->booking_emp_id) {
+                    $passengertype = 0;
+                } else {
+                    $passengertype = 1;
+                }
+            }
+
+            $travelDate = Carbon::parse($booking->departure_date)->startOfDay();
+
+            // หาราคาที่น้อยกว่าหรือเท่ากับวันเดินทาง
+            $fuelBefore = FuelPrice91::where('status', 1)
+                ->where('deleted', 0)
+                ->whereDate('dateprice', '<=', $travelDate)
+                ->orderByDesc('dateprice')
+                ->first();
+
+            if (!$fuelBefore) {
+                return response()->json(['message' => 'ไม่พบราคาก่อนวันเดินทาง']);
+            }
+
+            // หาราคาที่มากกว่าวันที่เจอ (คือ row ถัดไป)
+            $fuelAfter = FuelPrice91::where('status', 1)
+                ->where('deleted', 0)
+                ->whereDate('dateprice', '>', $fuelBefore->dateprice)
+                ->orderBy('dateprice')
+                ->first();
+
+            // ตรวจสอบว่า travelDate อยู่ระหว่าง fuelBefore กับ fuelAfter หรือไม่มี fuelAfter
+            if (!$fuelAfter || $travelDate < Carbon::parse($fuelAfter->dateprice)) {
+                $oilPrice = $fuelBefore->price;
+                $oilPriceID = $fuelBefore->id;
+            } else {
+                return response()->json(['message' => 'วันที่เดินทางอยู่นอกช่วงราคาน้ำมันที่มีข้อมูล']);
+            }
+
+            // หาช่วงราคาที่ oilPrice ตกอยู่ในนั้น
+            $rate = Fuelprice::where('status', 1)
+                ->where('deleted', 0)
+                ->where('startrate', '<=', $oilPrice)
+                ->where('endrate', '>=', $oilPrice)
+                ->first();
+
+            if (!$rate) {
+
+                $data_oil_price = $oilPrice;
+                $data_message = 'ไม่พบช่วงราคาครอบคลุม';
+            }
+
+            $travel_date = $travelDate->format('d/m/Y');
+            $data_oil_price = $oilPrice;
+            $price_used_date = Carbon::parse($fuelBefore->dateprice)->format('d/m/Y');
+            $rate_id = $rate->id;
+            $bath_per_km = $rate->bathperkm;
+            $oilid = $oilPriceID;
+        }
+        // dd($booking);
+        // dd($passengertype);
+
+        $messageAlert = MessageAlert::where('status', 1)->where('deleted', 0)->first();
+        $message_data = $messageAlert->message ?? 'test';
+
+        //ตรวจว่าเป็น Base64 จริงไหม
+        $isBase64 = false;
+        if ($message_data) {
+            $decoded = base64_decode($message_data, true); // true = strict mode
+            if ($decoded !== false && base64_encode($decoded) === $message_data) {
+                $isBase64 = true;
+            }
+        }
+
+        // ถอดรหัสถ้าใช่ Base64
+        $message_decode = $isBase64 ? base64_decode($message_data) : $message_data;
+
+        // $specialApprovers = "";
+        $specialApprovers = Approvespecial::where('status', 1)
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
+        // dd($specialApprovers);
+
+        // objectdata
+        $objectdata = Objectdata::where('status', 1)
+            ->where('deleted', 0)
+            ->orderBy('id')
+            ->get();
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+
+        if ($empid != "") {
+            if ($typegroup == 1) {
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers','objectdata']));
+            } else {
+                $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
+                return view('front.expenses.error', compact('message'));
+            }
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'bookid' => 'required',
+            'empid' => 'required',
+            'extype' => 'required',
+            'returntime' => 'required',
+            'departuretime' => 'required',
+            'totaldistance' => 'required',
+            'costoffood' => 'required',
+            'travelexpenses' => 'required',
+            'gasolinecost' => 'required',
+            'totalExpense' => 'required',
+            // ถ้ามีใช้จ่ายอื่นๆให้บังคับกรอกไฟล์
+            // 'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'files.*' => 'sometimes|file|max:5120|mimes:jpg,jpeg,png,pdf',
+
+        ]);
+
+        $typeapp = 1;
+        $fullname = Auth::user()->fullname;
+
+        if ($request->extype == 3) {
+            // ถ้า Level มากกว่า 7 ส่ง type 1
+            if ($request->empleveldata > 7) {
+                $typeapp = 1;
+            } else {
+                $typeapp = 2;
+            }
+
+            $fullname = "$request->empfullname_tech";
+        } else {
+            $typeapp = 1;
+            $fullname = Auth::user()->fullname;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $todayPrefix = Carbon::now()->format('Ymd');
+
+            $latestId = Expense::where('id', 'like', $todayPrefix . '%')
+                ->orderByDesc('id')
+                ->first();
+
+            $nextNumber = $latestId ? ((int)substr($latestId->id, 8)) + 1 : 1;
+            $newId = $todayPrefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+            $request->merge([
+                'latitude' => $request->latitude ? round((float) $request->latitude, 8) : null,
+                'longitude' => $request->longitude ? round((float) $request->longitude, 8) : null,
+                'latitude_b' => $request->latitude_b ? round((float) $request->latitude_b, 8) : null,
+                'longitude_b' => $request->longitude_b ? round((float) $request->longitude_b, 8) : null,
+            ]);
+
+            $expense = Expense::create([
+                'id' => $newId,
+                'prefix' => "EX",
+                'bookid' => $request->bookid,
+                'empid' => $request->empid,
+                'extype' => $request->extype,
+                'departurefrom' => $request->departurefrom ?? null,
+                'departureplant' => $request->departureplant ?? null,
+                'departuretext' => $request->departuretext ?? null,
+                'returnfrom' => $request->returnfrom ?? null,
+                'returnplant' => $request->returnplant ?? null,
+                'returnfromtext' => $request->returnfromtext ?? null,
+                'returntime' => $request->returntime,
+                'totaldistance' => $request->totaldistance,
+                // new 28/05
+
+                'basedistance' => $request->basedistance  ?? 0,
+                'afdistance' => $request->afdistance  ?? 0,
+                'distancemore' => $request->distancemore  ?? 0,
+                'distancenote' =>  $request->distancenote ?? null,
+                // new 28/05
+                'latitude' =>  $request->latitude,
+                'longitude' =>  $request->longitude,
+                'latitude_b' =>  $request->latitude_b,
+                'longitude_b' =>  $request->longitude_b,
+                'map_a_name' =>  $request->map_a_name ?? null,
+                'map_b_name' =>  $request->map_b_name ?? null,
+                'checktoil' =>  $request->checktoil ?? 0,
+                'fuel91id' =>  $request->fuel91id ?? null,
+                'fuelpricesid' =>  $request->fuelpricesid ?? null,
+                'publictransportfare' => $request->publictransportfare ?? 0,
+                'expresswaytoll' => $request->expresswaytoll ?? 0,
+                'otherexpenses' => $request->otherexpenses ?? 0,
+                'costoffood' => $request->costoffood,
+                'travelexpenses' => $request->travelexpenses,
+                'gasolinecost' => $request->gasolinecost,
+                'totalprice' => $request->totalExpense,
+
+                // new 22/12/25
+                 'departuretime' => $request->departuretime,
+                 'remarknew' => $request->remarknew ?? null,
+                // new 22/12/25
+            ]);
+
+            if (is_array($request->days)) {
+                foreach ($request->days as $day) {
+                    ExpenseFood::create([
+                        'exid' => $expense->id,
+                        'mealid' => $day['mealid'],
+                        'meal1' => floatval($day['meal1'][0] ?? 0),
+                        'meal2' => floatval($day['meal2'][0] ?? 0),
+                        'meal3' => floatval($day['meal3'][0] ?? 0),
+                        'meal4' => floatval($day['meal4'][0] ?? 0),
+                        'meal1reject' => in_array("1", $day['mealx1'] ?? []) ? 1 : 0,
+                        'meal2reject' => in_array("1", $day['mealx2'] ?? []) ? 1 : 0,
+                        'meal3reject' => in_array("1", $day['mealx3'] ?? []) ? 1 : 0,
+                        'meal4reject' => in_array("1", $day['mealx4'] ?? []) ? 1 : 0,
+                        'totalprice' => floatval($day['totalprice']),
+                        'totalpricebf' => floatval($day['totalpricebf']),
+                        'totalreject' => intval($day['totalreject']),
+                        'used_date' => $day['date'],
+                    ]);
+                }
+            }
+
+            // ✅ บันทึก Approve
+            $token = Str::random(64);
+            $approve = Approve::create([
+                'exid' => $expense->id,
+                'typeapprove' => $typeapp, //ประเภทที่ 1 รอหัวหน้าอนุมัติ //ประเภทที่ 2 ผุ้จัดการส่วนตรวจสอบ
+                'empid' => $request->head_id,
+                'email' => $request->head_email ?? '',
+                'approvename' => $request->head_name ?? '',
+                'emailstatus' => 1,
+                'statusapprove' => 0,
+                'login_token' => $token,
+                'token_expires_at' => now()->addDays(30), // แก้ไขจาก 10 เป็น 30 วัน 19112025
+            ]);
+            $link = route('approve.magic.login', ['token' => $approve->login_token]);
+            $data = [
+                'type' => 1,
+                'title' => 'แจ้งเตือนการอนุมัติการเบิกเบี้ยเลี้ยง',
+                'name' => $request->head_name,
+                'full_name' => $fullname,
+                'departuredate' => $request->departuredatemail ?? '',
+                'link' => $link,
+            ];
+
+
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $filename = Str::random() . '.' . $file->getClientOriginalExtension();
+                    // $file->hashName();
+                    $path = $file->storeAs('images/expenses', $filename, 'public');
+
+                    ExpenseFile::create([
+                        'exid' => $expense->id,
+                        'path' => $path,
+                        'etc' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            MailHelper::sendExternalMail(
+                $request->head_email,
+                'อนุมัติการเบิกเบี้ยเลี้ยง',
+                'mails.exapprove', // ชื่อ blade view
+                $data,
+                'Expense Claim System EX' . $expense->id,
+            );
+
+            #log
+            $json = "";
+            $json = json_encode([
+                'expense' => $expense->toArray(),
+                'foods' => ExpenseFood::where('exid', $expense->id)->get()->toArray(),
+                'approve' => $approve->toArray(),
+                'files' => ExpenseFile::where('exid', $expense->id)->get()->toArray(),
+            ]);
+            logAction('add', 'Expense', 'บันทึกการเบิก EX' . $expense->id, $json);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว',
+                'expense_id' => $expense->id,
+                'class' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
+                'error' => $e->getMessage(),
+                'class' => 'error'
+            ], 500);
+        }
+    }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'expense_id' => 'required|exists:expenses,id',
+            'files' => 'required',
+            'files.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
+        ]);
+
+        $paths = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('images/expenses', 'public');
+
+                ExpenseFile::create([
+                    'exid' => $request->expense_id,
+                    'path' => $path,
+                ]);
+
+                $paths[] = $path;
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'อัปโหลดสำเร็จ',
+                'paths' => $paths
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'ไม่มีไฟล์ถูกอัปโหลด'
+        ]);
+    }
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        // ส่งตัวแปรบอกว่าเป็นหน้า view
+        $bu = "";
+        $isView = 0;
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            ->get();
+        $departure_date = $expense->vbooking->departure_date
+            ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
+            : null;
+
+        $return_date = $expense->vbooking->return_date
+            ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $empid = $expense->empid;
+        $bu = BuEmp($empid);
+        // dd($bu);
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // dd($empLevel);
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+        $startDate = Carbon::parse($expense->vbooking->departure_date);
+        $endDate = Carbon::parse($expense->vbooking->return_date);
+        $startTime = Carbon::parse($expense->vbooking->departure_time);
+        // $endTime = Carbon::parse($expense->vbooking->return_time);
+        $endTime = Carbon::parse($expense->returntime);
+
+
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
+        $approvals = Approve::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
+
+        $files = ExpenseFile::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->get();
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+        // dd($groupplant);
+        $passengertype = 0;
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
+                // $passengertype = 1;
+                if ($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id) {
+                    $passengertype = 0;
+                } else {
+                    $passengertype = 1;
+                }
+            }
+        }
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
+
+        return view('front.expenses.view', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $expense = Expense::findOrFail($id);
+
+
+
+        $approve = Approve::where('exid', $expense->id)
+            ->where('typeapprove', 1)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($approve && $approve->statusapprove == 0) {
+            // ยกเลิก Expense
+            $expense->update([
+                'deleted' => 1,
+                'status' => 0,
+            ]);
+
+            // ยกเลิก Approve ทุก exid เดียวกัน
+            Approve::where('exid', $expense->id)->update([
+                'statusapprove' => 99,
+                'remark' => 'รายการถูกยกเลิกโดยผู้ใช้',
+                'status' => 0,
+                'deleted' => 1,
+            ]);
+
+            #log
+            $json  = "";
+            $json = json_encode([
+                'expense' => $expense->toArray(),
+                'approves' => Approve::where('exid', $expense->id)->get()->toArray(),
+            ]);
+            logAction('delete', 'Expense', 'ยกเลิกรายการเบิก EX' . $expense->id, $json);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ยกเลิกรายการเรียบร้อยแล้ว'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'ไม่สามารถยกเลิกได้ เพราะมีการอนุมัติแล้ว'
+        ]);
+    }
+
+
+    // public function Heademp(Request $request)
+    // {
+    //     $keyword = $request->input('sKeyword');
+    //     $page = $request->input('page', 1);
+    //     $limit = 5;
+
+    //     $query = Valldataemp::query();
+
+    //     if ($keyword) {
+    //         $query->where('EMAIL', 'like', "%$keyword%");
+    //     }
+
+    //     $query->where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+    //         ->where('STAEMP', '!=', 9)
+    //         ->where('numlvl', '>=', 10);
+
+    //     $total = $query->count();
+
+    //     $results = $query->skip(($page - 1) * $limit)
+    //         ->take($limit)
+    //         ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT']) // ดึงหลาย field
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->CODEMPID,
+    //                 'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}"
+    //             ];
+    //         });
+
+    //     return response()->json([
+    //         'data' => $results,
+    //         'total_count' => $total,
+    //     ]);
+    // }
+
+    // public function Heademp(Request $request)
+    // {
+    //     $keyword = $request->input('sKeyword');
+    //     $page = $request->input('page', 1);
+    //     $limit = 5;
+
+    //     // --- Query ปกติจาก v_alldataemp ---
+    //     $query = Valldataemp::query();
+
+    //     if ($keyword) {
+    //         $query->where('EMAIL', 'like', "%$keyword%");
+    //     }
+
+    //     $query->where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+    //         ->where('STAEMP', '!=', 9)
+    //         ->where('numlvl', '>=', 10);
+
+    //     $total = $query->count();
+
+    //     $results = $query->skip(($page - 1) * $limit)
+    //         ->take($limit)
+    //         ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT'])
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->CODEMPID,
+    //                 'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}",
+    //                 'group' => 'ทั่วไป'
+    //             ];
+    //         });
+
+    //     // --- ดึงรายชื่ออนุมัติพิเศษ ---
+    //     $specials = Approvespecial::where('status', 1)
+    //         ->where('deleted', 0)
+    //         ->when($keyword, function ($q) use ($keyword) {
+    //             $q->where('email', 'like', "%$keyword%")
+    //                 ->orWhere('fullname', 'like', "%$keyword%");
+    //         })
+    //         ->get(['empid', 'email', 'fullname'])
+    //         ->map(function ($s) {
+    //             return [
+    //                 'id' => $s->empid,
+    //                 'text' => "{$s->email} | {$s->fullname}",
+    //                 'group' => 'อนุมัติพิเศษ'
+    //             ];
+    //         });
+
+    //     // รวม 2 collection
+    //     $merged = $specials->merge($results);
+
+    //     return response()->json([
+    //         'data' => $merged->values(),
+    //         'total_count' => $merged->count(),
+    //     ]);
+    // }
+
+    public function Heademp(Request $request)
+    {
+        $keyword = $request->input('sKeyword');
+        $page = $request->input('page', 1);
+        $limit = 5;
+
+        // --- Query ปกติจาก v_alldataemp ---
+        $query = Valldataemp::query();
+
+        if ($keyword) {
+            $query->where('EMAIL', 'like', "%$keyword%");
+        }
+
+        $query->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033'])
+            ->where('STAEMP', '!=', 9)
+            ->where('numlvl', '>=', 10);
+
+        $total = $query->count();
+
+        $results = $query->skip(($page - 1) * $limit)
+            ->take($limit)
+            ->get(['CODEMPID', 'EMAIL', 'NAMFIRSTT', 'NAMLASTT'])
+            ->map(function ($item) {
+                return [
+                    'id' => $item->CODEMPID,
+                    'text' => "{$item->EMAIL} | {$item->NAMFIRSTT} {$item->NAMLASTT}",
+                    'group' => 'ทั่วไป',
+                ];
+            });
+
+        // --- ดึงรายชื่ออนุมัติพิเศษ ---
+        $specials = Approvespecial::where('status', 1)
+            ->where('deleted', 0)
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->where('email', 'like', "%$keyword%")
+                    ->orWhere('fullname', 'like', "%$keyword%");
+            })
+            ->get(['empid', 'email', 'fullname'])
+            ->map(function ($s) {
+                return [
+                    'id' => $s->empid,
+                    'text' => "{$s->email} | {$s->fullname}",
+                    'group' => 'M3',
+                ];
+            });
+
+        // ✅ แปลงทั้งคู่ให้เป็น Collection ปลอดภัยก่อน merge
+        $merged = collect($specials)->merge(collect($results));
+
+        return response()->json([
+            'data' => $merged->values(),
+            'total_count' => $merged->count(),
+        ]);
+    }
+
+
+
+    public function getAllHeadEmp(Request $request)
+    {
+        $empid = $request->query('emid'); // รับ emid จาก query string
+
+        $data = Valldataemp::where('CODEMPID', $empid)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->whereNotIn('CODEMPID', ['1234', '41000014', '23000033', '63000455'])
+            ->where('STAEMP', '!=', 9)
+            // ->where('numlvl', '>=', 10)
+            ->first();
+
+        // ถ้าไม่เจอข้อมูลเลย
+        if (!$data) {
+            return response()->json([
+                'message' => 'ไม่พบข้อมูล',
+            ], 404);
+        }
+
+        return response()->json([
+            'Idemp' => $data->CODEMPID,
+            'Emailemp' => $data->EMAIL,
+            'Nameemp' => $data->NAMFIRSTT . ' ' . $data->NAMLASTT,
+        ]);
+    }
+
+    private function getDistance($startName, $endName)
+    {
+        return DistanceRate::where(function ($q) use ($startName, $endName) {
+            $q->whereHas('Startplant', function ($q2) use ($startName) {
+                $q2->where('plantname', $startName);
+            })->whereHas('Endplant', function ($q3) use ($endName) {
+                $q3->where('plantname', $endName);
+            });
+        })->orWhere(function ($q) use ($startName, $endName) {
+            $q->whereHas('Startplant', function ($q2) use ($endName) {
+                $q2->where('plantname', $endName);
+            })->whereHas('Endplant', function ($q3) use ($startName) {
+                $q3->where('plantname', $startName);
+            });
+        })->where('deleted', 0)->value('kilometer') ?? 0;
+    }
+
+    public function getHeadEmp($empid)
+    {
+        $url = 'https://notify.bgc.co.th/api/helper/vheademp';
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsInNEYXRlTm93IjoiMjAyNS0wNC0xNyAxMDoxOToyMyJ9.eyJBcHBJRCI6IjExIiwiaUFkbWluSWQiOiIzIiwic0RhdGVOb3ciOiIyMDI1LTA0LTE3IDEwOjE5OjIzIn0.buvrdlbp4CZQRw0EWuqXGhgF8W9BXBgy5CjXGiLpGMo';
+
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
+        ])->post($url, [
+            'Account_number' => $empid
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        // ถ้า error
+        return [
+            'status' => false,
+            'message' => 'ไม่สามารถดึงข้อมูลได้',
+            'error' => $response->body(),
+        ];
+    }
+}

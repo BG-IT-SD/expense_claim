@@ -97,9 +97,9 @@
                     @endif
                 </td>
                 <td>{{ $booking->title ?? '' }}</td>
-                <td>{{ $booking->bu ?? '' }}</td>
-                <td>{{ $location ?? '' }}</td>
-                <td>{{ BuEmp($expense->empid) }} </td>
+                <td>{{ PlantDisplayName($booking->bu) ?? '' }}</td>
+                <td>{{ PlantDisplayName($location) ?? '' }}</td>
+                <td>{{ PlantDisplayName(BuEmp($expense->empid)) }} </td>
                 <td>'{{ $expense->empid }}</td>
                 <td>{{ $fullName }}</td>
                 <td>{{ $expense->userhr->DEPT ?? '-' }}</td>

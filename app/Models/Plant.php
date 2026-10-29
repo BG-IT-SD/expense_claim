@@ -13,12 +13,23 @@ class Plant extends Model
 
     // Define fillable fields to allow mass assignment
     protected $fillable = [
+        'plant_code',
         'plantname',
+        'province',
         'created_by',
         'modified_by',
         'status',
         'deleted',
     ];
+
+    public function getDisplayNameAttribute(): string
+    {
+        if (in_array($this->plant_code, ['BGCI-PT', 'BGCI-AY'], true) && !empty($this->province)) {
+            return "BGCI ({$this->province})";
+        }
+
+        return $this->plantname;
+    }
 
 public function CreatedBy(){
         return $this->belongsTo(User::class, 'created_by', 'id');

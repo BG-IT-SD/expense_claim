@@ -49,15 +49,12 @@
 
                     @if ($expense->vbooking->locationid == 12)
                         @if ($expense->vbooking->type_reserve == 1 || $expense->vbooking->type_reserve == 3)
-                            @php
-                                $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
-                            @endphp
                             <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                                 data-style="btn-default" tabindex="null" disabled>
                                 @foreach ($plants as $plant)
                                     <option value="{{ $plant->id }}"
-                                        {{ $plant->plantname == $expense->vbooking->bu ? 'selected' : '' }}>
-                                        {{ $plant->plantname }}
+                                        {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>
+                                        {{ $selectedPlant?->id == $plant->id ? $expense->vbooking->bu : $plant->plantname }}
                                     </option>
                                 @endforeach
                             </select>
@@ -66,15 +63,12 @@
                         @else
                         @endif
                     @else
-                        @php
-                            $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
-                        @endphp
                         <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
-                                    {{ $plant->plantname == $expense->vbooking->bu ? 'selected' : '' }}>
-                                    {{ $plant->plantname }}
+                                    {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>
+                                    {{ $selectedPlant?->id == $plant->id ? $expense->vbooking->bu : $plant->plantname }}
                                 </option>
                             @endforeach
                         </select>
@@ -179,7 +173,7 @@
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
                                     {{ $plant->plantname == $expense->vbooking->locationbu ? 'selected' : '' }}>
-                                    {{ $plant->plantname }}
+                                    {{ $plant->display_name }}
                                 </option>
                             @endforeach
                         </select>

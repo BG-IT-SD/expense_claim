@@ -80,7 +80,7 @@
     {{-- <table style="width: 100%;">
         <tr>
             <td colspan="18" align="center">
-                <b>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท {{ $exgroup->plantname }}</b>
+                <b>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท {{ PlantDisplayName($exgroup->plantname) }}</b>
             </td>
         </tr>
         <tr>
@@ -94,7 +94,7 @@
             <tr>
                 <td align="center">
                     <b style="font-size: 14pt;">สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท
-                        {{ $exgroup->plantname }}</b>
+                        {{ PlantDisplayName($exgroup->plantname) }}</b>
                 </td>
             </tr>
             <tr>
@@ -138,7 +138,7 @@
                     {{-- หัวสถานที่ --}}
                     <tr style="background-color: #f2f2f2;">
                         <td colspan="17" style="border: 1px solid #000;">
-                            <b>สถานที่ไปปฏิบัติงาน: {{ $groupName }}</b>
+                            <b>สถานที่ไปปฏิบัติงาน: {{ PlantDisplayName($groupName) }}</b>
                         </td>
                     </tr>
 
@@ -225,7 +225,7 @@
                     {{-- รวมสถานที่ --}}
                     <tr style="background-color:#E8E8E8; font-weight: bold;">
                         <td colspan="11" style="text-align: center;">
-                            รวมสถานที่ {{ $groupName }}
+                            รวมสถานที่ {{ PlantDisplayName($groupName) }}
                         </td>
                         <td style="text-align: right;">{{ number_format(round($sum_food), 2) }}</td>
                         <td style="text-align: right;">{{ number_format(round($sum_gas), 2) }}</td>

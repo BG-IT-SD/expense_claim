@@ -1,0 +1,115 @@
+let map, directionsService, directionsRenderer;
+let autocompleteOrigin, autocompleteDestination;
+let originPlace = null;
+let destinationPlace = null;
+let distanceCalculated = false;
+
+window.initMap = function () {
+  const mapElement = document.getElementById("map");
+  const originInput = document.getElementById("origin");
+  const destinationInput = document.getElementById("destination");
+
+  if (!mapElement || !originInput || !destinationInput) {
+    return;
+  }
+
+  map = new google.maps.Map(mapElement, {
+    zoom: 13,
+    center: { lat: 13.7563, lng: 100.5018 },
+  });
+
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+
+  const placeFields = ["name", "formatted_address", "geometry.location"];
+  autocompleteOrigin = new google.maps.places.Autocomplete(originInput, {
+    fields: placeFields,
+  });
+  autocompleteDestination = new google.maps.places.Autocomplete(destinationInput, {
+    fields: placeFields,
+  });
+
+  autocompleteOrigin.setComponentRestrictions({ country: ["th"] });
+  autocompleteDestination.setComponentRestrictions({ country: ["th"] });
+
+  autocompleteOrigin.addListener("place_changed", () => {
+    originPlace = autocompleteOrigin.getPlace();
+    setInputValue("map_a_name", originPlace.name || originPlace.formatted_address || "");
+    distanceCalculated = false;
+  });
+
+  autocompleteDestination.addListener("place_changed", () => {
+    destinationPlace = autocompleteDestination.getPlace();
+    setInputValue("map_b_name", destinationPlace.name || destinationPlace.formatted_address || "");
+    distanceCalculated = false;
+  });
+};
+
+window.calculateDistance = function (event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  const originAddress = originPlace?.formatted_address || document.getElementById("origin")?.value;
+  const destinationAddress = destinationPlace?.formatted_address || document.getElementById("destination")?.value;
+
+  if (!originAddress || !destinationAddress) {
+    alert("กรุณากรอกที่ตั้งต้นทางและปลายทางให้ครบ");
+    distanceCalculated = false;
+    return;
+  }
+
+  if (originPlace?.geometry?.location) {
+    setInputValue("latitude", originPlace.geometry.location.lat());
+    setInputValue("longitude", originPlace.geometry.location.lng());
+  }
+
+  if (destinationPlace?.geometry?.location) {
+    setInputValue("latitude_b", destinationPlace.geometry.location.lat());
+    setInputValue("longitude_b", destinationPlace.geometry.location.lng());
+  }
+
+  directionsService.route({
+    origin: originAddress,
+    destination: destinationAddress,
+    travelMode: google.maps.TravelMode.DRIVING,
+  }, (result, status) => {
+    if (status !== "OK") {
+      alert("ไม่สามารถคำนวณเส้นทางได้ กรุณาตรวจสอบชื่อสถานที่ให้ชัดเจน");
+      distanceCalculated = false;
+      return;
+    }
+
+    directionsRenderer.setDirections(result);
+
+    const distanceValue = result.routes[0].legs[0].distance.value;
+    const distanceText = result.routes[0].legs[0].distance.text;
+    const roundTripKm = ((distanceValue / 1000) * 2).toFixed(2);
+
+    setText("distance", distanceText);
+    setInputValue("totaldistance_text", roundTripKm);
+    setInputValue("totaldistance", roundTripKm);
+
+    if (window.jQuery) {
+      $('input[name="checktoil"]:checked').trigger("change");
+    }
+
+    distanceCalculated = true;
+  });
+};
+
+function setText(id, value) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.innerText = value;
+  }
+}
+
+function setInputValue(id, value) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.value = value;
+  }
+}

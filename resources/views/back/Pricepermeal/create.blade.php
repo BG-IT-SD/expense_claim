@@ -148,7 +148,7 @@
                                                         name="plants[]"
                                                         value="{{ $plant->id }}"
                                                         {{ in_array($plant->id, $selected) ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="plant_{{ $plant->id }}">{{ $plant->plantname }}</label>
+                                                    <label class="form-check-label" for="plant_{{ $plant->id }}">{{ $plant->display_name }}</label>
                                                 </div>
                                             @endforeach
                                             </div>

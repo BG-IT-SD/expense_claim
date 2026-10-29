@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class OrsController extends Controller
+{
+    public function autocomplete(Request $request)
+    {
+        $validated = $request->validate([
+            'text' => ['required', 'string', 'min:2', 'max:255'],
+        ]);
+
+        $response = $this->geoapify()
+            ->acceptJson()
+            ->get($this->geoapifyUrl('/v1/geocode/autocomplete'), [
+                'text' => $validated['text'],
+                'limit' => 6,
+                'filter' => 'countrycode:th',
+                'lang' => 'th',
+                'apiKey' => config('services.geoapify.key'),
+            ]);
+
+        if (!$response->successful()) {
+            return response()->json([
+                'message' => 'Geoapify autocomplete failed.',
+            ], 502);
+        }
+
+        $features = collect($response->json('features', []))
+            ->map(function ($feature) {
+                $properties = $feature['properties'] ?? [];
+                $coordinates = $feature['geometry']['coordinates'] ?? null;
+
+                if (!is_array($coordinates) || count($coordinates) < 2) {
+                    return null;
+                }
+
+                return [
+                    'label' => $properties['formatted'] ?? $properties['address_line1'] ?? $properties['name'] ?? '',
+                    'name' => $properties['name'] ?? $properties['address_line1'] ?? $properties['formatted'] ?? '',
+                    'address' => $properties['formatted'] ?? '',
+                    'lat' => (float) $coordinates[1],
+                    'lng' => (float) $coordinates[0],
+                ];
+            })
+            ->filter(fn ($item) => !empty($item['label']))
+            ->values();
+
+        return response()->json([
+            'results' => $features,
+        ]);
+    }
+
+    public function directions(Request $request)
+    {
+        $request->validate([
+            'origin.lat' => ['required', 'numeric', 'between:-90,90'],
+            'origin.lng' => ['required', 'numeric', 'between:-180,180'],
+            'destination.lat' => ['required', 'numeric', 'between:-90,90'],
+            'destination.lng' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $response = $this->ors()
+            ->accept('application/geo+json')
+            ->asJson()
+            ->post($this->orsUrl('/openrouteservice/v2/directions/driving-car/geojson'), [
+                'coordinates' => [
+                    [
+                        (float) $request->input('origin.lng'),
+                        (float) $request->input('origin.lat'),
+                    ],
+                    [
+                        (float) $request->input('destination.lng'),
+                        (float) $request->input('destination.lat'),
+                    ],
+                ],
+                'units' => 'm',
+            ]);
+
+        if (!$response->successful()) {
+            return response()->json([
+                'message' => 'OpenRouteService directions failed.',
+            ], 502);
+        }
+
+        $feature = $response->json('features.0');
+        $summary = $feature['properties']['summary'] ?? [];
+        $distanceMeters = (float) ($summary['distance'] ?? 0);
+
+        return response()->json([
+            'distance_meters' => $distanceMeters,
+            'duration_seconds' => (float) ($summary['duration'] ?? 0),
+            'distance_text' => number_format($distanceMeters / 1000, 2) . ' km',
+            'geometry' => $feature['geometry'] ?? null,
+        ]);
+    }
+
+    private function ors()
+    {
+        $apiKey = config('services.openrouteservice.key');
+
+        abort_if(empty($apiKey), 500, 'OpenRouteService API key is not configured.');
+
+        return Http::withHeaders([
+            'Authorization' => $apiKey,
+            'Accept-Language' => 'th,en;q=0.8',
+        ])->timeout(15);
+    }
+
+    private function orsUrl(string $path): string
+    {
+        return rtrim(config('services.openrouteservice.base_url'), '/') . $path;
+    }
+
+    private function geoapify()
+    {
+        $apiKey = config('services.geoapify.key');
+
+        abort_if(empty($apiKey), 500, 'Geoapify API key is not configured.');
+
+        return Http::timeout(15);
+    }
+
+    private function geoapifyUrl(string $path): string
+    {
+        return rtrim(config('services.geoapify.base_url'), '/') . $path;
+    }
+}

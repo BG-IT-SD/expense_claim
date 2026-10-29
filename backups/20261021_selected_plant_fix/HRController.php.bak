@@ -1,0 +1,1540 @@
+<?php
+
+namespace App\Http\Controllers\Back;
+
+use App\Helpers\MailHelper;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Expense;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApproveNotification;
+use App\Mail\TestMail;
+use App\Models\Approve;
+use App\Models\ApproveStaff;
+use App\Models\Exgroup;
+use App\Models\ExpenseFile;
+use App\Models\ExpenseFood;
+use App\Models\ExpenseLog;
+use App\Models\Fuelprice;
+use App\Models\Groupplant;
+use App\Models\Passenger;
+use App\Models\Plant;
+use App\Models\Vbookingall;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use App\Exports\HrExport;
+use App\Models\GroupSpecial;
+use App\Models\User;
+use App\Models\Valldataemp;
+use Maatwebsite\Excel\Facades\Excel;
+
+class HRController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+    // public function index(Request $request)
+    // {
+    //     $empid = Auth::user()->empid;
+    //     $bookids = [];
+
+    //     $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+    //     ->where('empid', $empid)
+    //     ->first();
+
+    //     $plantNames = $staff->plantSettingDetails->pluck('plant.plantname');
+
+    //     // dd($plantNames);
+
+    //     $filterBu = $request->input('bu');
+    //     $empids = null; // null = ไม่กรอง
+
+    //     // ถ้ามีการเลือก BU
+    //     if ($filterBu) {
+    //         // ค้นจาก users ก่อน
+    //         $empids = User::where('bu', $filterBu)->pluck('empid');
+
+    //         // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+    //         if ($empids->isEmpty()) {
+    //             $empids = Valldataemp::where('alias_name', $filterBu)
+    //                 ->where('STAEMP', '!=', 9)
+    //                 ->pluck('CODEMPID');
+    //         }
+    //     }
+
+
+
+    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
+    //         ->whereHas('latestApprove', function ($query) {
+    //             $query->where(function ($q) {
+    //                 $q->where('typeapprove', 1)
+    //                     ->orWhere(function ($sub) {
+    //                         $sub->where('typeapprove', 3)
+    //                             ->where('statusapprove', 0);
+    //                     });
+    //             });
+    //         })
+    //         ->when($request->filled('status'), function ($q) use ($request) {
+    //             $q->whereHas('latestApprove', function ($sub) use ($request) {
+    //                 $sub->where('statusapprove', $request->status);
+    //             });
+    //         })
+    //         ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+    //             $q->whereIn('empid', $empids);
+    //         })
+    //         ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+    //             $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+    //         }, function ($q) {
+    //             // ถ้าไม่กรอกวันที่: ดึงย้อนหลัง 1 เดือน
+    //             $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+    //         })
+    //         ->when($plantNames && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
+    //             $q->whereHas('user', function ($query) use ($plantNames) {
+    //                 $query->whereIn('bu', $plantNames);
+    //             });
+    //         })
+    //         ->whereIn('extype', [1, 3])
+    //         ->where('deleted', 0)
+    //         ->get();
+
+    //     $statusList = [
+    //         0 => 'รออนุมัติ',
+    //         1 => 'รอตรวจสอบ',
+    //         2 => 'ไม่อนุมัติ',
+    //         99 => 'ยกเลิกโดยผู้ใช้',
+    //     ];
+
+    //     $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+    //     return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
+    // }
+
+    public function index(Request $request)
+    {
+        $empid = Auth::user()->empid;
+        $bookids = [];
+
+        // พนักงานที่ login และโรงงานที่เขาดูแล
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+            ->where('empid', $empid)
+            ->where('deleted', 0)
+            ->where('step', 9)
+            ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname')
+            ->filter()
+            ->unique()
+            ->values(); // BU ที่เจ้าของ login ดูแล
+
+        // dd($plantNames);
+
+        $filterBu = $request->input('bu');
+        $empids = null;
+        // dd($plantNames);
+
+        // if ($filterBu) {
+        //     // ดึง empid ที่ belong กับ BU ที่กรอก
+        //     $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+        //     $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+        //         ->where('STAEMP', '!=', 9)
+        //         ->pluck('CODEMPID');
+
+        //     $empids = $empidsFromUser->merge($empidsFromValldataemp)->unique()->values();
+        // }
+
+        if ($filterBu) {
+            // User search/เลือก BU
+            $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+            // $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::where('bu', $filterBu)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else if ($plantNames->isNotEmpty()) {
+            // ไม่ได้เลือก BU → default ตาม BU ที่ login ดูแล
+            $empidsFromUser = User::whereIn('bu', $plantNames)->pluck('empid');
+            // $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::whereIn('bu', $plantNames)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else {
+            // เผื่อกรณี ไม่มี BU เลย
+            $empids = collect();
+        }
+
+
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1)
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0);
+                        })
+                        ->orWhere(function ($sub2) {
+                            $sub2->where('typeapprove', 4)
+                                ->where('statusapprove', 2);
+                        })->orWhere(function ($sub3) {
+                            $sub3->where('typeapprove', 5)
+                                ->where('statusapprove', 2);
+                        });
+                });
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->whereHas('latestApprove', function ($sub) use ($request) {
+                    $sub->where('statusapprove', $request->status);
+                });
+            })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
+            ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+            }, function ($q) {
+                $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+            })
+            // เฉพาะ BU ที่เจ้าของ login ดูแล (ถ้าไม่มี filterBu)
+            // ->when(!$filterBu && $plantNames->isNotEmpty(), function ($q) use ($plantNames) {
+            //     $q->whereHas('user', function ($query) use ($plantNames) {
+            //         $query->whereIn('bu', $plantNames);
+            //     });
+            // })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
+
+            ->whereIn('extype', [1, 3])
+            ->where('deleted', 0)
+            ->get();
+
+        $statusList = [
+            0 => 'รออนุมัติ',
+            1 => 'รอตรวจสอบ',
+            2 => 'ไม่อนุมัติ',
+            99 => 'ยกเลิกโดยผู้ใช้',
+        ];
+
+        $plants = Plant::where('status', 1)->where('deleted', 0)->get();
+
+        return view('back.hr.list', compact('expenses', 'statusList', 'plants'));
+    }
+
+    // public function history()
+    // {
+    //     $empid = Auth::user()->empid;
+    //     // พนักงานที่ login และโรงงานที่เขาดูแล
+    //     $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+    //         ->where('empid', $empid)
+    //         ->where('deleted', 0)
+    //         ->where('step', 9)
+    //         ->first();
+
+    //     $plantNames = $staff?->plantSettingDetails
+    //         ->pluck('plant.plantname', 'plant.id')
+    //         ->filter()
+    //         ->map(function ($name, $id) {
+    //             return ['id' => $id, 'name' => $name];
+    //         })
+    //         ->values();
+    //     // dd($plantNames);
+
+    //     $usercheck = Auth::user()->empid;
+
+    //     // $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech'])
+    //     //     ->whereHas('latestApprove', function ($query) use ($usercheck) {
+    //     //         $query->where('typeapprove', 3)
+    //     //             ->where('statusapprove', 1)
+    //     //             ->where('empid', $usercheck); // แสดงเฉพาะข้อมูลผู้ตรวจสอบที่ login
+    //     //     })
+    //     //     ->whereIn('extype', [1, 2, 3])
+    //     //     ->get();
+    //     $expenses = Expense::with(['latestApprove', 'vbooking', 'vbookingdrv', 'user', 'tech'])
+    //         ->whereHas('latestApprove', function ($q) use ($usercheck) {
+    //             $q->where('typeapprove', 3)
+    //                 ->where('statusapprove', 1)
+    //                 ->when((string)$usercheck !== '58000545', fn($qq) => $qq->where('empid', $usercheck));
+    //         })
+    //         ->whereIn('extype', [1, 2, 3])
+    //         ->get();
+
+    //     $page = 'HR.show';
+
+    //     return view('back.hr.approved', compact('expenses', 'page', 'plantNames'));
+    // }
+    public function history()
+    {
+        ini_set('max_execution_time', 300);
+        $empid = Auth::user()->empid;
+
+        // พนักงาน HR + โรงงานที่ดูแล
+        $staff = ApproveStaff::with([
+            'plantSettingDetails' => function ($q) {
+                $q->where('deleted', 0)
+                    ->with('plant'); // โหลด plant ต่อ
+            }
+        ])
+            ->where('empid', $empid)
+            ->where('deleted', 0)
+            ->where('step', 9)
+            ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname', 'plant.id')
+            ->filter()
+            ->map(fn($name, $id) => ['id' => $id, 'name' => $name])
+            ->values();
+
+        // dd($plantNames);
+
+        $usercheck = $empid;
+
+        // ดึงเฉพาะ expense ที่อนุมัติแล้วโดยคนนี้
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'vbookingdrv', 'user', 'tech'])
+            ->whereHas('latestApprove', function ($q) use ($usercheck) {
+                $q->where('typeapprove', 3)
+                    ->where('statusapprove', 1)
+                    ->when((string) $usercheck !== '58000545', fn($qq) => $qq->where('empid', $usercheck));
+            })
+            ->whereIn('extype', [1, 2, 3])
+            ->get();
+
+        // 🟢 แบ่งกลุ่มตาม BU/Plant แค่ครั้งเดียว (ลด N×M loop)
+        $expensesByPlant = $expenses->groupBy(function ($expense) use ($usercheck) {
+            if ((string)$usercheck === '64000417') {
+                return 'PTI';
+            }
+
+            return BuEmp($expense->empid);
+        });
+
+        // dd($expensesByPlant);
+
+        $page = 'HR.show';
+
+        return view('back.hr.approved', compact('expensesByPlant', 'page', 'plantNames'));
+    }
+
+
+    public function groupList(Request $request)
+    {
+        $exgroups = Exgroup::where('deleted', 0)
+            ->when(
+                $request->filled('exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', $request->exdate)
+            )
+            ->when(
+                $request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '<=', $request->end_exdate)
+            )
+            // ถ้าไม่กรอกวันที่เลย ให้ default ย้อนหลัง 1 เดือน
+            ->when(
+                !$request->filled('exdate') && !$request->filled('end_exdate'),
+                fn($q) =>
+                $q->whereDate('groupdate', '>=', now()->subMonth()->startOfDay())
+            )
+            ->when(
+                $request->filled('status'),
+                fn($q) => $q->where('statusapprove', $request->status)
+            )
+            ->orderByDesc('id')
+            ->get();
+
+        $statusList = searchStatus();
+        return view('back.hr.grouplist', compact('exgroups', 'statusList'));
+    }
+
+    public function hrdriver(Request $request)
+    {
+        $exid = $request->filled('exid')
+            ? ltrim($request->exid, 'EX')
+            : null;
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+            ->whereHas('latestApprove', function ($query) use ($request) {
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1) // เอาทุก statusapprove
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0); // เฉพาะ statusapprove = 0
+                        });
+                })->when($request->filled('status'), function ($q) use ($request) {
+                    $q->where('statusapprove', $request->status);
+                });
+            })
+            ->when(
+                $request->filled('exid'),
+                fn($q) =>
+                $q->where('id', $exid)
+            )
+            ->when(
+                $request->filled('drivers'),
+                fn($q) =>
+                $q->where('empid', $request->drivers)
+            )
+            ->whereIn('extype', [2])
+            ->get();
+
+        // Status
+        $status = searchStatus();
+        $drivers = GroupSpecial::whereIn('typeid', [2])->where("deleted", 0)->where("status", 1)->get();
+
+        return view('back.hr.listdriver', compact('expenses', 'status', 'drivers'));
+    }
+    public function driverhistory()
+    {
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'tech'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->whereIn('typeapprove', [1, 3, 4, 5]);
+                // ->where('statusapprove', 1);
+            })
+            ->whereIn('extype', [2])
+            ->get();
+        $page = 'HR.show';
+        return view('back.hr.historydv', compact('expenses', 'page'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id, $type = null)
+    {
+        $expense = Expense::with(['foods', 'logs.booking'])->findOrFail($id);
+
+
+        $driver_empid = $expense->empid;
+        $driver_name = optional($expense->tech)->fullname ?? '-';
+
+        // ดึงวันที่ที่เบิกอาหารทั้งหมด
+        $Alldayfood = $expense->foods->pluck('used_date')->unique()->sort()->map(function ($date) {
+            return \Carbon\Carbon::parse($date);
+        });
+
+        $groupedTimeRanges = [];
+        $start = null;
+        $end = null;
+
+        foreach ($expense->foods as $food) {
+            $dayKey = $food->used_date;
+
+            // หา logs ที่เกี่ยวข้องกับ foodid นี้
+            $relatedLogs = $expense->logs->where('foodid', $food->id);
+
+            $details = [];
+            $start = null;
+            $end = null;
+
+            foreach ($relatedLogs as $log) {
+                $booking = $log->booking;
+                if ($booking) {
+                    $bookingStart = Carbon::parse($booking->departure_date . ' ' . $booking->departure_time);
+                    $bookingEnd = Carbon::parse($booking->return_date . ' ' . $booking->return_time);
+
+                    $start = is_null($start) || $bookingStart->lt($start) ? $bookingStart : $start;
+                    $end = is_null($end) || $bookingEnd->gt($end) ? $bookingEnd : $end;
+
+                    $details[] = [
+                        'id' => $booking->id,
+                        'location_name' => $booking->location_name,
+                        'start' => $bookingStart,
+                        'end' => $bookingEnd,
+                    ];
+                }
+            }
+
+            // fallback ถ้าไม่มี log
+            $groupedTimeRanges[$dayKey] = [
+                'start' => $start ?? Carbon::createFromTimeString('06:00'),
+                'end' => $end ?? Carbon::createFromTimeString('23:59'),
+                'details' => $details,
+            ];
+        }
+        // foreach ($expense->foods as $food) {
+        //     $dayKey = $food->used_date;
+        //     $relatedLogs = $expense->logs->where('foodid', $food->id);
+
+        //     $details = [];
+        //     $start = null;
+        //     $end = null;
+
+        //     foreach ($relatedLogs as $log) {
+        //         $booking = $log->booking;
+        //         if (!$booking) continue;
+
+        //         // ✅ เวลาจริงจาก booking (สำหรับ "รายการย่อย")
+        //         $origStart = Carbon::parse($booking->departure_date . ' ' . $booking->departure_time);
+        //         $origEnd   = Carbon::parse($booking->return_date . ' ' . $booking->return_time);
+
+        //         // ✅ เวลาที่จะใช้ใน "หัวข้อหลัก" (อาจถูกปรับ)
+        //         $calcStart = $origStart->copy();
+        //         $calcEnd   = $origEnd->copy();
+
+        //         // ถ้า booking ข้ามวัน และวันปัจจุบันตรงกับวัน return_date → เริ่ม 00:00
+        //         if ($booking->departure_date != $booking->return_date && $booking->return_date == $dayKey) {
+        //             $calcStart = Carbon::parse($booking->return_date . ' 00:00');
+        //         }
+
+        //         // ✅ ใช้ calcStart/calcEnd สำหรับหัวข้อหลัก
+        //         $start = is_null($start) || $calcStart->lt($start) ? $calcStart : $start;
+        //         $end   = is_null($end) || $calcEnd->gt($end) ? $calcEnd : $end;
+
+        //         // ✅ ใช้เวลาจริง (ไม่ปรับ) สำหรับแสดงในรายการย่อย
+        //         $details[] = [
+        //             'id'            => $booking->id,
+        //             'location_name' => $booking->location_name,
+        //             'start'         => $origStart, // ← original
+        //             'end'           => $origEnd,   // ← original
+        //         ];
+        //     }
+
+        //     // fallback ถ้าไม่มี booking
+        //     $groupedTimeRanges[$dayKey] = [
+        //         'start'   => $start ?? Carbon::createFromTimeString('06:00'),
+        //         'end'     => $end ?? Carbon::createFromTimeString('23:59'),
+        //         'details' => $details,
+        //     ];
+        // }
+
+
+
+        $approvals = Approve::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
+
+        // dd($details);
+
+        // ราคาต่อมื้อ
+        $prices = [1 => 50, 2 => 60, 3 => 60, 4 => 50];
+
+        // คนอนุมัติปัจจุบัน
+        $headempid = Auth::user()->empid ?? '';
+        $heademail = Auth::user()->email ?? '';
+        $headname = Auth::user()->fullname ?? '';
+
+        // คนอนุมัติขั้นถัดไป
+        $bu = BuEmp($driver_empid);
+        $nextStepApprove = Approvestep($bu, 1, 1);
+
+        $finalHEmailNext = $nextStepApprove['email'] ?? 'Kamolwan.b@bgiglass.com';
+        $finalHNameNext = $nextStepApprove['fullname'] ?? '';
+        $finalIdNext = $nextStepApprove['empid'] ?? '66000510';
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
+
+        $startDate = $Alldayfood->first();
+        $endDate = $Alldayfood->last();
+
+
+        return view('front.driver.show', compact(
+            'expense',
+            'driver_empid',
+            'driver_name',
+            'Alldayfood',
+            'groupedTimeRanges',
+            'prices',
+            'finalHEmailNext',
+            'finalHNameNext',
+            'finalIdNext',
+            'type',
+            'headempid',
+            'heademail',
+            'headname',
+            'approvals',
+            'startDate',
+            'endDate'
+        ));
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id, $type = null)
+    {
+        // ส่งตัวแปรบอกว่าเป็นหน้า edit
+        $isView = 1;
+        if ($type != null) {
+            $isView = 0;
+        } else {
+            $isView = 1;
+        }
+
+        $finalHEmail = '';
+        $finalHName = '';
+        $finalId = '';
+
+        $finalHEmailNext = '';
+        $finalHNameNext = '';
+        $finalIdNext = '';
+
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            ->get();
+        $departure_date = $expense->vbooking->departure_date
+            ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
+            : null;
+
+        $return_date = $expense->vbooking->return_date
+            ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $empid = $expense->empid;
+        $bu = BuEmp($empid);
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // dd($empLevel);
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+
+        $startDate = Carbon::parse($expense->vbooking->departure_date);
+        $endDate = Carbon::parse($expense->vbooking->return_date);
+        $startTime = Carbon::parse($expense->vbooking->departure_time);
+        // $endTime = Carbon::parse($expense->vbooking->return_time);
+        $endTime = Carbon::parse($expense->returntime);
+
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
+        $approvals = Approve::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
+
+        $files = ExpenseFile::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->get();
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
+
+        $extype = $expense->extype;
+
+        // คนตรวจสอบ
+        $finalHEmail = Auth::user()->email;
+        $finalHName = Auth::user()->fullname;
+        $finalId = Auth::user()->empid;
+        // ลำดับถัดไป
+        $nextStepApprove = Approvestep($bu, 1, 1);
+        // dd($nextStepApprove);
+        $finalHEmailNext = $nextStepApprove["email"];
+        $finalHNameNext = $nextStepApprove["fullname"];
+        $finalIdNext = $nextStepApprove["empid"];
+
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
+
+        // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
+        // $finalHNameNext = 'เสาวภา เข็มเหลือง';
+        // $finalIdNext = '63000455';
+        // dd($expenseFoods);
+
+        $passengertype = 0;
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
+                // $passengertype = 1;
+                if ($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id) {
+                    $passengertype = 0;
+                } else {
+                    $passengertype = 1;
+                }
+            }
+        }
+
+
+        return view('back.hr.frmapprovegrp', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+    }
+
+    public function editapprove($id, $type = null, $approve = null)
+    {
+        // ส่งตัวแปรบอกว่าเป็นหน้า edit
+        $isView = 3;
+        if ($type != null) {
+            if ($type == 1) {
+                $isView = 3;
+            } else {
+                $isView = 0;
+            }
+        } else {
+            $isView = 3;
+        }
+
+        $finalHEmail = '';
+        $finalHName = '';
+        $finalId = '';
+
+        $finalHEmailNext = '';
+        $finalHNameNext = '';
+        $finalIdNext = '';
+
+        $expense = Expense::with(['vbooking', 'user', 'fuel', 'fuelprice'])->findOrFail($id);
+        // Plant
+        $plants = Plant::where('status', 1)->where('deleted', 0)
+            ->get();
+        $departure_date = $expense->vbooking->departure_date
+            ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
+            : null;
+
+        $return_date = $expense->vbooking->return_date
+            ? Carbon::parse("{$expense->vbooking->return_date} {$expense->vbooking->return_time}")->format('d/m/Y H:i')
+            : null;
+
+        $empid = $expense->empid;
+        $bu = BuEmp($empid);
+        $level = 1;
+        $empLevel = LevelEmp($empid);
+        // dd($empLevel);
+        if ($empLevel <= 7) {
+            $level = 1;
+        } else {
+            $level = 2;
+        }
+
+        $startDate = Carbon::parse($expense->vbooking->departure_date);
+        $endDate = Carbon::parse($expense->vbooking->return_date);
+        $startTime = Carbon::parse($expense->vbooking->departure_time);
+        $endTime = Carbon::parse($expense->vbooking->return_time);
+
+        $Alldayfood = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $expenseFoods = ExpenseFood::where('exid', $expense->id)->get()->keyBy('used_date');
+        $approvals = Approve::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get();
+
+
+
+        $files = ExpenseFile::where('exid', $expense->id)
+            ->where('deleted', 0)
+            ->where('status', 1)
+            ->get();
+
+        // Food
+        $groupplant = Groupplant::with([
+            'plant',
+            'meal.group',
+            'meal',
+        ])
+            ->where('deleted', 0)
+            ->whereHas('plant', function ($query) use ($bu) {
+                $query->where('plantname', $bu);
+            })
+            ->whereHas('meal.group', function ($query) use ($level) {
+                $query->where('levelid', $level);
+            })
+            ->first();
+
+        $reasons = ['อบรม', 'สัมมนา', 'ฝึกงาน', 'ติดตั้งเครื่องจักร', 'ลูกค้าร้องเรียน', 'พบลูกค้า', 'อื่นๆ'];
+        // ราคาน้ำมัน
+        $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
+
+        $extype = $expense->extype;
+
+        // คนตรวจสอบ
+        $finalHEmail = Auth::user()->email;
+        $finalHName = Auth::user()->fullname;
+        $finalId = Auth::user()->empid;
+        // ลำดับถัดไป
+        $nextStepApprove = Approvestep($bu, 1, 1);
+        // dd($nextStepApprove);
+        $finalHEmailNext = $nextStepApprove["email"];
+        $finalHNameNext = $nextStepApprove["fullname"];
+        $finalIdNext = $nextStepApprove["empid"];
+
+        // $finalHEmailNext = 'Kamolwan.b@bgiglass.com';
+        // $finalHNameNext = 'กมลวรรณ บรรชา';
+        // $finalIdNext = '66000510';
+
+        // $finalHEmailNext = 'Saowapha.K@bgiglass.com';
+        // $finalHNameNext = 'เสาวภา เข็มเหลือง';
+        // $finalIdNext = '63000455';
+
+        $passengertype = 0;
+        if ($expense->vbooking->type_reserve == 4) {
+            if ($empid == $expense->vbooking->passenger_empid) {
+                // $passengertype = 1;
+                if ($expense->vbooking->passenger_empid == $expense->vbooking->booking_emp_id) {
+                    $passengertype = 0;
+                } else {
+                    $passengertype = 1;
+                }
+            }
+        }
+
+        return view('back.hr.frmapproveafter', compact(['expense', 'empid', 'passengertype', 'reasons', 'approve', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu', 'finalHEmail', 'finalHName', 'finalId', 'finalHEmailNext', 'finalHNameNext', 'finalIdNext']));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+
+            'costoffood' => 'required',
+            'travelexpenses' => 'required',
+            'gasolinecost' => 'required',
+            'totalExpense' => 'required',
+            // 'files.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf',
+
+        ]);
+        // dd($request->all());
+
+        try {
+            DB::beginTransaction();
+
+            $page_mode = $request->input('page_mode', 99);
+            $checkstep = $request->input('checkstep', 99);
+            //    dd($page_mode);
+
+            $update = Expense::find($id);
+            if ($update) {
+                $update->update([
+                    'returntime' => $request->returntime,
+                    'publictransportfare' => $request->publictransportfare ?? 0,
+                    'expresswaytoll' => $request->expresswaytoll ?? 0,
+                    'otherexpenses' => $request->otherexpenses ?? 0,
+                    'costoffood' => $request->costoffood,
+                    'travelexpenses' => $request->travelexpenses,
+                    'gasolinecost' => $request->gasolinecost,
+                    'totalprice' => $request->totalExpense,
+                    // New
+                    'afdistance' => $request->afdistance ?? 0,
+                    'basedistance' => $request->basedistance ?? 0,
+                    'distancemore' => $request->distancemore ?? 0,
+                    'distancenote' => $request->distancenote ?? '',
+                    'totaldistance' => $request->totaldistance ?? 0,
+                    // New
+                    // New24122025
+                    'departuretime' => $request->departuretime,
+                    'remarknew' => $request->remarknew ?? null,
+                    // New24122025
+                ]);
+            }
+
+            // มื้ออาหาร
+            foreach ($request->days as $day) {
+                $expenseFood = ExpenseFood::where('exid', $id)
+                    ->where('used_date', $day['date'])
+                    ->first();
+
+                if ($expenseFood) {
+                    $expenseFood->meal1 = floatval($day['meal1'][0] ?? 0);
+                    $expenseFood->meal2 = floatval($day['meal2'][0] ?? 0);
+                    $expenseFood->meal3 = floatval($day['meal3'][0] ?? 0);
+                    $expenseFood->meal4 = floatval($day['meal4'][0] ?? 0);
+
+                    $expenseFood->meal1reject = in_array("1", $day['mealx1'] ?? []) ? 1 : 0;
+                    $expenseFood->meal2reject = in_array("1", $day['mealx2'] ?? []) ? 1 : 0;
+                    $expenseFood->meal3reject = in_array("1", $day['mealx3'] ?? []) ? 1 : 0;
+                    $expenseFood->meal4reject = in_array("1", $day['mealx4'] ?? []) ? 1 : 0;
+
+                    $expenseFood->totalprice = floatval($day['totalprice'] ?? 0);
+                    $expenseFood->totalpricebf = floatval($day['totalpricebf'] ?? 0);
+                    $expenseFood->totalreject = intval($day['totalreject'] ?? 0);
+
+                    $expenseFood->save();
+                }
+            }
+
+            //  End มื้ออาหาร
+            $approve = null;
+            if ($page_mode == 1) {
+                // ถ้ามาจากการตรวจสอบให้เพิ่มข้อมูล approve
+                // บันทึก Approve
+                $token = Str::random(64);
+                // $token2 = Str::random(64);
+                $approve = Approve::create([
+                    'exid' => $id,
+                    'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
+                    'empid' => $request->head_id,
+                    'email' => $request->head_email ?? '',
+                    'approvename' => $request->head_name ?? '',
+                    'emailstatus' => 1,
+                    'statusapprove' => 1,
+                    'login_token' => $token,
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+            }
+            // End บันทึก Approve
+
+            // ถ้าstep 1 ให้คำนวณยอดเงินใน ex group ใหม่
+            if ($checkstep == 1) {
+                // หา groupid ของ expense นี้
+                $groupId = $update->exgroup ?? null;
+
+                if ($groupId) {
+                    // ดึงทุกรายการใน group
+                    $groupExpenses = Expense::where('exgroup', $groupId)
+                        ->where('deleted', 0)
+                        ->get();
+
+                    // set ค่าเริ่มต้น
+                    $sumFood = 0;
+                    $sumTravel = 0;
+                    $sumGas = 0;
+                    $sumOther = 0;
+                    $sumTotal = 0;
+
+                    foreach ($groupExpenses as $exp) {
+                        $sumFood   += $exp->costoffood ?? 0;
+                        $sumTravel += $exp->travelexpenses ?? 0;
+                        $sumGas    += $exp->gasolinecost ?? 0;
+                        $sumOther  += ($exp->publictransportfare ?? 0)
+                            + ($exp->expresswaytoll ?? 0)
+                            + ($exp->otherexpenses ?? 0);
+
+                        $sumTotal  += $exp->totalprice ?? 0;
+                    }
+
+                    // update ตาราง exgroups ด้วยยอดรวมใหม่
+                    Exgroup::where('id', $groupId)->update([
+                        'totalfood'        => $sumFood,
+                        'totalfuel'        => $sumGas,
+                        'totalother'       => $sumOther,
+                        'total'            => $sumTotal,
+                        'nettotalfood'     => $sumFood,
+                        'nettotalfuel'     => $sumGas,
+                        'nettotalother'    => $sumOther,
+                        'nettotal'         => $sumTotal,
+                    ]);
+                }
+            }
+            DB::commit();
+
+
+            $logData = [
+                'expense'  => $update ? $update->toArray() : null,
+                'foods'    => ExpenseFood::where('exid', $id)->get()->toArray(),
+                'approve'  => $approve ? $approve->toArray() : null,
+            ];
+            logAction(
+                'update',
+                'Expense',
+                'ตรวจสอบรายการเบิก EX' . $id,
+                json_encode($logData)
+            );
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'ตรวจสอบข้อมูลเรียบร้อยแล้ว',
+                'expense_id' => $id,
+                'class' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
+                'error' => $e->getMessage(),
+                'class' => 'error'
+            ], 500);
+        }
+    }
+
+    // public function updateClaimDriver(Request $request, $id)
+    // {
+    //     DB::beginTransaction();
+
+    //     try {
+    //         $expense = Expense::with('foods')->findOrFail($id);
+    //         $days = $request->input('days', []);
+    //         $costoffood = $request->input('costoffood', 0);
+    //         $empid = $request->input('empid');
+
+    //         // ลบ log เดิมก่อน
+    //         // ExpenseLog::where('exid', $expense->id)->delete();
+
+    //         foreach ($days as $index => $day) {
+    //             $usedDate = $day['date'];
+
+    //             // คำนวณมื้อ
+    //             $meal1 = isset($day['meal1']) ? array_sum($day['meal1']) : 0;
+    //             $meal2 = isset($day['meal2']) ? array_sum($day['meal2']) : 0;
+    //             $meal3 = isset($day['meal3']) ? array_sum($day['meal3']) : 0;
+    //             $meal4 = isset($day['meal4']) ? array_sum($day['meal4']) : 0;
+    //             $total = $meal1 + $meal2 + $meal3 + $meal4;
+
+    //             // อัปเดต/สร้าง expense_food
+    //             $food = $expense->foods->firstWhere('used_date', $usedDate);
+
+    //             if ($food) {
+    //                 $food->update([
+    //                     'meal1' => $meal1,
+    //                     'meal2' => $meal2,
+    //                     'meal3' => $meal3,
+    //                     'meal4' => $meal4,
+    //                     'totalpricebf' => $total,
+    //                     'totalprice' => $total,
+    //                 ]);
+    //             }
+    //         }
+
+    //         // อัปเดตยอดรวม
+    //         $expense->update([
+    //             'costoffood' => $costoffood,
+    //             'totalprice' => $costoffood,
+    //         ]);
+
+    //         // บันทึก Approve
+    //         $token = Str::random(64);
+    //         $approve = Approve::create([
+    //             'exid' => $id,
+    //             'typeapprove' => 3, //ประเภทที่ 3 Hr ตรวจสอบ
+    //             'empid' => $request->head_id,
+    //             'email' => $request->head_email ?? '',
+    //             'approvename' => $request->head_name ?? '',
+    //             'emailstatus' => 1,
+    //             'statusapprove' => 1,
+    //             'login_token' => $token,
+    //             'token_expires_at' => now()->addDays(10),
+    //         ]);
+    //         // End บันทึก Approve
+    //         DB::commit();
+
+
+    //         $logData = [
+    //             'expense'  => $expense->toArray(),
+    //             'foods'    => $expense->foods->toArray(),
+    //             'approve'  => $approve->toArray(),
+    //         ];
+    //         logAction(
+    //             'update',
+    //             'Expense',
+    //             'ตรวจสอบเบิกค่าอาหาร พขร EX' . $expense->id,
+    //             json_encode($logData)
+    //         );
+
+    //         return redirect()->route('HR.hrdriver')->with('success', 'ตรวจสอบการเบิกอาหารเรียบร้อย');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return redirect()->route('HR.hrdriver')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+    //     }
+    // }
+    public function updateClaimDriver(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $expense = Expense::with('foods')->findOrFail($id);
+
+            $action = $request->input('action_type');
+
+            if ($action === 'approve') {
+                // ✅ กรณีผ่าน
+                $days = $request->input('days', []);
+                $costoffood = $request->input('costoffood', 0);
+
+                foreach ($days as $day) {
+                    $usedDate = $day['date'];
+                    $meal1 = isset($day['meal1']) ? array_sum($day['meal1']) : 0;
+                    $meal2 = isset($day['meal2']) ? array_sum($day['meal2']) : 0;
+                    $meal3 = isset($day['meal3']) ? array_sum($day['meal3']) : 0;
+                    $meal4 = isset($day['meal4']) ? array_sum($day['meal4']) : 0;
+                    $total = $meal1 + $meal2 + $meal3 + $meal4;
+
+                    $food = $expense->foods->firstWhere('used_date', $usedDate);
+                    if ($food) {
+                        $food->update([
+                            'meal1' => $meal1,
+                            'meal2' => $meal2,
+                            'meal3' => $meal3,
+                            'meal4' => $meal4,
+                            'totalpricebf' => $total,
+                            'totalprice'   => $total,
+                        ]);
+                    }
+                }
+
+                $expense->update([
+                    'costoffood' => $costoffood,
+                    'totalprice' => $costoffood,
+                ]);
+
+                $approve = Approve::create([
+                    'exid' => $id,
+                    'typeapprove' => 3,
+                    'empid' => $request->head_id,
+                    'email' => $request->head_email ?? '',
+                    'approvename' => $request->head_name ?? '',
+                    'emailstatus' => 1,
+                    'statusapprove' => 1,
+                    'login_token' => Str::random(64),
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+
+                $message = 'ตรวจสอบการเบิกอาหารเรียบร้อย';
+            } else {
+                // ❌ กรณีไม่ผ่าน
+                $reason = $request->input('reject_reason');
+
+                // ลบ logs ที่เกี่ยวข้อง
+                ExpenseLog::where('exid', $expense->id)->delete();
+
+                // เพิ่ม record reject ใน approve
+                $approve = Approve::create([
+                    'exid' => $id,
+                    'typeapprove' => 3,
+                    'empid' => $request->head_id,
+                    'email' => $request->head_email ?? '',
+                    'approvename' => $request->head_name ?? '',
+                    'emailstatus' => 1,
+                    'statusapprove' => 2, // ไม่อนุมัติ
+                    'remark' => $reason,
+                    'login_token' => Str::random(64),
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+
+                $message = 'ไม่ผ่านการตรวจสอบ และลบ Expense Logs แล้ว';
+            }
+
+            DB::commit();
+
+            return redirect()->route('HR.hrdriver')->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('HR.hrdriver')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function reject(Request $request)
+    {
+        $request->validate([
+            'rejectremark' => 'required',
+            'rejectidexpense' => 'required'
+        ]);
+
+        $id = $request->rejectidexpense ?? "";
+        $empfullname = $request->empfullname ?? "";
+        $departuredaterj = $request->departuredaterj ?? "";
+        $empemailrj = $request->empemailrj ?? "";
+
+        if ($id != "") {
+            $approve = Approve::create([
+                'exid' => $id,
+                'typeapprove' => 3,
+                'empid' => $request->head_idrj,
+                'email' => $request->head_emailrj ?? '',
+                'approvename' => $request->head_namerj ?? '',
+                'emailstatus' => 1,
+                'statusapprove' => 2,
+                'remark' => $request->rejectremark,
+            ]);
+
+            if ($approve) {
+                // ส่งเมลเฉพาะกรณี reject
+                $data = [
+                    'headname' => $request->head_namerj ?? '', // คนที่ reject
+                    'name' => $empfullname, // user
+                    'expenseid' => $approve->exid, //exid
+                    'departuredate' => $departuredaterj,
+                    'remark' => $request->rejectremark,
+                ];
+
+                MailHelper::sendExternalMail(
+                    $empemailrj, // ผู้รับ คือ ผู้ขอเบิก
+                    'แจ้งผลการไม่อนุมัติการเบิกเบี้ยเลี้ยง',
+                    'mails.reject', // ชื่อ blade view mail
+                    $data,
+                    'Expense Claim System EX' . $id,
+                );
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'ยกเลิกข้อมูลเรียบร้อยแล้ว',
+                    'expense_id' => $id,
+                    'class' => 'success'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล',
+                    'class' => 'error'
+                ], 500);
+            }
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'ไม่พบรหัสอ้างอิงรายการ',
+                'class' => 'warning'
+            ], 400);
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     */
+
+    public function destroy(string $id)
+    {
+        //
+    }
+
+
+    public function showPassengerList($bookid)
+    {
+        try {
+            $passengers = Passenger::where('booking_id', $bookid)->get();
+
+            foreach ($passengers as $p) {
+                // ดึงข้อมูล expense โดยเชื่อมด้วย bookid และ empid
+                $expense = Expense::where('bookid', $p->booking_id)
+                    ->where('empid', $p->passenger_empid)
+                    ->first();
+
+                $p->expense = $expense;
+
+                // ถ้ามี expense แล้ว ค่อยดึง approve
+                if ($expense) {
+                    $lastApprove = Approve::where('exid', $expense->id)
+                        ->orderByDesc('id')
+                        ->first();
+
+                    if ($lastApprove) {
+                        // เพิ่ม text หลังจากกำหนด lastapprove แล้ว
+                        $lastApprove->status_text = status_approve_badge(
+                            $lastApprove->statusapprove,
+                            $lastApprove->typeapprove
+                        );
+
+                        $lastApprove->type_text = type_approve_text(
+                            $lastApprove->typeapprove
+                        );
+
+                        $p->expense->lastapprove = $lastApprove;
+                    }
+                }
+            }
+
+
+            return response()->json($passengers);
+        } catch (\Exception $e) {
+            // \Log::error('Error fetching passenger list: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function hrNextApprove(Request $request)
+    {
+        $ids = $request->input('expense_ids', []);
+        $plantName = $request->input('plant_name');
+        $plantID = $request->input('plant_id');
+        // dd($request->input('plant_name'));
+        $makeuserempid = Auth::user()->empid;
+        $makeusername = Auth::user()->fullname;
+
+        $nextstaffgroup = ApproveStaff::where('group', function ($query) use ($makeuserempid) {
+            $query->select('group')
+                ->from('approvestaff')
+                ->where('empid', $makeuserempid)
+                ->where('status', 1)
+                ->where('deleted', 0)
+                ->limit(1);
+        })
+            ->where('step', 1)
+            ->where('status', 1)
+            ->where('deleted', 0)
+            ->first();
+        // dd($nextstaffgroup);
+
+        $expenses = Expense::with(['vbooking', 'vbookingdrv', 'user', 'tech', 'userhr'])
+            ->whereIn('id', $ids)
+            ->get();
+
+        return view('back.hr.groupapprove', compact('expenses', 'makeuserempid', 'makeusername', 'nextstaffgroup', 'plantName', 'plantID'));
+    }
+
+    public function hrHextApprove(Request $request)
+    {
+        // dd($request);
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Insert into exgroups
+            $exgroup = Exgroup::create([
+                'groupdate' => now()->toDateString(),
+                'grouptime' => now()->toTimeString(),
+                'typeapprove' => 4,
+                'statusapprove' => 0,
+                'checkempid' => $request->checkempid,
+                'nextmpid' => $request->nextmpid,
+                'nextemail' => $request->nextemail,
+                'totalfood' => $request->totalfood,
+                'totalfuel' => $request->totalfuel,
+                'expresswaytoll' =>  $request->expresswaytoll,
+                'publictransportfare' =>  $request->publictransportfare,
+                'otherexpenses' =>  $request->otherexpenses,
+                'totalother' => $request->totalother,
+                'total' => $request->total,
+                'plantid' => $request->plantid,
+                'plantname' => $request->plantname,
+            ]);
+
+            $exgroupId = $exgroup->id;
+            // 2. Update expenses.exgroup
+            foreach ($request->expense_id as $exid) {
+                Expense::where('id', $exid)->update([
+                    'exgroup' => $exgroupId
+                ]);
+            }
+            $nextmail = $request->nextemail;
+            // $nextmail = 'Kamolwan.b@bgiglass.com';
+            // 3. Insert approve (typeapprove = 4)
+            $token = Str::random(64);
+            foreach ($request->expense_id as $exid) {
+
+                Approve::create([
+                    'exid' => $exid,
+                    'typeapprove' => 4,
+                    'empid' => $request->nextmpid,
+                    'email' => $nextmail,
+                    'approvename' => $request->approvename,
+                    'emailstatus' => 1,
+                    'exgroup' => $exgroupId,
+                    'statusapprove' => 0,
+                    'login_token' => $token,
+                    'token_expires_at' => now()->addDays(10),
+                ]);
+            }
+
+            // 4. Update approve (typeapprove != 4) เพิ่ม exgroup
+            // Approve::whereIn('exid', $request->expense_id)
+            //     ->where('typeapprove', '!=', 4)
+            //     ->update([
+            //         'exgroup' => $exgroupId
+            //     ]);
+
+            DB::commit();
+
+            //ส่งเมลหลังจาก Commit
+            $nowDate = Carbon::now()->format('d/m/Y');
+
+            $link = route('approve.magic.login', ['token' => $token]);
+
+            MailHelper::sendExternalMail(
+                $nextmail,
+                'แจ้งเตือนอนุมัติกลุ่มรายการเบิกเบี้ยเลี้ยงวันที่ ' . $nowDate,
+                'mails.groupapprove',
+                [
+                    'name' => $request->approvename,
+                    'groupid' => $exgroup->id,
+                    'count' => count($request->expense_id),
+                    'groupdate' => $nowDate,
+                    'checkname' => $request->checkname,
+                    'link' => $link
+                ],
+                'รายการขออนุมัติกลุ่ม EXGROUP-' . $exgroup->id . 'วันที่ ' . $nowDate
+            );
+
+            $logData = [
+                'exgroup'   => $exgroup->toArray(),
+                'expense_ids' => $request->expense_id, // ID ที่อัปเดต exgroup
+                'approves'  => Approve::where('exgroup', $exgroupId)->get()->toArray(),
+            ];
+            logAction(
+                'add',
+                'Exgroup',
+                'สร้างกลุ่มการอนุมัติ EXGROUP-' . $exgroup->id,
+                json_encode($logData)
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'บันทึกสำเร็จ',
+                'redirect' => route('HR.approved')
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function groupDetail($id)
+    {
+
+        //ดึงรายการเบิกทั้งหมดในกลุ่ม
+        $expenses = Expense::with(['vbooking', 'user', 'tech', 'userhr', 'latestApprove'])
+            ->where('exgroup', $id)
+            ->get();
+        //ดึงข้อมูลกลุ่ม
+        $exgroup = Exgroup::findOrFail($id);
+        $create_by = $exgroup->CreatedBy->fullname ?? "";
+        $checked_by = $exgroup->user->fullname ?? "";
+        $nextuser = $exgroup->nextuser->fullname ?? "";
+        $finaluser = $exgroup->finaluser->fullname ?? "";
+
+        $page = 'HR.show';
+
+        return view('back.hr.groupdetail', compact('expenses', 'exgroup', 'create_by', 'checked_by', 'nextuser', 'finaluser', 'page'));
+    }
+
+    public function export(Request $request)
+    {
+        $empid = Auth::user()->empid;
+        $bookids = [];
+
+        // if ($request->filled('exdate') && $request->filled('end_exdate')) {
+        //     $bookids = Vbookingall::whereBetween('departure_date', [
+        //         $request->exdate,
+        //         $request->end_exdate
+        //     ])->pluck('id');
+        // }
+
+        $staff = ApproveStaff::with(['plantSettingDetails.plant'])
+            ->where('empid', $empid)
+            ->where('deleted', 0)
+            ->where('step', 9)
+            ->first();
+
+        $plantNames = $staff?->plantSettingDetails
+            ->pluck('plant.plantname')
+            ->filter()
+            ->unique()
+            ->values(); // BU ที่เจ้าของ login ดูแล
+
+        $filterBu = $request->input('bu');
+        $empids = null; // null = ไม่กรอง
+
+        // // ถ้ามีการเลือก BU
+        // if ($filterBu) {
+        //     // ค้นจาก users ก่อน
+        //     $empids = User::where('bu', $filterBu)->pluck('empid');
+
+        //     // ถ้าไม่เจอใน users -> ค้นจาก v_alldataemp
+        //     if ($empids->isEmpty()) {
+        //         $empids = Valldataemp::where('alias_name', $filterBu)
+        //             ->where('STAEMP', '!=', 9)
+        //             ->pluck('CODEMPID');
+        //     }
+        // }
+
+
+        if ($filterBu) {
+            // User search/เลือก BU
+            $empidsFromUser = User::where('bu', $filterBu)->pluck('empid');
+            // $empidsFromValldataemp = Valldataemp::where('alias_name', $filterBu)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::where('bu', $filterBu)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else if ($plantNames->isNotEmpty()) {
+            // ไม่ได้เลือก BU → default ตาม BU ที่ login ดูแล
+            $empidsFromUser = User::whereIn('bu', $plantNames)->pluck('empid');
+            // $empidsFromValldataemp = Valldataemp::whereIn('alias_name', $plantNames)
+            //     ->where('STAEMP', '!=', 9)
+            //     ->pluck('CODEMPID');
+            $empidsFromGroupspecial = GroupSpecial::whereIn('bu', $plantNames)->pluck('empid');
+            $empids = $empidsFromUser
+                // ->merge($empidsFromValldataemp)
+                ->merge($empidsFromGroupspecial)
+                ->unique()
+                ->values();
+        } else {
+            // เผื่อกรณี ไม่มี BU เลย
+            $empids = collect();
+        }
+
+        $expenses = Expense::with(['latestApprove', 'vbooking', 'user', 'tech', 'userhr', 'foods'])
+            ->whereHas('latestApprove', function ($query) {
+                $query->where(function ($q) {
+                    $q->where('typeapprove', 1)
+                        ->orWhere(function ($sub) {
+                            $sub->where('typeapprove', 3)
+                                ->where('statusapprove', 0);
+                        });
+                });
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->whereHas('latestApprove', function ($sub) use ($request) {
+                    $sub->where('statusapprove', $request->status);
+                });
+            })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
+            ->when($request->filled('exdate') && $request->filled('end_exdate'), function ($q) use ($request) {
+                $q->whereBetween('created_at', [$request->exdate, $request->end_exdate]);
+            }, function ($q) {
+                // ถ้าไม่กรอกวันที่: ดึงย้อนหลัง 1 เดือน
+                $q->where('created_at', '>=', now()->subMonth()->startOfDay());
+            })
+            ->when($empids && $empids->isNotEmpty(), function ($q) use ($empids) {
+                $q->whereIn('empid', $empids);
+            })
+            ->whereIn('extype', [1, 3])
+            ->where('deleted', 0)
+            ->get();
+
+
+        // dd($expenses);
+
+        $date = date('Y-m-d');
+        return Excel::download(new HrExport($expenses), "HRCheck_$date.xlsx");
+    }
+}

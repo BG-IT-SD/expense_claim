@@ -220,7 +220,7 @@
                     <td class="text-right">{{ number_format(round($r->expresswaytoll), 2) }}</td>
                     <td class="text-right">{{ number_format(round($total_travel), 2) }}</td>
                     <td class="text-right"><strong>{{ number_format(round($r->totalprice), 2) }}</strong></td>
-                    <td>{{ optional($r->finalApprove->exgroupRef)->plantname ?? '-' }}</td>
+                    <td>{{ PlantDisplayName(optional($r->finalApprove->exgroupRef)->plantname) ?? '-' }}</td>
                 </tr>
 
                 @php($lastGroupId = $currentGroupId)

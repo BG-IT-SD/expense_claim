@@ -5,6 +5,17 @@
 
     RewriteEngine On
 
+    # If a maintenance index is uploaded to the public root, serve it for every URL.
+    RewriteCond %{DOCUMENT_ROOT}/index.html -f
+    RewriteCond %{REMOTE_ADDR} ^171\.102\.40\.253$
+    RewriteRule ^$ index.php [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/index.html -f
+    RewriteCond %{REMOTE_ADDR} !^171\.102\.40\.253$
+    RewriteCond %{REQUEST_URI} !/index\.html$
+    RewriteCond %{REQUEST_URI} !/client-ip\.php$
+    RewriteRule ^ index.html [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

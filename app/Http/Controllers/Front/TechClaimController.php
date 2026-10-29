@@ -91,11 +91,11 @@ class TechClaimController extends Controller
 
         $startDate = $request->filled('exdate')
             ? $request->exdate
-            : now()->startOfMonth()->toDateString();
+            : now()->subDays(30)->toDateString();
 
         $endDate = $request->filled('end_exdate')
             ? $request->end_exdate
-            : now()->endOfMonth()->toDateString();
+            : now()->toDateString();
 
         $exid = $request->filled('exid')
             ? ltrim($request->exid, 'EX')
@@ -114,15 +114,26 @@ class TechClaimController extends Controller
             ->whereHas('latestApprove', function ($query) {
                 $query->whereIn('typeapprove', [1, 2, 3, 4, 5, 6]);
             })
+            ->orderByDesc('id')
             ->get();
 
 
         $expenses = $expenses->filter(function ($exp) use ($startDate, $endDate) {
             $departure = optional($exp->vbooking)->departure_date;
 
-            return $departure &&
-                $departure >= $startDate &&
-                $departure <= $endDate;
+            if (!$departure) {
+                return false;
+            }
+
+            if ($startDate && $departure < $startDate) {
+                return false;
+            }
+
+            if ($endDate && $departure > $endDate) {
+                return false;
+            }
+
+            return true;
         })->values();
 
         return view('front.techclaim.history', compact('expenses'));

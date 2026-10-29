@@ -19,7 +19,7 @@
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h3 class="mb-0"><span class="mdi mdi-file-document-check h3"></span> รายการขออนุมัติกลุ่ม:
                                 {{ ' EXGROUP-' . $exgroup->id . ' วันที่ ' . $exgroup->groupdate }} [
-                                {{ $exgroup->plantname }} ]</h3>
+                                {{ PlantDisplayName($exgroup->plantname) }} ]</h3>
                         </div>
                         <div class="card-body row">
                             <div class="table-responsive text-nowrap">

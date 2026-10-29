@@ -210,6 +210,19 @@ class ExpenseController extends Controller
             // ->whereIn('id', [2, 4, 7, 9, 10, 11])
             ->get();
 
+        // Map Plant from Carbooking by the shared plant code. Keep the old BU
+        // lookup as a fallback for historical bookings that do not have the code.
+        $selectedPlant = !empty($booking->expense_plant_code)
+            ? $plants->firstWhere('plant_code', $booking->expense_plant_code)
+            : null;
+
+        if (!$selectedPlant) {
+            $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
+        }
+
+        // getDistance() currently resolves its rate by plants.plantname.
+        $PlantStart = $selectedPlant?->plantname ?? $booking->bu;
+
         // Databooking
         $departure_date = $booking->departure_date ? Carbon::parse("{$booking->departure_date} {$booking->departure_time}")->format('d/m/Y H:i') : null;
         $return_date = $booking->return_date ? Carbon::parse("{$booking->return_date} {$booking->return_time}")->format('d/m/Y H:i') : null;
@@ -466,7 +479,7 @@ class ExpenseController extends Controller
 
         if ($empid != "") {
             if ($typegroup == 1) {
-                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers','objectdata']));
+                return view('front.expenses.index', compact(['booking', 'empid', 'passengertype', 'empemail', 'empfullname', 'typegroup', 'plants', 'selectedPlant', 'ratefuels', 'travel_date', 'oilid', 'data_oil_price', 'price_used_date', 'rate_id', 'bath_per_km', 'data_message', 'departure_date', 'return_date', 'reasons', 'totalDistance', 'groupplant', 'Alldayfood', 'startDate', 'startTime', 'endDate', 'endTime', 'empLevel', 'headempid', 'headlevel', 'heademail', 'headname', 'approve_g', 'messageAlert', 'message_decode', 'specialApprovers','objectdata']));
             } else {
                 $message =  'ไม่ใช้ประเภทคนทั่วไป กลุ่ม พนักงานขับรถ หรือ ช่าง กรุณาติดต่อ Admin เพื่อทำการเบิก';
                 return view('front.expenses.error', compact('message'));
@@ -721,6 +734,20 @@ class ExpenseController extends Controller
         // Plant
         $plants = Plant::where('status', 1)->where('deleted', 0)
             ->get();
+
+        // Prefer the Plant saved with the Expense. Fall back to the shared
+        // Carbooking code, then to the legacy BU name for older records.
+        $selectedPlant = $expense->departureplant
+            ? $plants->firstWhere('id', (int) $expense->departureplant)
+            : null;
+
+        if (!$selectedPlant && !empty($expense->vbooking->expense_plant_code)) {
+            $selectedPlant = $plants->firstWhere('plant_code', $expense->vbooking->expense_plant_code);
+        }
+
+        if (!$selectedPlant) {
+            $selectedPlant = $plants->firstWhere('plantname', $expense->vbooking->bu);
+        }
         $departure_date = $expense->vbooking->departure_date
             ? Carbon::parse("{$expense->vbooking->departure_date} {$expense->vbooking->departure_time}")->format('d/m/Y H:i')
             : null;
@@ -791,7 +818,7 @@ class ExpenseController extends Controller
         // ราคาน้ำมัน
         $ratefuels = Fuelprice::where("status", 1)->where("deleted", 0)->orderByDesc('startrate')->get();
 
-        return view('front.expenses.view', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
+        return view('front.expenses.view', compact(['expense', 'empid', 'passengertype', 'reasons', 'departure_date', 'return_date', 'plants', 'selectedPlant', 'ratefuels', 'Alldayfood', 'expenseFoods', 'groupplant', 'approvals', 'files', 'isView', 'startDate', 'endDate', 'startTime', 'endTime', 'bu']));
     }
 
     /**

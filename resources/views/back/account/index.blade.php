@@ -58,7 +58,7 @@
                                                 @foreach ($plantNames as $plant)
                                                     <option value="{{ $plant['id'] }}"
                                                         {{ (string) $plant['id'] === (string) old('bu', $selectedBu ?? '') ? 'selected' : '' }}>
-                                                        {{ $plant['name'] }}
+                                                        {{ PlantDisplayName($plant['name']) }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -114,7 +114,7 @@
                                 @foreach ($exgroups as $exgroup)
                                     <tr>
                                         <td>{{ $exgroup->id }}</td>
-                                        <td>{{ $exgroup->plantname }}</td>
+                                        <td>{{ PlantDisplayName($exgroup->plantname) }}</td>
                                         <td>{{ \Carbon\Carbon::parse($exgroup->groupdate)->format('d/m/Y') }}</td>
                                         <td>{{ isset($exgroup->nettotal) ? number_format($exgroup->nettotal, 2) : number_format($exgroup->total, 2) }}
                                         </td>

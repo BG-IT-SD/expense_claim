@@ -16,6 +16,7 @@ use App\Http\Controllers\Back\GroupspecialController;
 use App\Http\Controllers\Back\HRController;
 use App\Http\Controllers\Back\HRgroupController;
 use App\Http\Controllers\Back\ImportlistController;
+use App\Http\Controllers\Back\MapSettingController;
 use App\Http\Controllers\Back\MessageController;
 use App\Http\Controllers\Back\PricepermealController;
 use App\Http\Controllers\Back\ReportHRController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\Front\HeadApprovedController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\TechClaimController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\OrsController;
 use App\Http\Controllers\UpdatefuelController;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
@@ -98,6 +100,9 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
     // Map
     Route::get('/map', [MapController::class, 'index']);
     Route::post('/calculate-distance', [MapController::class, 'calculateDistance'])->name('calculate.distance');
+    Route::get('/ors/autocomplete', [OrsController::class, 'autocomplete'])->name('ors.autocomplete');
+    Route::post('/ors/route-link', [OrsController::class, 'routeLink'])->name('ors.route-link');
+    Route::post('/ors/directions', [OrsController::class, 'directions'])->name('ors.directions');
     // Map
 
     // Expense
@@ -387,6 +392,8 @@ Route::group(['middleware' => ['auth', 'remember.login']], function () {
         Route::get('/admin/resend-mail', [ResendMailController::class, 'showForm'])->name('tools.resendMail.show');
         Route::get('/admin/resend-mail/{approve}/preview', [ResendMailController::class, 'preview'])->name('tools.resendMail.preview');
         Route::post('/admin/resend-mail', [ResendMailController::class, 'sendMail'])->name('tools.resendMail.send');
+        Route::get('/admin/map-setting', [MapSettingController::class, 'index'])->name('MapSetting.index');
+        Route::put('/admin/map-setting', [MapSettingController::class, 'update'])->name('MapSetting.update');
     });
 });
 

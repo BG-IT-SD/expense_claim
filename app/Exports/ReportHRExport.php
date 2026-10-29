@@ -147,9 +147,9 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
             ? (optional($e->tech)->fullname ?? '-')
             : (optional($e->user)->fullname ?? '-');
 
-        $company = in_array($e->extype, [2, 3])
+        $company = PlantDisplayName(in_array($e->extype, [2, 3])
             ? (optional($e->tech)->bu ?? '-')
-            : (optional($e->user)->bu ?? '-');
+            : (optional($e->user)->bu ?? '-'));
 
         $booking = $e->extype == 2 ? $e->vbookingdrv : $e->vbooking;
 
@@ -283,8 +283,8 @@ class ReportHRExport implements FromQuery, WithMapping, WithHeadings, WithChunkR
             $personType,
             $driver,
 
-            $from,
-            $to,
+            PlantDisplayName($from),
+            PlantDisplayName($to),
 
             $distance1,
             $distance2,

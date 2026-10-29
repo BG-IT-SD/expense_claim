@@ -8,14 +8,14 @@
                         <tr>
                             <th class="table-primary"></th>
                             @foreach($groupedPlants as $colIndex => $colPlant)
-                                <th class="table-primary">{{ $colPlant->plantname ?? $colPlant->plantname }}</th>
+                                <th class="table-primary">{{ $colPlant->display_name ?? $colPlant->plantname }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($groupedPlants as $rowPlant)
                         <tr>
-                            <th class="table-primary">{{ $rowPlant->plantname }}</th>
+                            <th class="table-primary">{{ $rowPlant->display_name ?? $rowPlant->plantname }}</th>
                             @foreach($groupedPlants as $colPlant)
                                 @php
                                     $value = null;
@@ -55,8 +55,8 @@
                                 @foreach ($rates as $rate)
                                     <tr>
                                         <td>{{ $rate->id }}</td>
-                                        <td>{{ $rate->Startplant->plantname }}</td>
-                                        <td>{{ $rate->Endplant->plantname }}</td>
+                                        <td>{{ $rate->Startplant->display_name }}</td>
+                                        <td>{{ $rate->Endplant->display_name }}</td>
                                         <td>{{ $rate->kilometer }}</td>
                                         <td>{!! $rate->status == 1
                                             ? '<span class="badge rounded-pill bg-success">Active</span>'

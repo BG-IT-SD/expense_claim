@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\Userrole;
+use App\Models\ApplicationSetting;
+use App\Models\Userrole as UserRole;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +24,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        try {
+            if (Schema::hasTable('application_settings')) {
+                $mapProvider = ApplicationSetting::where('key', 'map_provider')->value('value');
+
+                if (in_array($mapProvider, ['google', 'open'], true)) {
+                    config(['services.map_provider' => $mapProvider]);
+                }
+            }
+        } catch (\Throwable $exception) {
+            config(['services.map_provider' => config('services.map_provider', 'google')]);
+        }
+
         View::composer('*', function ($view) {
             if (Auth::check()) {
                 $userId = Auth::id();

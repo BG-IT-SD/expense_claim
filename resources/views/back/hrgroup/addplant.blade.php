@@ -24,7 +24,7 @@
                                         <select name="plant" id="plant" class="form-select form-select-l">
                                             <option value="">เลือก plant</option>
                                             @foreach ($plants as $plant)
-                                            <option value="{{ $plant->id }}">{{ $plant->plantname }}</option>
+                                            <option value="{{ $plant->id }}">{{ $plant->display_name }}</option>
                                             @endforeach
                                         </select>
                                         <input type="hidden" name="groupid" value="{{ $id }}">

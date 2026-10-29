@@ -6,7 +6,7 @@
 <table>
     <tr>
         <td colspan="18" align="center"><strong>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท
-                {{ $exgroup->plantname }}</strong></td>
+                {{ PlantDisplayName($exgroup->plantname) }}</strong></td>
     </tr>
     <tr>
         <td colspan="18" align="center">ประจำสัปดาห์ {{ Thaidatenow(Carbon::parse($exgroup->groupdate)) }}</td>
@@ -72,7 +72,7 @@
 
             <tr style="background-color:#f2f2f2;">
                 <td colspan="18" style="border:1px solid #000;"><strong>สถานที่ไปปฏิบัติงาน:
-                        {{ $groupName }}</strong></td>
+                        {{ PlantDisplayName($groupName) }}</strong></td>
             </tr>
 
             @foreach ($group as $i => $expense)
@@ -159,7 +159,7 @@
             {{-- รวมต่อสถานที่ --}}
             <tr style="font-weight:bold;">
                 <td colspan="12" style="text-align: center; vertical-align: middle; border:1px solid #000;">
-                    <strong> รวมสถานที่ {{ $groupName }} </strong>
+                    <strong> รวมสถานที่ {{ PlantDisplayName($groupName) }} </strong>
                 </td>
                 <td style="text-align: right; border:1px solid #000;">
                     <strong>{{ number_format(round($sum_food), 2) }}</strong></td>

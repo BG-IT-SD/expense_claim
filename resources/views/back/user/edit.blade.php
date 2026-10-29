@@ -60,7 +60,7 @@
                                             <li class="d-flex align-items-center mb-1">
                                                 <i class="mdi mdi-domain mdi-24px"></i><span
                                                     class="fw-medium mx-2">Bu:</span>
-                                                <span id="text-bu">{{ $users->bu }}</span>
+                                                <span id="text-bu">{{ PlantDisplayName($users->bu) }}</span>
                                             </li>
                                             <li class="d-flex align-items-center mb-1">
                                                 <i class="mdi mdi-lock-reset mdi-24px"></i>

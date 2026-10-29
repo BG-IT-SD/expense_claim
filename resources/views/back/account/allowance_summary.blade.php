@@ -47,7 +47,7 @@
                         <option value="">-- เลือกBU --</option>
                         @foreach ($plants as $plant)
                             <option value="{{ $plant->id }}" @selected(request('bu') == $plant->id)>
-                                {{ $plant->plantname }}
+                                {{ $plant->display_name }}
                             </option>
                         @endforeach
                     </select>

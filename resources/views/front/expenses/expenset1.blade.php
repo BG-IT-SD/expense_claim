@@ -47,15 +47,12 @@
                     --}}
                     @if ($booking->locationid == 12)
                         @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
-                            @php
-                                $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
-                            @endphp
                             <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                                 data-style="btn-default" tabindex="null" disabled>
                                 @foreach ($plants as $plant)
                                     <option value="{{ $plant->id }}"
-                                        {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>
-                                        {{ $plant->plantname }}
+                                        {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>
+                                        {{ $selectedPlant?->id == $plant->id ? $booking->bu : $plant->plantname }}
                                     </option>
                                 @endforeach
                             </select>
@@ -64,14 +61,11 @@
                         @else
                         @endif
                     @else
-                        @php
-                            $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
-                        @endphp
                         <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
-                                    {{ $plant->plantname == $booking->bu ? 'selected' : '' }}>{{ $plant->plantname }}
+                                    {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>{{ $selectedPlant?->id == $plant->id ? $booking->bu : $plant->plantname }}
                                 </option>
                             @endforeach
                         </select>
@@ -88,15 +82,25 @@
             <!-- เฉพาะเมื่อ type_reserve == 4 -->
             <div class="container mt-3 mb-3 mapsearch">
                 <h3>กรุณาเลือกสถานที่ต้นทางและปลายทางเพื่อคำนวณระยะทาง</h3>
+                @if (config('services.map_provider', 'google') === 'open')
+                    <div class="mb-3">
+                        <label for="google_route_link">วางลิงก์เส้นทาง Google Maps</label>
+                        <input id="google_route_link" class="form-control" type="url" placeholder="https://maps.app.goo.gl/..." autocomplete="off">
+                    </div>
+                @endif
                 <div class="mb-3">
                     <label for="origin">ต้นทาง</label>
-                    <input id="origin" class="form-control" type="text" placeholder="เช่น บางกอกกล๊าส">
+                    <input id="origin" class="form-control" type="text"
+                        placeholder="{{ config('services.map_provider', 'google') === 'open' ? 'ชื่อสถานที่ / Google Maps link / lat,lng' : 'ชื่อสถานที่' }}"
+                        autocomplete="off">
                 </div>
                 <div class="mb-3">
                     <label for="destination">ปลายทาง</label>
-                    <input id="destination" class="form-control" type="text" placeholder="เช่น ฟิวเจอร์พาร์ค">
+                    <input id="destination" class="form-control" type="text"
+                        placeholder="{{ config('services.map_provider', 'google') === 'open' ? 'ชื่อสถานที่ / Google Maps link / lat,lng' : 'ชื่อสถานที่' }}"
+                        autocomplete="off">
                 </div>
-                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
+                <button type="button" onclick="calculateDistance(event)" class="btn btn-primary">คำนวณระยะทาง</button>
 
                 <div class="mt-3">
                     <strong>ระยะทาง:</strong> <span id="distance"></span>
@@ -126,7 +130,7 @@
                     <input type="hidden" name="destination_value" id="destination_value">
                 </div>
 
-                <button onclick="calculateDistance()" class="btn btn-primary">คำนวณระยะทาง</button>
+                <button type="button" onclick="calculateDistance(event)" class="btn btn-primary">คำนวณระยะทาง</button>
 
                 <div class="mt-3">
                     <strong>ระยะทาง:</strong> <span id="distance"></span>
@@ -202,7 +206,7 @@
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
                                     {{ $plant->plantname == $booking->locationbu ? 'selected' : '' }}>
-                                    {{ $plant->plantname }}
+                                    {{ $plant->display_name }}
                                 </option>
                             @endforeach
                         </select>

@@ -1,0 +1,68 @@
+@extends('layouts.template')
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Map Provider Setting</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('MapSetting.update') }}">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="mb-4">
+                                <label class="form-label">เลือกตัวคำนวณและค้นหาแผนที่</label>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="map_provider" id="map_provider_google"
+                                        value="google" {{ old('map_provider', $provider) === 'google' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="map_provider_google">
+                                        Google Maps แบบเดิม
+                                    </label>
+                                    <div class="form-text">
+                                        ใช้ Google Places autocomplete และ Google Directions เหมือนระบบเดิม
+                                    </div>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="map_provider" id="map_provider_open"
+                                        value="open" {{ old('map_provider', $provider) === 'open' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="map_provider_open">
+                                        Open map provider
+                                    </label>
+                                    <div class="form-text">
+                                        ใช้ Leaflet, Geoapify และ OpenRouteService พร้อมช่องวางลิงก์เส้นทาง
+                                    </div>
+                                </div>
+
+                                @error('map_provider')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">บันทึก</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('jscustom')
+    @if (session('message'))
+        <script>
+            Swal.fire({
+                title: {!! json_encode(session('message')) !!},
+                icon: {!! json_encode(session('class')) !!},
+                customClass: {
+                    confirmButton: 'btn btn-primary waves-effect waves-light'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+@endsection

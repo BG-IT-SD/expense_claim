@@ -29,7 +29,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="mb-0">{{ Auth::user()->fullname }}</h6>
-                                    <small class="text-muted">{{ Auth::user()->bu }}</small>
+                                    <small class="text-muted">{{ PlantDisplayName(Auth::user()->bu) }}</small>
                                 </div>
                             </div>
                         </a>

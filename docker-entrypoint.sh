@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+LOCAL_CA_CERT="/var/www/html/docker/certs/proxy-root.crt"
+if [ -f "$LOCAL_CA_CERT" ]; then
+    install -m 0644 "$LOCAL_CA_CERT" /usr/local/share/ca-certificates/expense-claim-proxy-root.crt
+    update-ca-certificates
+fi
+
 mkdir -p \
     storage/framework/cache/data \
     storage/framework/cache/laravel-excel \

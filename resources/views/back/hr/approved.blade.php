@@ -32,7 +32,7 @@
                                                 aria-controls="{{ $plant['id'] }}" data-plantname="{{ $plant['name'] }}"
                                                 data-plantid="{{ $plant['id'] }}"
                                                 aria-selected="{{ $loop->first ? 'true' : 'false' }}">
-                                                {{ $plant['name'] }}
+                                                {{ PlantDisplayName($plant['name']) }}
                                             </button>
                                         </li>
                                     @endforeach
@@ -263,9 +263,9 @@
 
                                                             <td>
                                                                 @if ($expense->extype == 2)
-                                                                    {{ $expense->vbookingdrv?->locationbu ?? '-' }}
+                                                                    {{ PlantDisplayName($expense->vbookingdrv?->locationbu) ?? '-' }}
                                                                 @else
-                                                                    {{ $expense->vbooking?->locationbu ?? '-' }}
+                                                                    {{ PlantDisplayName($expense->vbooking?->locationbu) ?? '-' }}
                                                                 @endif
                                                             </td>
 

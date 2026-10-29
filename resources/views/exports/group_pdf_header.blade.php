@@ -22,7 +22,7 @@
 <table style="width:100%;">
     <tr>
         <td align="center">
-            <b>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท {{ $exgroup->plantname }}</b>
+            <b>สรุปรายชื่อพนักงาน เบิกค่าเดินทาง/เบี้ยเลี้ยง บริษัท {{ PlantDisplayName($exgroup->plantname) }}</b>
         </td>
     </tr>
     <tr>

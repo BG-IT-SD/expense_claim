@@ -203,7 +203,7 @@ class ReportHRController extends Controller
 
 
                 return [
-                    'company'        => in_array($e->extype, [2, 3]) ? (optional($e->tech)->bu ?? '-') : (optional($e->user)->bu ?? '-'),
+                    'company'        => PlantDisplayName(in_array($e->extype, [2, 3]) ? (optional($e->tech)->bu ?? '-') : (optional($e->user)->bu ?? '-')),
                     'empid'          => $e->empid ?? '-',
                     'fullname'       => $fullname,
                     'dept'           => optional($e->userhr)->DEPT ?? '-',
@@ -221,8 +221,8 @@ class ReportHRController extends Controller
                     'passengers'  => $passengers,
                     'person_type' => $personType,
                     'driver'      => $driver,
-                    'from'        => $from,
-                    'to'          => $to,
+                    'from'        => PlantDisplayName($from),
+                    'to'          => PlantDisplayName($to),
 
                     'departuretime' => $e->departuretime ?? ($depTime ?? '-'),
                     'returntime'    => $e->returntime ?? ($retTime ?? '-'),
