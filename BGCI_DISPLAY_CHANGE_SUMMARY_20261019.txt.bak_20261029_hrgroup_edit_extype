@@ -1,0 +1,100 @@
+สรุปการปรับชื่อแสดงผล Plant: BGCI แยกตามจังหวัด
+วันที่: 19/10/2026
+
+วัตถุประสงค์
+- PTI แสดงเป็น BGCI (ปทุมธานี)
+- AGI แสดงเป็น BGCI (พระนครศรีอยุธยา)
+- Plant อื่นแสดงชื่อเดิม
+- ค่าภายใน plantname, Plant ID, ค่าในฟอร์ม, เงื่อนไขค้นหา และข้อมูลย้อนหลังยังคงเป็น PTI/AGI เพื่อไม่กระทบ Logic เดิม
+
+หลักการที่ใช้
+1. เพิ่ม display_name accessor ใน Plant model โดยอ้างอิง plant_code และ province
+2. เพิ่มฟังก์ชัน PlantDisplayName() สำหรับแปลงข้อความ PTI/AGI จาก User, Booking, Exgroup และรายงาน
+3. ปรับข้อความที่แสดงต่อผู้ใช้โดยคงค่าภายในเดิม และเพิ่ม mapping สายอนุมัติตาม BU ที่ HRMS ส่ง
+4. ปรับชื่อกลุ่มระยะทาง AGI/AY1/AY2 เป็น BGCI (พระนครศรีอยุธยา)/AY1/AY2
+5. อัปเดต 29/10/2026: เพิ่ม mapping AGI ไปกลุ่มอนุมัติ 2 สำหรับ extype 1 โดยคง PTI ไปกลุ่ม 3
+
+ไฟล์ที่แก้ไข (40 ไฟล์ ไม่ซ้ำ)
+
+[Model และ Helper]
+1. app/Models/Plant.php
+2. app/Helpers/Approvestatus.php
+
+[Controller และ Export class]
+3. app/Http/Controllers/Back/DistanceRateController.php
+4. app/Http/Controllers/Back/AccountReportController.php
+5. app/Http/Controllers/Back/ReportHRController.php
+6. app/Exports/ReportHRExport.php
+
+[หน้าจอ Approval และ Account]
+7. resources/views/approve/approve_group.blade.php
+8. resources/views/back/account/allowance_summary.blade.php
+9. resources/views/back/account/index.blade.php
+10. resources/views/back/account/listapprove.blade.php
+11. resources/views/back/account/listhold.blade.php
+12. resources/views/back/account/manage.blade.php
+13. resources/views/back/account/view.blade.php
+
+[หน้าตั้งค่า Plant, HR และระยะทาง]
+14. resources/views/back/acgroup/addplant.blade.php
+15. resources/views/back/acgroup/edit.blade.php
+16. resources/views/back/DistanceRate/create.blade.php
+17. resources/views/back/DistanceRate/index.blade.php
+18. resources/views/back/hr/approved.blade.php
+19. resources/views/back/hr/groupdetail.blade.php
+20. resources/views/back/hr/grouplist.blade.php
+21. resources/views/back/hr/list.blade.php
+22. resources/views/back/hr/report/index.blade.php
+23. resources/views/back/hrgroup/addplant.blade.php
+24. resources/views/back/hrgroup/edit.blade.php
+25. resources/views/back/Pricepermeal/create.blade.php
+26. resources/views/back/techapprove/index.blade.php (เพิ่มชื่อ BU สำหรับค้นหา BGCI และจังหวัด)
+27. resources/views/back/user/edit.blade.php
+
+[รายงานและไฟล์ส่งออก]
+28. resources/views/exports/allowance_summary_excel.blade.php
+29. resources/views/exports/allowance_summary_pdf.blade.php
+30. resources/views/exports/group_excel_final.blade.php
+31. resources/views/exports/group_excel.blade.php
+32. resources/views/exports/group_pdf_final.blade.php
+33. resources/views/exports/group_pdf_header.blade.php
+34. resources/views/exports/group_pdf.blade.php
+35. resources/views/exports/hr-list.blade.php
+
+[หน้าผู้ใช้งาน]
+36. resources/views/front/expenses/expenset1.blade.php (แก้ Undefined variable $selectedPlant)
+37. resources/views/front/expenses/views/expenset1.blade.php (แก้ Undefined variable $selectedPlant)
+38. resources/views/front/headapprove/listhr.blade.php
+39. resources/views/front/profile/index.blade.php
+40. resources/views/layouts/header.blade.php
+
+ไฟล์สำรอง
+- ทุกไฟล์ข้างต้นมีไฟล์สำรองอยู่ข้างไฟล์ต้นฉบับ
+- รูปแบบชื่อ: <ชื่อไฟล์เดิม>.bak_20261019_bgci_display
+- ตัวอย่าง: app/Models/Plant.php.bak_20261019_bgci_display
+- ไฟล์ที่แก้เพิ่มเติมภายหลังมีสำรอง: resources/views/front/expenses/views/expenset1.blade.php.bak_20261029_selected_plant_fix
+- ไฟล์สรุปฉบับก่อนแก้มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_selected_plant_fix
+- ไฟล์หน้าสร้าง Expense มีสำรอง: resources/views/front/expenses/expenset1.blade.php.bak_20261029_booking_selected_plant_fix
+- ไฟล์สรุปก่อนเพิ่มรายการหน้าสร้าง Expense มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_booking_selected_plant_fix
+- ไฟล์ค้นหารายชื่อช่างมีสำรอง: resources/views/back/techapprove/index.blade.php.bak_20261029_bgci_search_fix
+- ไฟล์สรุปก่อนเพิ่มรายการแก้ค้นหามีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_bgci_search_fix
+- ไฟล์ mapping สายอนุมัติ AGI มีสำรอง: app/Helpers/Approvestatus.php.bak_20261029_agi_group2
+- ไฟล์สรุปก่อนเพิ่ม mapping สายอนุมัติมีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_agi_group2
+
+เงื่อนไขข้อมูลที่ต้องมีในตาราง plants
+- PTI: plant_code = BGCI-PT และ province = ปทุมธานี
+- AGI: plant_code = BGCI-AY และ province = พระนครศรีอยุธยา
+
+ผลกระทบที่ตั้งใจหลีกเลี่ยง
+- ไม่เปลี่ยน plantname ภายในจาก PTI/AGI
+- ไม่เปลี่ยน Plant ID
+- เพิ่ม mapping AGI ไปกลุ่มอนุมัติ 2 สำหรับ extype 1; คง PTI ไปกลุ่ม 3 และไม่แก้รายชื่อผู้อนุมัติในฐานข้อมูล
+- ไม่แก้อัตราค่าอาหาร
+- ไม่แก้ Distance Rate
+- ไม่แก้ข้อมูล Exgroup หรือ Expense ย้อนหลัง
+
+การตรวจสอบ
+- ตรวจสอบไฟล์ที่แก้ทุกไฟล์ว่ามี Backup ครบแล้ว
+- ตรวจสอบ git diff --check แล้วไม่พบ whitespace error
+- เครื่องนี้ไม่มีคำสั่ง PHP ใน PATH จึงยังไม่ได้รัน php -l หรือ PHPUnit
+- การอัปเดต mapping วันที่ 29/10/2026: ตรวจ diff แล้ว; ยังไม่ได้ทดสอบสร้างรายการอนุมัติจริง

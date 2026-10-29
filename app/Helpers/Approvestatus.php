@@ -255,6 +255,7 @@ if (!function_exists('Approvestep')) {
                 'KBI'  => 2,
                 'BGCP' => 2,
                 'BGC' => 2, // 'BGC' -> 2
+                'AGI'  => 2, // BGCI Ayutthaya
                 'PTI'  => 3,
             ];
             $group = $buGroupMap[$bu] ?? null;

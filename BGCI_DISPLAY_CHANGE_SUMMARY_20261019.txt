@@ -10,10 +10,11 @@
 หลักการที่ใช้
 1. เพิ่ม display_name accessor ใน Plant model โดยอ้างอิง plant_code และ province
 2. เพิ่มฟังก์ชัน PlantDisplayName() สำหรับแปลงข้อความ PTI/AGI จาก User, Booking, Exgroup และรายงาน
-3. ปรับเฉพาะข้อความที่แสดงต่อผู้ใช้ ไม่เปลี่ยนค่าที่ใช้บันทึกหรือกรองข้อมูล
+3. ปรับข้อความที่แสดงต่อผู้ใช้โดยคงค่าภายในเดิม และเพิ่ม mapping สายอนุมัติตาม BU ที่ HRMS ส่ง
 4. ปรับชื่อกลุ่มระยะทาง AGI/AY1/AY2 เป็น BGCI (พระนครศรีอยุธยา)/AY1/AY2
+5. อัปเดต 29/10/2026: เพิ่ม mapping AGI ไปกลุ่มอนุมัติ 2 สำหรับ extype 1 โดยคง PTI ไปกลุ่ม 3
 
-ไฟล์ที่แก้ไข (40 ไฟล์ ไม่ซ้ำ)
+ไฟล์ที่แก้ไข (42 ไฟล์ ไม่ซ้ำ)
 
 [Model และ Helper]
 1. app/Models/Plant.php
@@ -66,6 +67,8 @@
 38. resources/views/front/headapprove/listhr.blade.php
 39. resources/views/front/profile/index.blade.php
 40. resources/views/layouts/header.blade.php
+41. resources/views/back/hrgroup/editlist.blade.php (ส่ง extype ให้รายการค้นหาผู้อนุมัติในหน้าแก้ไข)
+42. app/Http/Controllers/Back/HRgroupController.php (ไม่นำแถว Inactive มา block รายชื่อ HRMS ที่เลือกได้)
 
 ไฟล์สำรอง
 - ทุกไฟล์ข้างต้นมีไฟล์สำรองอยู่ข้างไฟล์ต้นฉบับ
@@ -77,6 +80,12 @@
 - ไฟล์สรุปก่อนเพิ่มรายการหน้าสร้าง Expense มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_booking_selected_plant_fix
 - ไฟล์ค้นหารายชื่อช่างมีสำรอง: resources/views/back/techapprove/index.blade.php.bak_20261029_bgci_search_fix
 - ไฟล์สรุปก่อนเพิ่มรายการแก้ค้นหามีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_bgci_search_fix
+- ไฟล์ mapping สายอนุมัติ AGI มีสำรอง: app/Helpers/Approvestatus.php.bak_20261029_agi_group2
+- ไฟล์สรุปก่อนเพิ่ม mapping สายอนุมัติมีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_agi_group2
+- หน้าแก้ไขสายอนุมัติ HR มีสำรอง: resources/views/back/hrgroup/editlist.blade.php.bak_20261029_hrgroup_edit_extype
+- ไฟล์สรุปก่อนแก้หน้า HR มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_hrgroup_edit_extype
+- Controller กรองรายชื่อ Active มีสำรอง: app/Http/Controllers/Back/HRgroupController.php.bak_20261029_hrgroup_active_approver_filter
+- ไฟล์สรุปก่อนแก้เงื่อนไข status มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_hrgroup_active_approver_filter
 
 เงื่อนไขข้อมูลที่ต้องมีในตาราง plants
 - PTI: plant_code = BGCI-PT และ province = ปทุมธานี
@@ -85,7 +94,10 @@
 ผลกระทบที่ตั้งใจหลีกเลี่ยง
 - ไม่เปลี่ยน plantname ภายในจาก PTI/AGI
 - ไม่เปลี่ยน Plant ID
-- ไม่แก้สายอนุมัติ
+- เพิ่ม mapping AGI ไปกลุ่มอนุมัติ 2 สำหรับ extype 1; คง PTI ไปกลุ่ม 3 และไม่แก้รายชื่อผู้อนุมัติในฐานข้อมูล
+- แก้หน้า edit สายอนุมัติ HR ให้ค้นหารายชื่อ HRMS ได้ โดยส่ง extype ของแถวที่กำลังแก้ไปกับคำขอ
+- แก้รายการพนักงานที่ถูกกันออกจากผลค้นหาให้พิจารณาเฉพาะ ApproveStaff ที่ status=1 และ deleted=0; แถว Inactive จะไม่ block การเลือกอีก
+- ยังไม่ได้เปลี่ยนผู้อนุมัติในฐานข้อมูลจริง; หลังนำโค้ดขึ้นระบบจึงเลือก 66000510 คุณกมลวรรณแทนผู้จัดการฝ่ายได้
 - ไม่แก้อัตราค่าอาหาร
 - ไม่แก้ Distance Rate
 - ไม่แก้ข้อมูล Exgroup หรือ Expense ย้อนหลัง
@@ -94,3 +106,5 @@
 - ตรวจสอบไฟล์ที่แก้ทุกไฟล์ว่ามี Backup ครบแล้ว
 - ตรวจสอบ git diff --check แล้วไม่พบ whitespace error
 - เครื่องนี้ไม่มีคำสั่ง PHP ใน PATH จึงยังไม่ได้รัน php -l หรือ PHPUnit
+- การอัปเดต mapping วันที่ 29/10/2026: ตรวจ diff แล้ว; ยังไม่ได้ทดสอบสร้างรายการอนุมัติจริง
+- การแก้หน้า HR: ตรวจการเชื่อม hidden extype กับตัวค้นหา Select2 จากโค้ดแล้ว; ยังไม่ได้ทดสอบกับ HRMS หรือฐานข้อมูลจริง

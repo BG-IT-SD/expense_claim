@@ -252,7 +252,12 @@ class HRgroupController extends Controller
         $step = $request->input('step');
         $extype = $request->input('extype');
 
-        $approveStaff = ApproveStaff::where('deleted', 0)->where('group', $group)->where('step', $step)->where('extype', $extype)->get();
+        $approveStaff = ApproveStaff::where('status', 1)
+            ->where('deleted', 0)
+            ->where('group', $group)
+            ->where('step', $step)
+            ->where('extype', $extype)
+            ->get();
         $approveStaffData = $approveStaff?->pluck('empid')
             ->filter()
             ->unique()
