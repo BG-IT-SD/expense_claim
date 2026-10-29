@@ -213,7 +213,7 @@
                                     @forelse ($technicians as $technician)
                                         @php $isAssigned = !empty($technician->groupapprove); @endphp
                                         <tr data-assignment="{{ $isAssigned ? 'assigned' : 'unassigned' }}"
-                                            data-search="{{ strtolower($technician->empid.' '.$technician->fullname.' '.$technician->bu.' '.$technician->dept.' '.$technician->position) }}">
+                                            data-search="{{ strtolower($technician->empid.' '.$technician->fullname.' '.$technician->bu.' '.PlantDisplayName($technician->bu).' '.$technician->dept.' '.$technician->position) }}">
                                             <td class="text-center">
                                                 <input class="form-check-input technician-checkbox" type="checkbox"
                                                     name="technician_ids[]" value="{{ $technician->id }}"

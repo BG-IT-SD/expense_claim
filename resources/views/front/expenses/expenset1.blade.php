@@ -45,6 +45,10 @@
                     {{-- <input type="text" id="confirm-password" class="form-control" value="{{ $booking->bu }}"
                         aria-describedby="confirm-password2">
                     --}}
+                    @php
+                        $selectedPlant = $plants->firstWhere('plantname', $booking->bu);
+                    @endphp
+
                     @if ($booking->locationid == 12)
                         @if ($booking->type_reserve == 1 || $booking->type_reserve == 3)
                             <select id="departureplant2" name="departureplant2" class="form-control w-100 text-dark"
@@ -52,7 +56,7 @@
                                 @foreach ($plants as $plant)
                                     <option value="{{ $plant->id }}"
                                         {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>
-                                        {{ $selectedPlant?->id == $plant->id ? $booking->bu : $plant->plantname }}
+                                        {{ $plant->display_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -65,7 +69,7 @@
                             data-style="btn-default" tabindex="null" disabled>
                             @foreach ($plants as $plant)
                                 <option value="{{ $plant->id }}"
-                                    {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>{{ $selectedPlant?->id == $plant->id ? $booking->bu : $plant->plantname }}
+                                    {{ $selectedPlant?->id == $plant->id ? 'selected' : '' }}>{{ $plant->display_name }}
                                 </option>
                             @endforeach
                         </select>

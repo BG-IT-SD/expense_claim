@@ -13,7 +13,7 @@
 3. ปรับเฉพาะข้อความที่แสดงต่อผู้ใช้ ไม่เปลี่ยนค่าที่ใช้บันทึกหรือกรองข้อมูล
 4. ปรับชื่อกลุ่มระยะทาง AGI/AY1/AY2 เป็น BGCI (พระนครศรีอยุธยา)/AY1/AY2
 
-ไฟล์ที่แก้ไข (40 ไฟล์)
+ไฟล์ที่แก้ไข (40 ไฟล์ ไม่ซ้ำ)
 
 [Model และ Helper]
 1. app/Models/Plant.php
@@ -47,7 +47,7 @@
 23. resources/views/back/hrgroup/addplant.blade.php
 24. resources/views/back/hrgroup/edit.blade.php
 25. resources/views/back/Pricepermeal/create.blade.php
-26. resources/views/back/techapprove/index.blade.php
+26. resources/views/back/techapprove/index.blade.php (เพิ่มชื่อ BU สำหรับค้นหา BGCI และจังหวัด)
 27. resources/views/back/user/edit.blade.php
 
 [รายงานและไฟล์ส่งออก]
@@ -61,8 +61,8 @@
 35. resources/views/exports/hr-list.blade.php
 
 [หน้าผู้ใช้งาน]
-36. resources/views/front/expenses/expenset1.blade.php
-37. resources/views/front/expenses/views/expenset1.blade.php
+36. resources/views/front/expenses/expenset1.blade.php (แก้ Undefined variable $selectedPlant)
+37. resources/views/front/expenses/views/expenset1.blade.php (แก้ Undefined variable $selectedPlant)
 38. resources/views/front/headapprove/listhr.blade.php
 39. resources/views/front/profile/index.blade.php
 40. resources/views/layouts/header.blade.php
@@ -71,6 +71,12 @@
 - ทุกไฟล์ข้างต้นมีไฟล์สำรองอยู่ข้างไฟล์ต้นฉบับ
 - รูปแบบชื่อ: <ชื่อไฟล์เดิม>.bak_20261019_bgci_display
 - ตัวอย่าง: app/Models/Plant.php.bak_20261019_bgci_display
+- ไฟล์ที่แก้เพิ่มเติมภายหลังมีสำรอง: resources/views/front/expenses/views/expenset1.blade.php.bak_20261029_selected_plant_fix
+- ไฟล์สรุปฉบับก่อนแก้มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_selected_plant_fix
+- ไฟล์หน้าสร้าง Expense มีสำรอง: resources/views/front/expenses/expenset1.blade.php.bak_20261029_booking_selected_plant_fix
+- ไฟล์สรุปก่อนเพิ่มรายการหน้าสร้าง Expense มีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_booking_selected_plant_fix
+- ไฟล์ค้นหารายชื่อช่างมีสำรอง: resources/views/back/techapprove/index.blade.php.bak_20261029_bgci_search_fix
+- ไฟล์สรุปก่อนเพิ่มรายการแก้ค้นหามีสำรอง: BGCI_DISPLAY_CHANGE_SUMMARY_20261019.txt.bak_20261029_bgci_search_fix
 
 เงื่อนไขข้อมูลที่ต้องมีในตาราง plants
 - PTI: plant_code = BGCI-PT และ province = ปทุมธานี
